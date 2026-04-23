@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Whisker Intrusion</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hud" aria-label="Mission status">
+        <div>
+          <p class="eyebrow">Whisker Intrusion</p>
+          <h1>Shadow paws, sharp ears.</h1>
+        </div>
+        <div class="status-grid">
+          <div>
+            <span>Room</span>
+            <strong id="roomLabel">Kennel Gate</strong>
+          </div>
+          <div>
+            <span>Keycards</span>
+            <strong id="keyLabel">0/3</strong>
+          </div>
+          <div>
+            <span>Alert</span>
+            <strong id="alertLabel">Clear</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="game-frame" aria-label="Whisker Intrusion game">
+        <canvas id="game" width="960" height="640" aria-label="Top-down stealth cat game"></canvas>
+        <div id="message" class="message" hidden></div>
+      </section>
+
+      <section class="controls" aria-label="Controls">
+        <span><kbd>WASD</kbd> or <kbd>Arrows</kbd> move</span>
+        <span><kbd>Shift</kbd> pad softly</span>
+        <span><kbd>E</kbd> scratch panels / collect</span>
+        <span><kbd>R</kbd> restart</span>
+      </section>
+    </main>
+    <script src="game.js"></script>
+  </body>
+</html>

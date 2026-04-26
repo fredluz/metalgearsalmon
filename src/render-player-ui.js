@@ -73,6 +73,12 @@ function drawPrompts(room) {
   if (room.tuna && !room.tuna.taken && Math.hypot(player.x - room.tuna.x, player.y - room.tuna.y) < 58) {
     prompts.push({ x: room.tuna.x, y: room.tuna.y - 34, text: "E" });
   }
+  if (room.backpack && !room.backpack.taken && nearRect(room.backpack, 44)) {
+    prompts.push({ x: room.backpack.x + room.backpack.w / 2, y: room.backpack.y - 12, text: "E" });
+  }
+  if (room.exitZone && nearRect(room.exitZone, 44)) {
+    prompts.push({ x: room.exitZone.x + room.exitZone.w / 2, y: room.exitZone.y - 12, text: "E" });
+  }
   room.rations?.forEach((ration) => {
     if (!ration.taken && Math.hypot(player.x - ration.x, player.y - ration.y) < 48) {
       prompts.push({ x: ration.x, y: ration.y - 24, text: "E" });

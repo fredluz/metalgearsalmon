@@ -245,7 +245,7 @@
 
   function commandPatrolShift(room) {
     if (alert > 0 || sweepTimer > 0 || won || gameOver) return false;
-    const guards = room.guards.filter((guard) => guard.stunned <= 0 && guard.state !== "investigate");
+    const guards = room.guards.filter((guard) => guard.stunned <= 0 && guard.state !== "investigate" && !guard.static);
     const points = tacticalPoints(room);
     if (!guards.length || !points.length) return false;
 

@@ -5,6 +5,7 @@
     r: 15,
     room: 0,
     keys: 0,
+    gearRecovered: false,
     facing: { x: 1, y: 0 },
     hidden: false,
     moving: false,
@@ -98,7 +99,11 @@
     guard.reinforceTo = null;
     guard.reinforceDoor = null;
     guard.room = Number.isFinite(guard.room) ? guard.room : guard.homeRoom;
-    pointGuardAtTarget(guard, guard.route[1]);
+    if (guard.static && guard.dir) {
+      guard.pauseTimer = 0;
+    } else {
+      pointGuardAtTarget(guard, guard.route[1] || guard.route[0]);
+    }
     guard.pauseBase = Math.atan2(guard.dir.y, guard.dir.x);
   }
 
@@ -108,6 +113,7 @@
     if (room.keycard) room.keycard.taken = false;
     room.keycards?.forEach((keycard) => { keycard.taken = false; });
     if (room.tuna) room.tuna.taken = false;
+    if (room.backpack) room.backpack.taken = false;
     if (room.intel) room.intel.done = false;
     room.rations?.forEach((ration) => { ration.taken = false; });
     room.catnipPickups?.forEach((pickup) => { pickup.taken = false; });
@@ -138,6 +144,7 @@
       player.y = clamp(DEBUG_START.y, player.r, roomHeight(rooms[START_ROOM]) - player.r);
     }
     player.keys = 0;
+    player.gearRecovered = false;
     player.facing = { x: 1, y: 0 };
     player.hidden = false;
     player.boxed = false;
@@ -178,7 +185,7 @@
     stats.scratches = 0;
     roomFlash = 1.2;
     shake = 0;
-    notice("INFILTRATE: recover three collar tags", 2.4);
+    notice("INFILTRATE: recover your gear", 2.4);
     gameOver = false;
     message.hidden = true;
     updateHud();

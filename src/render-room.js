@@ -60,10 +60,12 @@ function drawIntelOverlay(room) {
 function drawRoom(room) {
   const current = room.index === player.room;
   drawFloor(room);
-  room.lightPools?.forEach((light) => {
-    const radius = light.radius || 90;
-    if (rectVisibleInRoom(room, { x: light.x - radius, y: light.y - radius, w: radius * 2, h: radius * 2 })) drawLightPool(light);
-  });
+  if (!room.systemDown) {
+    room.lightPools?.forEach((light) => {
+      const radius = light.radius || 90;
+      if (rectVisibleInRoom(room, { x: light.x - radius, y: light.y - radius, w: radius * 2, h: radius * 2 })) drawLightPool(light);
+    });
+  }
   drawIntelOverlay(room);
   if (extractionActive && room.index === START_ROOM) drawEvacPad(rooms[START_ROOM].start.x, rooms[START_ROOM].start.y);
   room.props?.forEach((prop) => {
@@ -87,6 +89,8 @@ function drawRoom(room) {
   room.panels?.forEach((panel) => {
     if (rectVisibleInRoom(room, panel)) drawPanel(panel, panel.done);
   });
+  if (room.backpack && !room.backpack.taken && rectVisibleInRoom(room, room.backpack)) drawBackpack(room.backpack);
+  if (room.exitZone && rectVisibleInRoom(room, room.exitZone)) drawExitZone(room.exitZone, room.systemDown && player.gearRecovered);
   if (room.alarm && rectVisibleInRoom(room, room.alarm)) drawAlarmPanel(room.alarm);
   room.cameras?.forEach((camera) => drawCamera(camera, cameraActive(room, camera)));
   room.sweeps?.forEach((sweep) => {
@@ -113,6 +117,7 @@ function drawRoom(room) {
   });
   if (current) catnips.forEach((pouch) => drawYarnBall(pouch.x, pouch.y, true, pouch.trail));
   if (room.tuna && !room.tuna.taken) drawTuna(room.tuna.x, room.tuna.y);
+  if (room.systemDown) drawBlackoutOverlay(room);
   drawCollisionDebugOverlay(room);
 
   if (room.lasers) {

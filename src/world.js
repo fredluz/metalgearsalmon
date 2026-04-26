@@ -15,8 +15,8 @@ const roomPlacements = typeof authoredRoomPlacements !== "undefined" ? authoredR
 const camera = {
   x: 0,
   y: 0,
-  w: PLAY_W,
-  h: H,
+  w: PLAY_W / CAMERA_ZOOM,
+  h: H / CAMERA_ZOOM,
 };
 
 const world = {
@@ -371,6 +371,7 @@ function cameraAxisBounds(axis) {
 
 function withRoomView(room, drawFn) {
   ctx.save();
+  ctx.scale(CAMERA_ZOOM, CAMERA_ZOOM);
   ctx.translate((room.worldX || 0) - camera.x, (room.worldY || 0) - camera.y);
   drawFn(room);
   ctx.restore();

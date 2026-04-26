@@ -76,14 +76,14 @@ function drawSidebar(room) {
   ctx.font = "700 8px monospace";
   ctx.fillText("X USE", PANEL_X + 102, 468);
 
-  drawSideBox(PANEL_X + 12, 498, PANEL_W - 24, 86, "ITEM", "#98a08f");
-  drawKeycard(PANEL_X + 38, 545);
+  drawSideBox(PANEL_X + 12, 498, PANEL_W - 24, 86, "GEAR", "#98a08f");
+  drawBackpackIcon(PANEL_X + 40, 545, 0.58);
   ctx.fillStyle = "#f0edcf";
   ctx.font = "700 20px monospace";
-  ctx.fillText(`x${player.keys}`, PANEL_X + 68, 552);
-  ctx.fillStyle = room.intel?.done ? "#7ed6c8" : "#46504a";
+  ctx.fillText(player.gearRecovered ? "OK" : "--", PANEL_X + 68, 552);
+  ctx.fillStyle = room.systemDown ? "#7ed6c8" : "#46504a";
   ctx.font = "700 9px monospace";
-  ctx.fillText(room.intel?.done ? "MAP OK" : "NO MAP", PANEL_X + 24, 574);
+  ctx.fillText(room.systemDown ? "LIGHTS OFF" : "LIT DOCK", PANEL_X + 24, 574);
   ctx.strokeStyle = "#46504a";
   ctx.strokeRect(PANEL_X + 106.5, 522.5, 28, 42);
   ctx.strokeRect(PANEL_X + 142.5, 522.5, 28, 42);

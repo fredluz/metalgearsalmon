@@ -1,4 +1,6 @@
-Deterministic top-down base map generated from src/rooms.js walkBounds.
-Ground-only nighttime fishing dock map: water, mud shore, wooden plank piers, mooring outlines, cleats, rope curls, and plank highlights.
-No actors, UI, labels, barrels, crates, lantern props, or boat props are baked into this base; those remain transparent prop layers.
-Art and collision intentionally share the same authored geometry to avoid walkable-water and blocked-dock mismatch.
+Use case: stylized-concept
+Asset type: 2D game base map background, top-down scrolling stealth level
+Source: Generated with the attached cleaned dock-footprint sketch as the composition lock.
+Primary request: Top-down moonlit 1950s Southeast Asian fishing-village dock stealth level. Preserve the sketch silhouette: left C-shaped dock, upper branch, central-right large pier mass, top-right rectangular dock loop, lower row of narrow pier fingers, and bottom green muddy shoreline.
+Base-layer constraints: environment only. No boats, crates, barrels, lanterns, generator, backpack, guards, cones, UI, labels, text, symbols, or characters. Collision and props are authored in the editor layer.
+Style: old MSX Metal Gear readability, dark blue-black water, desaturated brown weathered plank docks, muted green-brown shore, subtle moonlit highlights.

@@ -241,6 +241,10 @@ function drawTacticalPings() {
 }
 
 function drawPanel(panel, active) {
+  if (panel.type === "generator") {
+    drawGenerator(panel, active);
+    return;
+  }
   ctx.fillStyle = "rgba(0,0,0,0.30)";
   ctx.fillRect(panel.x + 4, panel.y + 7, panel.w, panel.h);
   ctx.fillStyle = "#111415";
@@ -256,6 +260,61 @@ function drawPanel(panel, active) {
     ctx.font = "700 8px monospace";
     ctx.fillText("OFF", panel.x + 13, panel.y + 37);
   }
+}
+
+function drawGenerator(generator, off) {
+  ctx.fillStyle = "rgba(0,0,0,0.34)";
+  ctx.fillRect(generator.x + 6, generator.y + 8, generator.w, generator.h);
+  ctx.fillStyle = off ? "#2c2941" : "#6b4fd8";
+  ctx.fillRect(generator.x, generator.y, generator.w, generator.h);
+  ctx.fillStyle = off ? "#46504a" : "#ffd65a";
+  ctx.fillRect(generator.x + 10, generator.y + 10, generator.w - 20, 10);
+  ctx.fillStyle = off ? "#171d21" : "#33276f";
+  ctx.fillRect(generator.x + 14, generator.y + 26, generator.w - 28, generator.h - 38);
+  ctx.strokeStyle = off ? "#7ed6c8" : "#f0edcf";
+  ctx.strokeRect(generator.x + 0.5, generator.y + 0.5, generator.w, generator.h);
+  ctx.fillStyle = off ? "#7ed6c8" : "#ffdc75";
+  ctx.font = "700 8px monospace";
+  ctx.fillText(off ? "OFF" : "GEN", generator.x + 22, generator.y + generator.h - 13);
+}
+
+function drawBackpackIcon(x, y, scale = 1) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(scale, scale);
+  ctx.fillStyle = "rgba(0,0,0,0.28)";
+  ctx.fillRect(-20, 13, 42, 10);
+  ctx.fillStyle = "#d486bd";
+  ctx.fillRect(-18, -12, 36, 32);
+  ctx.fillStyle = "#bf6fa6";
+  ctx.fillRect(-12, -20, 24, 14);
+  ctx.fillStyle = "#f0a8d5";
+  ctx.fillRect(-13, -7, 26, 15);
+  ctx.fillStyle = "#ffd65a";
+  ctx.fillRect(10, -2, 8, 4);
+  ctx.strokeStyle = "#5d354f";
+  ctx.strokeRect(-18.5, -12.5, 37, 33);
+  ctx.restore();
+}
+
+function drawBackpack(pack) {
+  drawBackpackIcon(pack.x + pack.w / 2, pack.y + pack.h / 2, 1);
+}
+
+function drawExitZone(exitZone, active) {
+  const pulse = 0.55 + Math.sin(performance.now() / 130) * 0.22;
+  ctx.fillStyle = active ? "rgba(126, 214, 200, 0.08)" : "rgba(243, 93, 76, 0.08)";
+  ctx.fillRect(exitZone.x, exitZone.y, exitZone.w, exitZone.h);
+  ctx.strokeStyle = active ? `rgba(126, 214, 200, ${pulse})` : "rgba(243, 93, 76, 0.55)";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(exitZone.x + 0.5, exitZone.y + 0.5, exitZone.w, exitZone.h);
+  drawHazardStripe(exitZone.x, exitZone.y + exitZone.h - 10, exitZone.w, 10);
+  ctx.lineWidth = 1;
+}
+
+function drawBlackoutOverlay(room) {
+  ctx.fillStyle = "rgba(0, 9, 18, 0.3)";
+  ctx.fillRect(0, 0, roomWidth(room), roomHeight(room));
 }
 
 function drawAlarmPanel(alarm) {

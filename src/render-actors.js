@@ -4,8 +4,10 @@ function drawVision(room, guard) {
   const dir = guard.dir || { x: 1, y: 0 };
   const angle = Math.atan2(dir.y, dir.x);
   const heightened = guard.state === "investigate" || guard.state === "callAlarm" || guard.state === "reinforce" || guard.state === "search" || guard.state === "sweep";
-  const range = heightened ? 205 : 176;
-  const spread = guard.state === "search" || guard.state === "sweep" ? 0.68 : 0.52;
+  const baseRange = guard.range || (heightened ? 205 : 176);
+  const darkRange = room.systemDown ? (guard.darkRangeFactor ?? 0.52) : 1;
+  const range = baseRange * darkRange;
+  const spread = guard.spread || (guard.state === "search" || guard.state === "sweep" ? 0.68 : 0.52);
   const tint = guard.suspicion > 0.6 ? "243, 93, 76" : "255, 214, 90";
   const rays = 24;
   const points = [];

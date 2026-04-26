@@ -7,11 +7,13 @@
     const dy = player.y - guard.y;
     const dist = Math.hypot(dx, dy);
     const heightened = guard.state === "investigate" || guard.state === "callAlarm" || guard.state === "reinforce" || guard.state === "search" || guard.state === "sweep";
-    const range = (heightened ? 205 : 176) * securityFactor();
+    const baseRange = guard.range || (heightened ? 205 : 176);
+    const darkRange = room.systemDown ? (guard.darkRangeFactor ?? 0.52) : 1;
+    const range = baseRange * securityFactor() * darkRange;
     if (dist > range || dist < 1) return 0;
     const dir = guard.dir || { x: 1, y: 0 };
     const dot = (dx / dist) * dir.x + (dy / dist) * dir.y;
-    const spread = guard.state === "search" || guard.state === "sweep" ? 0.68 : 0.52;
+    const spread = guard.spread || (guard.state === "search" || guard.state === "sweep" ? 0.68 : 0.52);
     const threshold = Math.cos(spread);
     if (dot < threshold) return 0;
     if (!hasLineOfSight(guard.x, guard.y, player.x, player.y, room.walls)) return 0;
@@ -162,7 +164,8 @@
       guard.boxRadioCooldown = Math.max(0, (guard.boxRadioCooldown || 0) - dt);
       if (updateGuardAim(room, guard, dt)) return;
       checkGuardWitnesses(room, guard, dt);
-      const patrolPausing = guard.state === "patrol" && (guard.pauseTimer || 0) > 0;
+      const guardFixed = guard.static;
+      const patrolPausing = !guardFixed && guard.state === "patrol" && (guard.pauseTimer || 0) > 0;
       if (patrolPausing) {
         guard.pauseTimer = Math.max(0, guard.pauseTimer - dt);
         const base = Number.isFinite(guard.pauseBase)
@@ -188,7 +191,7 @@
           guard.state = "patrol";
           clearGuardNavigation(guard);
         }
-      } else if (!patrolPausing) {
+      } else if (!patrolPausing && !guardFixed) {
         const target = (guard.state === "investigate" || guard.state === "sweep" || guard.state === "reroute" || guard.state === "reinforce" || guard.state === "callAlarm") && guard.target
           ? [guard.target.x, guard.target.y]
           : guard.route[guard.i];
@@ -240,6 +243,9 @@
             clearGuardNavigation(guard);
           }
         }
+      }
+      if (guardFixed && guard.target && guard.state !== "patrol") {
+        pointGuardAtTarget(guard, [guard.target.x, guard.target.y]);
       }
 
       const score = visionScore(guard, room);

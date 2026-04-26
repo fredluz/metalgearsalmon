@@ -218,6 +218,73 @@ kbd {
   padding: 2px 6px;
 }
 
+.editor-panel {
+  background: #060909;
+  border: 2px solid #7ed6c8;
+  box-shadow:
+    inset 0 0 0 3px #000,
+    0 10px 40px rgba(0, 0, 0, 0.45);
+  color: #f0edcf;
+  display: grid;
+  gap: 8px;
+  font-family: inherit;
+  font-size: 11px;
+  left: 18px;
+  max-height: calc(100vh - 36px);
+  padding: 10px;
+  position: fixed;
+  text-transform: uppercase;
+  top: 18px;
+  width: 278px;
+  z-index: 10;
+}
+
+.editor-title {
+  color: #7ed6c8;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.editor-row,
+.editor-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.editor-panel button,
+.editor-panel select {
+  background: #111514;
+  border: 1px solid #53615a;
+  border-radius: 0;
+  color: #f0edcf;
+  font: inherit;
+  min-height: 26px;
+  padding: 4px 7px;
+  text-transform: uppercase;
+}
+
+.editor-panel button.is-active {
+  background: #7ed6c8;
+  color: #071110;
+}
+
+.editor-panel label {
+  color: #98a08f;
+  display: grid;
+  gap: 4px;
+}
+
+.editor-panel textarea {
+  background: #030606;
+  border: 1px solid #33413c;
+  color: #9fb27b;
+  font: 10px/1.35 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  height: 190px;
+  resize: vertical;
+  width: 100%;
+}
+
 @media (max-width: 760px) {
   body {
     padding: 12px;

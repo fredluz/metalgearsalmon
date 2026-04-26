@@ -1,8 +1,13 @@
 {
+  "version": 1,
   "map": "dock-village",
+  "baseImage": "assets/maps/dock-village/dock-village-base.png",
   "width": 1511,
   "height": 1041,
-  "authoring": "Use ?editor=1 to draw walkBounds, walls, hiding, props, guards, and objectives. Copy JSON from the editor panel when ready.",
+  "start": {
+    "x": 92,
+    "y": 812
+  },
   "walkBounds": [],
   "walls": [],
   "hiding": [],

@@ -46,6 +46,7 @@ function draw() {
     drawGuardBarks();
     drawPlayer();
     drawPrompts(room);
+    drawEditorOverlay(room);
   });
   ctx.restore();
 
@@ -121,5 +122,6 @@ window.addEventListener("keyup", (event) => {
   keys.delete(event.key.toLowerCase());
 });
 
+initEditorMode();
 reset();
 requestAnimationFrame(loop);

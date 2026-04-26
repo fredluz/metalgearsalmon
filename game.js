@@ -19,6 +19,7 @@
     "src/render-tactics.js",
     "src/render-player-ui.js",
     "src/render-sidebar.js",
+    "src/editor.js",
     "src/main.js",
   ];
 

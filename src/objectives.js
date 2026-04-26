@@ -340,6 +340,9 @@
     if (sweepTimer > 0) return "AVOID SWEEP";
     if (boxCover(room)) return "BOX COVER";
     if (player.soft && inShadow(room)) return "SHADOW COVER";
+    if (room.backpack && !player.gearRecovered) return "RECOVER GEAR";
+    if (room.panels?.some((panel) => panel.type === "generator" && !panel.done)) return "CUT LIGHTS";
+    if (room.exitZone) return "REACH EXIT";
     if (room.tuna && !room.tuna.taken && player.keys >= REQUIRED_TAGS) return "SECURE TUNA";
     if (nextKeycard(room) && player.keys < REQUIRED_TAGS) return `FIND TAG ${player.keys + 1}`;
     const doorObjective = primaryDoorObjective(room);
@@ -357,6 +360,10 @@
       const door = primaryDoorObjective(room);
       return door ? doorTarget(door) : null;
     }
+    if (room.backpack && !player.gearRecovered) return { x: room.backpack.x + room.backpack.w / 2, y: room.backpack.y + room.backpack.h / 2, r: 32 };
+    const generator = room.panels?.find((candidate) => candidate.type === "generator" && !candidate.done);
+    if (generator) return { x: generator.x + generator.w / 2, y: generator.y + generator.h / 2, r: 34 };
+    if (room.exitZone) return { x: room.exitZone.x + room.exitZone.w / 2, y: room.exitZone.y + room.exitZone.h / 2, r: 36 };
     if (room.tuna && !room.tuna.taken && player.keys >= REQUIRED_TAGS) return { x: room.tuna.x, y: room.tuna.y, r: 32 };
     const keycard = nextKeycard(room);
     if (keycard && player.keys < REQUIRED_TAGS) {
@@ -388,6 +395,8 @@
       if (!keycard.taken) points.push({ x: keycard.x, y: keycard.y, label: "TAG" });
     });
     if (room.tuna && !room.tuna.taken) points.push({ x: room.tuna.x, y: room.tuna.y, label: "TUNA" });
+    if (room.backpack && !room.backpack.taken) points.push({ x: room.backpack.x + room.backpack.w / 2, y: room.backpack.y + room.backpack.h / 2, label: "GEAR" });
+    if (room.exitZone) points.push({ x: room.exitZone.x + room.exitZone.w / 2, y: room.exitZone.y + room.exitZone.h / 2, label: "EXIT" });
     room.panels?.forEach((panel) => {
       if (!panel.done) points.push({ x: panel.x + panel.w / 2, y: panel.y + panel.h / 2, label: "SYS" });
     });
@@ -406,7 +415,7 @@
   function updateHud() {
     const suspicion = Math.round(maxSuspicion() * 100);
     roomLabel.textContent = rooms[player.room].name;
-    keyLabel.textContent = `${player.keys}/${REQUIRED_TAGS}`;
+    keyLabel.textContent = rooms[player.room].backpack ? (player.gearRecovered ? "Got" : "Lost") : `${player.keys}/${REQUIRED_TAGS}`;
     gadgetLabel.textContent = player.meowCooldown > 0 ? `${Math.ceil(player.meowCooldown)}s` : "Ready";
     if (gameOver) {
       alertLabel.textContent = "Down";

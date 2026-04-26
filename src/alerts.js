@@ -257,6 +257,6 @@
     notice("MISSION COMPLETE", 2);
     playCue("pickup");
     const { result, best, isBetter } = recordRunResult();
-    message.innerHTML = `Mission complete.<br>The smoked tuna is secure.<br><small>Rank ${result.rank} | Time ${formatTime(result.time)} | Alerts ${result.alerts} | Hits ${result.hits} | Scratches ${stats.scratches}${isBetter ? "<br>New best infiltration." : `<br>Best ${best.rank} | ${formatTime(best.time)}`}<br>Press R to infiltrate again.</small>`;
+    message.innerHTML = `Mission complete.<br>The dock exit is clear.<br><small>Rank ${result.rank} | Time ${formatTime(result.time)} | Alerts ${result.alerts} | Hits ${result.hits} | Scratches ${stats.scratches}${isBetter ? "<br>New best infiltration." : `<br>Best ${best.rank} | ${formatTime(best.time)}`}<br>Press R to infiltrate again.</small>`;
     message.hidden = false;
   }

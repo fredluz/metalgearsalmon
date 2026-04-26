@@ -51,6 +51,28 @@
       }
     }
 
+    if (room.backpack && !room.backpack.taken && nearRect(room.backpack, 36)) {
+      room.backpack.taken = true;
+      player.gearRecovered = true;
+      roomFlash = 0.55;
+      playCue("pickup");
+      notice("GEAR RECOVERED: FIND THE GENERATOR", 1.45);
+      return;
+    }
+
+    if (room.exitZone && nearRect(room.exitZone, 38)) {
+      if (!player.gearRecovered) {
+        notice("GEAR STILL ON THE DOCK", 1);
+        return;
+      }
+      if (!room.systemDown) {
+        notice("LIGHTS STILL COVER THE EXIT", 1);
+        return;
+      }
+      completeMission();
+      return;
+    }
+
     if (room.panels) {
       const panel = room.panels.find((candidate) => !candidate.done && nearRect(candidate, 32));
       if (panel) {
@@ -64,8 +86,8 @@
         roomFlash = 0.7;
         makeNoise(panel.x + panel.w / 2, panel.y + panel.h / 2, 124, 0.5, "rgba(255, 214, 90, 0.65)", "SCRATCH", "scratch");
         playCue("pickup");
-        radio("CP: local security offline");
-        notice(room.intel?.text || "SECURITY PANEL CLAWED: ALARM OFF", 2.2);
+        radio(panel.type === "generator" ? "CP: dock lights offline" : "CP: local security offline");
+        notice(panel.type === "generator" ? "GENERATOR CLAWED: LIGHTS OUT" : room.intel?.text || "SECURITY PANEL CLAWED: ALARM OFF", 2.2);
         return;
       }
     }

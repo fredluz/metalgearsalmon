@@ -10,6 +10,7 @@
   const BUILD_ID = window.__BUILD_ID__ || "1ac3c0e";
   const urlParams = new URLSearchParams(window.location.search);
   const DEBUG_COLLISION = urlParams.get("debugCollision") === "1";
+  const EDITOR_MODE = urlParams.get("editor") === "1";
   const DEBUG_START = {
     x: Number(urlParams.get("debugX")),
     y: Number(urlParams.get("debugY")),
@@ -26,6 +27,7 @@
   const SIDEBAR = 190;
   const PLAY_W = VIEW_W - SIDEBAR;
   const H = canvas.height;
+  const CAMERA_ZOOM = 2;
   const PANEL_X = PLAY_W;
   const PANEL_W = SIDEBAR;
   const TILE = 32;

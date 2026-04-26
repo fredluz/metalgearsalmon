@@ -8,6 +8,12 @@
   const buildBadge = document.getElementById("buildBadge");
   const message = document.getElementById("message");
   const BUILD_ID = window.__BUILD_ID__ || "1ac3c0e";
+  const urlParams = new URLSearchParams(window.location.search);
+  const DEBUG_COLLISION = urlParams.get("debugCollision") === "1";
+  const DEBUG_START = {
+    x: Number(urlParams.get("debugX")),
+    y: Number(urlParams.get("debugY")),
+  };
   const assetUrl = (path) => `${path}?v=${encodeURIComponent(BUILD_ID)}`;
 
   if (buildBadge) {
@@ -49,12 +55,15 @@
   const enemyWalkSheet = new Image();
   const enemyFlashlightSheet = new Image();
   const enemyAlertSheet = new Image();
+  const dockBaseMap = new Image();
+  const propImages = {};
   const SPRITE = 64;
   let spritesReady = false;
   let playerWalkReady = false;
   let enemyWalkReady = false;
   let enemyFlashlightReady = false;
   let enemyAlertReady = false;
+  let dockBaseMapReady = false;
 
   spriteSheet.onload = () => {
     spritesReady = spriteSheet.width >= SPRITE * 4 && spriteSheet.height >= SPRITE * 2;
@@ -95,5 +104,35 @@
     enemyAlertReady = false;
   };
   enemyAlertSheet.src = assetUrl("assets/enemy-alert.png");
+
+  dockBaseMap.onload = () => {
+    dockBaseMapReady = true;
+  };
+  dockBaseMap.onerror = () => {
+    dockBaseMapReady = false;
+  };
+  dockBaseMap.src = assetUrl("assets/maps/dock-village/dock-village-base.png");
+
+  const propImageSources = {
+    dockFishingBoatSmall: "assets/props/dock-fishing-boat-small/prop.png",
+    dockRowboat: "assets/props/dock-rowboat/prop.png",
+    dockFishCrate: "assets/props/dock-fish-crate/prop.png",
+    dockBarrelStack: "assets/props/dock-barrel-stack/prop.png",
+    dockLanternPost: "assets/props/dock-lantern-post/prop.png",
+    dockHangingLantern: "assets/props/dock-hanging-lantern/prop.png",
+  };
+
+  Object.entries(propImageSources).forEach(([key, src]) => {
+    const image = new Image();
+    image.ready = false;
+    image.onload = () => {
+      image.ready = true;
+    };
+    image.onerror = () => {
+      image.ready = false;
+    };
+    image.src = assetUrl(src);
+    propImages[key] = image;
+  });
 
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));

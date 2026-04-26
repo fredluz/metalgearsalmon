@@ -9,6 +9,26 @@
       return;
     }
 
+    if (room.boatTransfers) {
+      const boat = room.boatTransfers.find((candidate) => nearRect(candidate, 34));
+      if (boat) {
+        const entryX = boat.x + boat.w / 2;
+        const entryY = boat.y + boat.h / 2;
+        player.x = boat.tx;
+        player.y = boat.ty;
+        player.hidden = false;
+        player.ventHidden = 0;
+        player.entryGrace = Math.max(player.entryGrace, 0.45);
+        roomFlash = 0.55;
+        makeNoise(entryX, entryY, 128, 0.46, "rgba(255, 214, 90, 0.58)", "BOAT", "boat");
+        makeNoise(player.x, player.y, 108, 0.42, "rgba(255, 214, 90, 0.48)", "DOCK", "boat");
+        sayNearestGuard(room, entryX, entryY, "boat creak");
+        playCue("room");
+        notice(boat.label === "NEXT" ? "BOAT RELEASED: NEXT DOCK" : "BOAT RELEASED: CROSSING", 1.15);
+        return;
+      }
+    }
+
     if (room.vents) {
       const vent = room.vents.find((candidate) => nearRect(candidate, 30));
       if (vent) {

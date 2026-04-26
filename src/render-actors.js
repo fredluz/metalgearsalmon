@@ -91,7 +91,11 @@ function drawSpriteFrame(frame, x, y, scale, flip) {
   ctx.restore();
 }
 
-function directionRow(facing) {
+function directionRow(facing, includeDiagonals = false) {
+  if (includeDiagonals && Math.abs(facing.x) > 0.25 && Math.abs(facing.y) > 0.25) {
+    if (facing.y > 0) return facing.x > 0 ? 4 : 5;
+    return facing.x > 0 ? 6 : 7;
+  }
   if (Math.abs(facing.x) > Math.abs(facing.y)) return facing.x < 0 ? 1 : 2;
   return facing.y > 0 ? 0 : 3;
 }
@@ -116,8 +120,8 @@ function drawSheetFrame(sheet, col, row, x, y, scale) {
   );
 }
 
-function drawAnimatedSprite(sheet, x, y, facing, moving, scale, speedOffset) {
-  const row = directionRow(facing);
+function drawAnimatedSprite(sheet, x, y, facing, moving, scale, speedOffset, includeDiagonals = false) {
+  const row = directionRow(facing, includeDiagonals);
   const col = animationColumn(moving, speedOffset);
   drawSheetFrame(sheet, col, row, x, y, scale);
 }
@@ -130,7 +134,7 @@ function drawEnemyStateSprite(x, y, state, scale, speedOffset) {
 
 function drawCatSprite(x, y, facing, variant) {
   if (variant === "player" && playerWalkReady) {
-    drawAnimatedSprite(playerWalkSheet, x, y, facing, player.moving, 0.78, 0);
+    drawAnimatedSprite(playerWalkSheet, x, y, facing, player.moving, 0.78, 0, playerWalkSheet.height >= SPRITE * 8);
     return true;
   }
 

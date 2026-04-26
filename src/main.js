@@ -23,9 +23,11 @@ function draw() {
       drawRoom(visibleRoom);
       visibleRoom.cameras?.forEach((camera) => drawCameraVision(visibleRoom, camera));
       visibleRoom.guards.forEach((guard) => drawVision(visibleRoom, guard));
-      visibleRoom.walls.forEach((wall) => {
-        if (rectVisibleInRoom(visibleRoom, wall)) drawWall(visibleRoom, wall);
-      });
+      if (visibleRoom.drawWalls !== false) {
+        visibleRoom.walls.forEach((wall) => {
+          if (rectVisibleInRoom(visibleRoom, wall)) drawWall(visibleRoom, wall);
+        });
+      }
       visibleRoom.guards.forEach(drawGuard);
       ctx.restore();
     });

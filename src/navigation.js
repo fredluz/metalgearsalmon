@@ -13,23 +13,67 @@
     return circleRect(player.x, player.y, range, rect);
   }
 
-  function blocked(x, y) {
-    const room = rooms[player.room];
+  function pointInPolygon(x, y, points) {
+    let inside = false;
+    for (let i = 0, j = points.length - 1; i < points.length; j = i, i += 1) {
+      const xi = Array.isArray(points[i]) ? points[i][0] : points[i].x;
+      const yi = Array.isArray(points[i]) ? points[i][1] : points[i].y;
+      const xj = Array.isArray(points[j]) ? points[j][0] : points[j].x;
+      const yj = Array.isArray(points[j]) ? points[j][1] : points[j].y;
+      const intersects = ((yi > y) !== (yj > y))
+        && x < ((xj - xi) * (y - yi)) / ((yj - yi) || 0.0001) + xi;
+      if (intersects) inside = !inside;
+    }
+    return inside;
+  }
+
+  function pointInWalkShape(shape, x, y) {
+    if (shape.type === "rect") {
+      return x >= shape.x && x <= shape.x + shape.w && y >= shape.y && y <= shape.y + shape.h;
+    }
+    if (shape.type === "ellipse") {
+      const dx = (x - shape.x) / shape.rx;
+      const dy = (y - shape.y) / shape.ry;
+      return dx * dx + dy * dy <= 1;
+    }
+    if (shape.type === "polygon") {
+      return pointInPolygon(x, y, shape.points || []);
+    }
+    return false;
+  }
+
+  function circleInWalkBounds(room, x, y, radius) {
+    if (!room.walkBounds?.length) return true;
+    const samples = [
+      [x, y],
+      [x - radius, y],
+      [x + radius, y],
+      [x, y - radius],
+      [x, y + radius],
+    ];
+    return samples.every(([sx, sy]) => room.walkBounds.some((shape) => pointInWalkShape(shape, sx, sy)));
+  }
+
+  function movementBlocked(room, x, y, radius, checkDoors = true) {
     const w = roomWidth(room);
     const h = roomHeight(room);
-    const rect = { x: x - player.r, y: y - player.r, w: player.r * 2, h: player.r * 2 };
-    if (x < player.r || x > w - player.r || y < player.r || y > h - player.r) return true;
-    if (queryRoomSpatial(room, "doors", rect).some((door) => !doorUnlocked(door) && circleRect(x, y, player.r, doorBlockRect(door)))) return true;
-    return queryRoomSpatial(room, "walls", rect).some((wall) => circleRect(x, y, player.r, wall));
+    const rect = { x: x - radius, y: y - radius, w: radius * 2, h: radius * 2 };
+    if (x < radius || x > w - radius || y < radius || y > h - radius) return true;
+    if (!circleInWalkBounds(room, x, y, radius)) return true;
+    if (checkDoors && queryRoomSpatial(room, "doors", rect).some((door) => !doorUnlocked(door) && circleRect(x, y, radius, doorBlockRect(door)))) return true;
+    return queryRoomSpatial(room, "walls", rect).some((wall) => circleRect(x, y, radius, wall));
+  }
+
+  function blocked(x, y) {
+    return movementBlocked(rooms[player.room], x, y, player.r);
   }
 
   function guardBlocked(room, x, y) {
-    const w = roomWidth(room);
-    const h = roomHeight(room);
-    const rect = { x: x - GUARD_RADIUS, y: y - GUARD_RADIUS, w: GUARD_RADIUS * 2, h: GUARD_RADIUS * 2 };
-    if (x < GUARD_RADIUS || x > w - GUARD_RADIUS || y < GUARD_RADIUS || y > h - GUARD_RADIUS) return true;
-    if (queryRoomSpatial(room, "doors", rect).some((door) => !doorUnlocked(door) && circleRect(x, y, GUARD_RADIUS, doorBlockRect(door)))) return true;
-    return queryRoomSpatial(room, "walls", rect).some((wall) => circleRect(x, y, GUARD_RADIUS, wall));
+    return movementBlocked(room, x, y, GUARD_RADIUS);
+  }
+
+  function smallBlocked(room, x, y, radius) {
+    return movementBlocked(room, x, y, radius, false);
   }
 
   function openTacticalPoint(room, x, y, fallback) {
@@ -101,6 +145,7 @@
       addNavNode(nodes, room, wall.x - NAV_CORNER_PAD, wall.y + wall.h + NAV_CORNER_PAD);
       addNavNode(nodes, room, wall.x + wall.w + NAV_CORNER_PAD, wall.y + wall.h + NAV_CORNER_PAD);
     });
+    room.navPoints?.forEach((point) => addNavNode(nodes, room, point.x, point.y));
 
     const edges = nodes.map(() => []);
     for (let i = 0; i < nodes.length; i += 1) {

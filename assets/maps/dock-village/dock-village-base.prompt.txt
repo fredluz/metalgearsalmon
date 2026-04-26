@@ -1,0 +1,4 @@
+Deterministic top-down base map generated from src/rooms.js walkBounds.
+Ground-only nighttime fishing dock map: water, mud shore, wooden plank piers, mooring outlines, cleats, rope curls, and plank highlights.
+No actors, UI, labels, barrels, crates, lantern props, or boat props are baked into this base; those remain transparent prop layers.
+Art and collision intentionally share the same authored geometry to avoid walkable-water and blocked-dock mismatch.

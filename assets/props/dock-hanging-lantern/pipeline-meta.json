@@ -1,0 +1,59 @@
+{
+  "target": "asset",
+  "mode": "single",
+  "prompt": "Pixel art prop sprite for an old Metal Gear / MSX-inspired stealth game, top-down slightly 3/4 from above. Single prop, centered, full object visible: a small hanging fishing lantern suspended from a curved weathered wooden support and short rope, compact bracket silhouette, dark crisp pixel outline, warm amber glass/oil lantern with tiny glow hints close to the lamp only, moonlit blue highlights on wood and metal, readable hanging shape for stealth gameplay. Background exactly solid #FF00FF magenta, no gradients, no texture, no shadows, no floor plane. No text, no labels, no UI, no watermark. Generous magenta margin; no part touches image edge. 256x256 single cell pixel-art asset.",
+  "role": "",
+  "input": "/Users/ines/vault/Projects/metalgearsalmon/assets/props/dock-hanging-lantern/raw-source.png",
+  "threshold": 100,
+  "edge_threshold": 150,
+  "duration": 200,
+  "rows": 1,
+  "cols": 1,
+  "cell_size": 256,
+  "fit_scale": 0.86,
+  "trim_border": 0,
+  "edge_clean_depth": 0,
+  "align": "center",
+  "shared_scale": false,
+  "component_mode": "all",
+  "component_padding": 0,
+  "min_component_area": 1,
+  "edge_touch_margin": 2,
+  "frame_labels": [
+    "frame-1"
+  ],
+  "frames": [
+    {
+      "grid": [
+        0,
+        0
+      ],
+      "source_box": [
+        0,
+        0,
+        1254,
+        1254
+      ],
+      "component_mode": "all",
+      "component_count": 9,
+      "selected_component_area": null,
+      "selected_component_bbox": null,
+      "crop_bbox": [
+        321,
+        155,
+        900,
+        1063
+      ],
+      "edge_touch": false,
+      "output_size": [
+        140,
+        220
+      ],
+      "paste_position": [
+        58,
+        18
+      ]
+    }
+  ],
+  "edge_touch_frames": []
+}

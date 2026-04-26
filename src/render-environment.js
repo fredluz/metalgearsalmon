@@ -3,6 +3,10 @@
 function drawFloor(room) {
   const w = roomWidth(room);
   const h = roomHeight(room);
+  if (room.baseImageKey === "dockVillageBase" && dockBaseMapReady) {
+    ctx.drawImage(dockBaseMap, 0, 0, w, h);
+    return;
+  }
   const view = roomViewRect(room, TILE);
   const startX = Math.max(28, Math.floor(view.x / TILE) * TILE);
   const endX = Math.min(w - 28, Math.ceil((view.x + view.w) / TILE) * TILE);
@@ -24,6 +28,104 @@ function drawFloor(room) {
       ctx.fillRect(x + 1, y + TILE - 4, TILE - 2, 3);
     }
   }
+}
+
+function propRenderRect(prop) {
+  if (prop.imageKey) {
+    return {
+      x: prop.x - prop.w / 2,
+      y: prop.y - prop.h,
+      w: prop.w,
+      h: prop.h,
+    };
+  }
+  return prop;
+}
+
+function drawLayeredProp(prop) {
+  const image = propImages[prop.imageKey];
+  const rect = propRenderRect(prop);
+  if (image?.ready) {
+    ctx.drawImage(image, rect.x, rect.y, rect.w, rect.h);
+    return;
+  }
+
+  ctx.fillStyle = "rgba(0,0,0,0.28)";
+  ctx.fillRect(rect.x + 5, rect.y + 7, rect.w, rect.h);
+  ctx.fillStyle = prop.fallback || "#6f7044";
+  ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+  ctx.strokeStyle = "#111514";
+  ctx.strokeRect(rect.x + 0.5, rect.y + 0.5, rect.w, rect.h);
+}
+
+function drawLightPool(light) {
+  const radius = light.radius || 90;
+  const gradient = ctx.createRadialGradient(light.x, light.y, 0, light.x, light.y, radius);
+  gradient.addColorStop(0, `rgba(255, 194, 92, ${light.alpha || 0.22})`);
+  gradient.addColorStop(0.48, "rgba(255, 156, 60, 0.09)");
+  gradient.addColorStop(1, "rgba(255, 156, 60, 0)");
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.arc(light.x, light.y, radius, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawDebugShape(shape) {
+  ctx.beginPath();
+  if (shape.type === "rect") {
+    ctx.rect(shape.x, shape.y, shape.w, shape.h);
+  } else if (shape.type === "ellipse") {
+    ctx.ellipse(shape.x, shape.y, shape.rx, shape.ry, 0, 0, Math.PI * 2);
+  } else if (shape.type === "polygon" && shape.points?.length) {
+    shape.points.forEach((point, index) => {
+      const x = Array.isArray(point) ? point[0] : point.x;
+      const y = Array.isArray(point) ? point[1] : point.y;
+      if (index === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.closePath();
+  }
+}
+
+function drawCollisionDebugOverlay(room) {
+  if (!DEBUG_COLLISION) return;
+  ctx.save();
+  ctx.fillStyle = "rgba(255, 214, 0, 0.24)";
+  ctx.fillRect(0, 0, roomWidth(room), roomHeight(room));
+
+  ctx.fillStyle = "rgba(24, 232, 124, 0.34)";
+  ctx.strokeStyle = "rgba(24, 255, 160, 0.85)";
+  ctx.lineWidth = 2;
+  room.walkBounds?.forEach((shape) => {
+    drawDebugShape(shape);
+    ctx.fill();
+    ctx.stroke();
+  });
+
+  ctx.fillStyle = "rgba(255, 47, 68, 0.48)";
+  ctx.strokeStyle = "rgba(255, 235, 235, 0.92)";
+  ctx.lineWidth = 1.5;
+  room.walls?.forEach((wall) => {
+    ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
+    ctx.strokeRect(wall.x + 0.5, wall.y + 0.5, wall.w, wall.h);
+  });
+
+  ctx.fillStyle = "#050706";
+  ctx.fillRect(14, 14, 314, 42);
+  ctx.strokeStyle = "#f0edcf";
+  ctx.strokeRect(14.5, 14.5, 314, 42);
+  ctx.fillStyle = "#ffd600";
+  ctx.fillRect(24, 25, 12, 12);
+  ctx.fillStyle = "#18e87c";
+  ctx.fillRect(112, 25, 12, 12);
+  ctx.fillStyle = "#ff2f44";
+  ctx.fillRect(210, 25, 12, 12);
+  ctx.fillStyle = "#f0edcf";
+  ctx.font = "700 10px monospace";
+  ctx.fillText("YELLOW WATER", 42, 35);
+  ctx.fillText("GREEN WALK", 130, 35);
+  ctx.fillText("RED BLOCK", 228, 35);
+  ctx.restore();
 }
 
 function drawWall(room, wall) {
@@ -201,7 +303,9 @@ function drawShadowZone(shadow) {
 }
 
 function drawProp(prop, room) {
-  if (prop.type === "crate") {
+  if (prop.imageKey) {
+    drawLayeredProp(prop);
+  } else if (prop.type === "crate") {
     drawCrate(prop, "#6f7044");
   } else if (prop.type === "pipe") {
     ctx.fillStyle = "rgba(0,0,0,0.24)";

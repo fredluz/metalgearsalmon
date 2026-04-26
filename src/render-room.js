@@ -60,17 +60,23 @@ function drawIntelOverlay(room) {
 function drawRoom(room) {
   const current = room.index === player.room;
   drawFloor(room);
+  room.lightPools?.forEach((light) => {
+    const radius = light.radius || 90;
+    if (rectVisibleInRoom(room, { x: light.x - radius, y: light.y - radius, w: radius * 2, h: radius * 2 })) drawLightPool(light);
+  });
   drawIntelOverlay(room);
   if (extractionActive && room.index === START_ROOM) drawEvacPad(rooms[START_ROOM].start.x, rooms[START_ROOM].start.y);
   room.props?.forEach((prop) => {
-    if (rectVisibleInRoom(room, prop)) drawProp(prop, room);
+    if (rectVisibleInRoom(room, propRenderRect(prop))) drawProp(prop, room);
   });
   room.shadows?.forEach((shadow) => {
     if (rectVisibleInRoom(room, shadow)) drawShadowZone(shadow);
   });
-  room.hiding.forEach((spot) => {
-    if (rectVisibleInRoom(room, spot)) drawCrate(spot, "#726b3e");
-  });
+  if (!room.useLayeredArt) {
+    room.hiding.forEach((spot) => {
+      if (rectVisibleInRoom(room, spot)) drawCrate(spot, "#726b3e");
+    });
+  }
   room.vents?.forEach((vent) => {
     if (rectVisibleInRoom(room, vent)) drawVent(vent);
   });
@@ -86,9 +92,11 @@ function drawRoom(room) {
   room.sweeps?.forEach((sweep) => {
     if (rectVisibleInRoom(room, sweep)) drawSensorSweep(room, sweep);
   });
-  room.walls.forEach((wall) => {
-    if (rectVisibleInRoom(room, wall)) drawWall(room, wall);
-  });
+  if (room.drawWalls !== false) {
+    room.walls.forEach((wall) => {
+      if (rectVisibleInRoom(room, wall)) drawWall(room, wall);
+    });
+  }
   const visibleDoors = roomDoors(room).filter((door) => shouldDrawDoor(room, door));
   visibleDoors.forEach((door) => drawDoorwayCutout(room, door));
 
@@ -105,6 +113,7 @@ function drawRoom(room) {
   });
   if (current) catnips.forEach((pouch) => drawYarnBall(pouch.x, pouch.y, true, pouch.trail));
   if (room.tuna && !room.tuna.taken) drawTuna(room.tuna.x, room.tuna.y);
+  drawCollisionDebugOverlay(room);
 
   if (room.lasers) {
     room.lasers.forEach((laser) => {

@@ -1,0 +1,59 @@
+{
+  "target": "asset",
+  "mode": "single",
+  "prompt": "Pixel-art game asset, single prop, centered, full object visible: narrow wooden motor fishing boat from the 1950s for a Southeast Asian / Vietnam fishing-village dock at night, top-down with a slight 3/4-from-above view. Old MSX Metal Gear-inspired stealth game style, crisp dark pixel outlines, readable at small scale. Weathered planked wooden hull, narrow bow, small covered motor housing at stern, subtle tarp and fishing net hints, a small warm lantern highlight, moonlit blue shadows on the wood, muted browns and teal-blue night tones. No people. Background exactly solid #FF00FF magenta, no gradients, no texture, no shadows, no floor plane. No text, no labels, no UI, no watermark. Generous magenta margin around the full boat; no part touches the image edge.",
+  "role": "",
+  "input": "/Users/ines/.codex/generated_images/019dcadf-78af-71c2-a159-f6092a02744d/ig_06cd1a16835c31b00169ee4dc348088191977a199dd1873f30.png",
+  "threshold": 100,
+  "edge_threshold": 150,
+  "duration": 200,
+  "rows": 1,
+  "cols": 1,
+  "cell_size": 512,
+  "fit_scale": 0.86,
+  "trim_border": 2,
+  "edge_clean_depth": 2,
+  "align": "center",
+  "shared_scale": false,
+  "component_mode": "all",
+  "component_padding": 2,
+  "min_component_area": 1,
+  "edge_touch_margin": 2,
+  "frame_labels": [
+    "prop-1"
+  ],
+  "frames": [
+    {
+      "grid": [
+        0,
+        0
+      ],
+      "source_box": [
+        0,
+        0,
+        1086,
+        1448
+      ],
+      "component_mode": "all",
+      "component_count": 1,
+      "selected_component_area": null,
+      "selected_component_bbox": null,
+      "crop_bbox": [
+        248,
+        161,
+        851,
+        1300
+      ],
+      "edge_touch": false,
+      "output_size": [
+        233,
+        440
+      ],
+      "paste_position": [
+        139,
+        36
+      ]
+    }
+  ],
+  "edge_touch_frames": []
+}

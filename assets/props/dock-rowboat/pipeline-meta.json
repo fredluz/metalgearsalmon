@@ -1,0 +1,59 @@
+{
+  "target": "asset",
+  "mode": "single",
+  "prompt": "Pixel-art game asset, single prop, centered, full object visible: small tied wooden rowboat / skiff for a 1950s Southeast Asian / Vietnam fishing-village dock at night, top-down with a slight 3/4-from-above view. Old MSX Metal Gear-inspired stealth game style, crisp dark pixel outlines, readable at small scale. Simple weathered wood rowboat with two bench seats, small oar pair, short tied rope at bow, a few subtle scuffs, moonlit blue shadows and a tiny warm lantern reflection on the planks, muted browns and teal-blue night tones. No people. Background exactly solid #FF00FF magenta, no gradients, no texture, no shadows, no floor plane. No text, no labels, no UI, no watermark. Generous magenta margin around the full boat; no part touches the image edge.",
+  "role": "",
+  "input": "/Users/ines/.codex/generated_images/019dcadf-78af-71c2-a159-f6092a02744d/ig_06cd1a16835c31b00169ee4e35eb1481919f14dd34df9b541c.png",
+  "threshold": 100,
+  "edge_threshold": 150,
+  "duration": 200,
+  "rows": 1,
+  "cols": 1,
+  "cell_size": 384,
+  "fit_scale": 0.84,
+  "trim_border": 2,
+  "edge_clean_depth": 2,
+  "align": "center",
+  "shared_scale": false,
+  "component_mode": "all",
+  "component_padding": 2,
+  "min_component_area": 1,
+  "edge_touch_margin": 2,
+  "frame_labels": [
+    "prop-1"
+  ],
+  "frames": [
+    {
+      "grid": [
+        0,
+        0
+      ],
+      "source_box": [
+        0,
+        0,
+        1086,
+        1448
+      ],
+      "component_mode": "all",
+      "component_count": 1,
+      "selected_component_area": null,
+      "selected_component_bbox": null,
+      "crop_bbox": [
+        196,
+        272,
+        902,
+        1162
+      ],
+      "edge_touch": false,
+      "output_size": [
+        255,
+        322
+      ],
+      "paste_position": [
+        64,
+        31
+      ]
+    }
+  ],
+  "edge_touch_frames": []
+}

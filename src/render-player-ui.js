@@ -83,6 +83,9 @@ function drawPrompts(room) {
       prompts.push({ x: pickup.x, y: pickup.y - 24, text: "E" });
     }
   });
+  room.boatTransfers?.forEach((boat) => {
+    if (nearRect(boat, 40)) prompts.push({ x: boat.x + boat.w / 2, y: boat.y - 12, text: "E" });
+  });
   room.vents?.forEach((vent) => {
     if (nearRect(vent, 38)) prompts.push({ x: vent.x + vent.w / 2, y: vent.y - 12, text: "E" });
   });

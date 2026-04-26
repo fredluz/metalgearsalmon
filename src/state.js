@@ -133,6 +133,10 @@
     player.room = START_ROOM;
     player.x = rooms[START_ROOM].start.x;
     player.y = rooms[START_ROOM].start.y;
+    if (Number.isFinite(DEBUG_START.x) && Number.isFinite(DEBUG_START.y)) {
+      player.x = clamp(DEBUG_START.x, player.r, roomWidth(rooms[START_ROOM]) - player.r);
+      player.y = clamp(DEBUG_START.y, player.r, roomHeight(rooms[START_ROOM]) - player.r);
+    }
     player.keys = 0;
     player.facing = { x: 1, y: 0 };
     player.hidden = false;

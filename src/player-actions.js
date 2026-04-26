@@ -181,7 +181,7 @@
         if (pouch.trail.length > 8) pouch.trail.shift();
         pouch.x = nextX;
         pouch.y = nextY;
-        const hitWall = room.walls.some((wall) => circleRect(pouch.x, pouch.y, 7, wall));
+        const hitWall = smallBlocked(room, pouch.x, pouch.y, 7);
         if (hitWall || pouch.traveled >= YARN_THROW_RANGE) {
           pouch.landed = true;
           pouch.ttl = 1.6;

@@ -1,486 +1,192 @@
 "use strict";
-  const rooms = [
-    {
-      name: "Cargo Kennel",
-      floor: "#1a2118",
-      wall: "#4c5742",
-      trim: "#778060",
-      start: { x: 86, y: 540 },
-      doors: [
-        {
-          x: 722, y: 292, w: 38, h: 86,
-          to: 4,
-          need: 0,
-          label: "SERVICE",
-          approach: { x: 690, y: 335 },
-          spawn: { x: 112, y: 328 },
-        },
-      ],
-      keycard: { x: 664, y: 112, taken: false },
-      intel: { x: 220, y: 232, w: 40, h: 48, done: false, text: "VENT PAIRS CAN BREAK CONTACT FAST." },
-      briefings: [
-        "ZERO: tags unlock the next sector.",
-        "ZERO: vents make noise, but break pursuit.",
-        "ZERO: moving in the box still looks wrong.",
-      ],
-      rations: [{ x: 82, y: 96, taken: false }, { x: 704, y: 548, taken: false }],
-      hiding: [{ x: 462, y: 470, w: 78, h: 58 }, { x: 212, y: 96, w: 86, h: 58 }],
-      shadows: [{ x: 54, y: 186, w: 86, h: 106 }, { x: 326, y: 392, w: 88, h: 92 }],
-      vents: [
-        { x: 188, y: 122, w: 54, h: 32, tx: 662, ty: 520 },
-        { x: 654, y: 498, w: 54, h: 32, tx: 224, ty: 140 },
-      ],
-      props: [
-        { type: "pipe", x: 88, y: 258, w: 210, h: 14 },
-        { type: "crate", x: 612, y: 248, w: 82, h: 54 },
-        { type: "drums", x: 620, y: 448, w: 88, h: 58 },
-        { type: "terminal", x: 220, y: 232, w: 40, h: 48 },
-      ],
-      cameras: [
-        { x: 728, y: 44, base: Math.PI * 0.78, sweep: 0.46, range: 180, phase: 0 },
-      ],
-      panels: [{ x: 220, y: 232, w: 40, h: 48, done: false }],
-      alarm: { x: 606, y: 88, w: 38, h: 42, disabled: false, triggered: false },
-      sweeps: [
-        { x: 72, y: 414, w: 420, h: 110, axis: "x", phase: 0.2, speed: 0.0011 },
-      ],
-      walls: [
-        { x: 0, y: 0, w: PLAY_W, h: 28 }, { x: 0, y: H - 28, w: PLAY_W, h: 28 },
-        { x: 0, y: 0, w: 28, h: H },
-        { x: PLAY_W - 28, y: 0, w: 28, h: 292 }, { x: PLAY_W - 28, y: 378, w: 28, h: H - 378 },
-        { x: 150, y: 170, w: 300, h: 36 }, { x: 540, y: 170, w: 164, h: 36 },
-        { x: 150, y: 350, w: 120, h: 36 }, { x: 390, y: 350, w: 300, h: 36 },
-        { x: 600, y: 450, w: 42, h: 130 }, { x: 320, y: 28, w: 36, h: 108 },
-      ],
-      guards: [
-        { x: 560, y: 104, route: [[560, 104], [690, 104], [690, 145], [560, 145]], i: 1, speed: 58 },
-        { x: 250, y: 290, route: [[250, 290], [350, 290], [350, 520], [250, 520]], i: 1, speed: 50 },
-      ],
+
+const DOCK_W = 1520;
+const DOCK_H = 1280;
+
+const dockWalkBounds = [
+  {
+    id: "south-muddy-shore",
+    type: "polygon",
+    surface: "shore",
+    points: [[0, 1058], [236, 1018], [438, 1034], [560, 1132], [560, 1280], [0, 1280]],
+  },
+  {
+    id: "upper-village-shore",
+    type: "polygon",
+    surface: "shore",
+    points: [[1245, 0], [1520, 0], [1520, 305], [1398, 324], [1318, 206], [1212, 128]],
+  },
+  { id: "entry-landing", type: "rect", x: 310, y: 1040, w: 220, h: 142 },
+  { id: "entry-step", type: "rect", x: 356, y: 1168, w: 128, h: 58 },
+  { id: "main-pier-lower", type: "rect", x: 370, y: 620, w: 84, h: 492 },
+  { id: "main-pier-upper", type: "rect", x: 370, y: 330, w: 84, h: 310 },
+  { id: "left-cross", type: "rect", x: 155, y: 598, w: 520, h: 74 },
+  { id: "left-dead-end", type: "rect", x: 126, y: 360, w: 328, h: 74 },
+  { id: "left-dead-end-leg", type: "rect", x: 150, y: 360, w: 78, h: 238 },
+  { id: "left-lower-finger", type: "rect", x: 152, y: 598, w: 76, h: 184 },
+  { id: "central-approach", type: "rect", x: 610, y: 548, w: 174, h: 74 },
+  { id: "central-spine", type: "rect", x: 616, y: 230, w: 82, h: 392 },
+  { id: "upper-cross", type: "rect", x: 616, y: 230, w: 360, h: 74 },
+  { id: "tag-two-finger", type: "rect", x: 870, y: 70, w: 84, h: 234 },
+  { id: "ferry-west-landing", type: "rect", x: 716, y: 566, w: 86, h: 92 },
+  { id: "ferry-east-landing", type: "rect", x: 930, y: 566, w: 86, h: 92 },
+  { id: "east-cross", type: "rect", x: 930, y: 548, w: 438, h: 84 },
+  { id: "east-spine", type: "rect", x: 1138, y: 350, w: 86, h: 612 },
+  { id: "east-upper-cross", type: "rect", x: 1048, y: 350, w: 360, h: 74 },
+  { id: "tuna-pier", type: "rect", x: 1320, y: 184, w: 86, h: 240 },
+  { id: "east-lower-cross", type: "rect", x: 1040, y: 890, w: 310, h: 84 },
+  { id: "tag-three-finger", type: "rect", x: 1220, y: 890, w: 86, h: 226 },
+  { id: "service-boat-exit", type: "rect", x: 1305, y: 1032, w: 170, h: 84 },
+];
+
+const dockProps = [
+  { id: "barrels-start-cover", imageKey: "dockBarrelStack", x: 405, y: 1130, w: 86, h: 86, sortY: 1130, fallback: "#6d5735" },
+  { id: "crates-left-cross", imageKey: "dockFishCrate", x: 560, y: 654, w: 112, h: 86, sortY: 654, fallback: "#77683e" },
+  { id: "lantern-left-spine", imageKey: "dockLanternPost", x: 410, y: 810, w: 64, h: 132, sortY: 810, fallback: "#9f7b3d" },
+  { id: "boat-left-mooring", imageKey: "dockFishingBoatSmall", x: 276, y: 555, w: 212, h: 106, sortY: 555, fallback: "#394b54" },
+  { id: "hanging-lantern-left-cross", imageKey: "dockHangingLantern", x: 650, y: 606, w: 54, h: 68, sortY: 606, fallback: "#d89a43" },
+  { id: "crates-upper-mid", imageKey: "dockFishCrate", x: 742, y: 292, w: 112, h: 82, sortY: 292, fallback: "#77683e" },
+  { id: "barrels-upper-crawl", imageKey: "dockBarrelStack", x: 646, y: 454, w: 82, h: 82, sortY: 454, fallback: "#6d5735" },
+  { id: "lantern-upper-central", imageKey: "dockLanternPost", x: 642, y: 280, w: 64, h: 132, sortY: 280, fallback: "#9f7b3d" },
+  { id: "ferry-rowboat-west", imageKey: "dockRowboat", x: 852, y: 654, w: 170, h: 94, sortY: 654, fallback: "#475b5f" },
+  { id: "lantern-east-spine", imageKey: "dockLanternPost", x: 1182, y: 760, w: 64, h: 132, sortY: 760, fallback: "#9f7b3d" },
+  { id: "crates-east-mid", imageKey: "dockFishCrate", x: 1038, y: 610, w: 110, h: 82, sortY: 610, fallback: "#77683e" },
+  { id: "barrels-center-bottom", imageKey: "dockBarrelStack", x: 1095, y: 936, w: 86, h: 86, sortY: 936, fallback: "#6d5735" },
+  { id: "boat-east-mooring", imageKey: "dockFishingBoatSmall", x: 1288, y: 528, w: 232, h: 116, sortY: 528, fallback: "#394b54" },
+  { id: "barrels-east-dead-end", imageKey: "dockBarrelStack", x: 1264, y: 1058, w: 80, h: 80, sortY: 1058, fallback: "#6d5735" },
+  { id: "hanging-lantern-tuna-gate", imageKey: "dockHangingLantern", x: 1358, y: 248, w: 54, h: 70, sortY: 248, fallback: "#d89a43" },
+  { id: "exit-rowboat", imageKey: "dockRowboat", x: 1420, y: 1086, w: 178, h: 98, sortY: 1086, fallback: "#475b5f" },
+];
+
+const rooms = [
+  {
+    name: "Dock Village",
+    width: DOCK_W,
+    height: DOCK_H,
+    baseImageKey: "dockVillageBase",
+    useLayeredArt: true,
+    drawWalls: false,
+    floor: "#071119",
+    wall: "#31413f",
+    trim: "#7aa6a0",
+    start: { x: 386, y: 1168 },
+    doors: [],
+    keycards: [
+      { x: 172, y: 398, taken: false },
+      { x: 912, y: 104, taken: false },
+      { x: 1264, y: 1050, taken: false },
+    ],
+    tuna: { x: 1362, y: 240, taken: false },
+    intel: {
+      x: 626,
+      y: 238,
+      w: 44,
+      h: 48,
+      done: false,
+      text: "DOCK SENSORS AND ALARM CUT FROM THIS PANEL.",
     },
-    {
-      name: "Vent Pantry",
-      floor: "#202822",
-      wall: "#45534f",
-      trim: "#77918b",
-      start: { x: 506, y: 568 },
-      doors: [
-        {
-          x: 454, y: 602, w: 96, h: 38,
-          to: 4,
-          need: 1,
-          label: "SERVICE",
-          approach: { x: 506, y: 568 },
-          spawn: { x: 382, y: 126 },
-        },
-      ],
-      keycard: { x: 650, y: 506, taken: false },
-      intel: { x: 694, y: 312, w: 40, h: 48, done: false, text: "SHADOWS HIDE YOU ONLY WHILE SNEAKING." },
-      briefings: [
-        "ZERO: shadows only work with soft paws.",
-        "ZERO: yarn can bait one patrol off-route.",
-        "ZERO: cameras build suspicion before contact.",
-      ],
-      rations: [{ x: 236, y: 132, taken: false }, { x: 614, y: 340, taken: false }],
-      catnipPickups: [{ x: 520, y: 120, taken: false }],
-      hiding: [{ x: 126, y: 114, w: 74, h: 60 }, { x: 642, y: 286, w: 74, h: 54 }],
-      shadows: [{ x: 384, y: 156, w: 114, h: 70 }, { x: 94, y: 506, w: 118, h: 74 }],
-      vents: [
-        { x: 76, y: 468, w: 54, h: 32, tx: 725, ty: 110 },
-        { x: 670, y: 92, w: 54, h: 32, tx: 104, ty: 488 },
-      ],
-      props: [
-        { type: "crate", x: 396, y: 94, w: 88, h: 62 },
-        { type: "pipe", x: 510, y: 404, w: 176, h: 14 },
-        { type: "terminal", x: 694, y: 312, w: 40, h: 48 },
-      ],
-      cameras: [
-        { x: 720, y: 58, base: Math.PI * 0.86, sweep: 0.54, range: 190, phase: 0.9 },
-      ],
-      panels: [{ x: 694, y: 312, w: 40, h: 48, done: false }],
-      alarm: { x: 642, y: 312, w: 38, h: 42, disabled: false, triggered: false },
-      sweeps: [
-        { x: 66, y: 78, w: 488, h: 112, axis: "x", phase: 1.6, speed: 0.001 },
-      ],
-      walls: [
-        { x: 0, y: 0, w: PLAY_W, h: 28 }, { x: 0, y: H - 28, w: 454, h: 28 }, { x: 550, y: H - 28, w: PLAY_W - 550, h: 28 },
-        { x: 0, y: 0, w: 28, h: H }, { x: PLAY_W - 28, y: 0, w: 28, h: H },
-        { x: 96, y: 230, w: 300, h: 38 }, { x: 506, y: 230, w: 198, h: 38 },
-        { x: 318, y: 398, w: 42, h: 170 }, { x: 584, y: 70, w: 42, h: 198 },
-        { x: 650, y: 382, w: 44, h: 164 }, { x: 450, y: 0, w: 104, h: 28 },
-      ],
-      guards: [
-        { x: 168, y: 522, route: [[168, 522], [288, 522], [288, 330], [168, 330]], i: 1, speed: 68 },
-        { x: 682, y: 118, route: [[682, 118], [650, 118], [650, 210], [708, 210]], i: 1, speed: 54 },
-        { x: 430, y: 326, route: [[430, 326], [540, 326], [540, 300], [430, 300]], i: 1, speed: 45 },
-      ],
-    },
-    {
-      name: "Laser Litter",
-      floor: "#1c2026",
-      wall: "#4a4f5d",
-      trim: "#7d86a0",
-      start: { x: 70, y: 308 },
-      doors: [
-        {
-          x: 0, y: 268, w: 38, h: 96,
-          to: 4,
-          need: 2,
-          label: "SERVICE",
-          approach: { x: 62, y: 316 },
-          spawn: { x: 632, y: 328 },
-        },
-        {
-          x: 722, y: 76, w: 38, h: 112,
-          to: 3,
-          need: 3,
-          progress: 3,
-          label: "TUNA",
-          approach: { x: 690, y: 132 },
-          spawn: { x: 70, y: 124 },
-        },
-      ],
-      keycard: { x: 124, y: 88, taken: false },
-      intel: { x: 84, y: 532, w: 46, h: 54, done: false, text: "PANEL CLAWS CUT LASERS AND CAMERAS." },
-      briefings: [
-        "ZERO: scratch panels before crossing beams.",
-        "ZERO: patrol routes are visible after intel.",
-        "ZERO: a stunned guard can still be found.",
-      ],
-      rations: [{ x: 558, y: 126, taken: false }, { x: 224, y: 532, taken: false }],
-      catnipPickups: [{ x: 674, y: 316, taken: false }],
-      hiding: [{ x: 172, y: 476, w: 92, h: 58 }, { x: 690, y: 84, w: 76, h: 60 }],
-      shadows: [{ x: 370, y: 414, w: 132, h: 82 }, { x: 662, y: 212, w: 72, h: 84 }],
-      panels: [{ x: 84, y: 532, w: 46, h: 54, done: false }],
-      alarm: { x: 96, y: 72, w: 38, h: 42, disabled: false, triggered: false },
-      props: [
-        { type: "terminal", x: 84, y: 532, w: 46, h: 54 },
-        { type: "pipe", x: 590, y: 280, w: 124, h: 14 },
-        { type: "crate", x: 432, y: 266, w: 74, h: 60 },
-      ],
-      cameras: [
-        { x: 706, y: 344, base: Math.PI, sweep: 0.72, range: 210, phase: 1.4, disabledBySystem: true },
-        { x: 62, y: 174, base: 0.28, sweep: 0.5, range: 180, phase: 2.3, disabledBySystem: true },
-      ],
-      walls: [
-        { x: 0, y: 0, w: PLAY_W, h: 28 }, { x: 0, y: H - 28, w: PLAY_W, h: 28 },
-        { x: 0, y: 0, w: 28, h: 268 }, { x: 0, y: 364, w: 28, h: H - 364 },
-        { x: PLAY_W - 28, y: 0, w: 28, h: 76 }, { x: PLAY_W - 28, y: 188, w: 28, h: H - 188 },
-        { x: 124, y: 190, w: 580, h: 34 }, { x: 124, y: 376, w: 570, h: 34 },
-        { x: 330, y: 224, w: 38, h: 152 }, { x: 618, y: 224, w: 38, h: 152 },
-      ],
-      lasers: [
-        { x: 150, y: 300, w: 520, h: 9, phase: 0 },
-        { x: 150, y: 466, w: 430, h: 9, phase: 1.4 },
-      ],
-      guards: [
-        { x: 150, y: 300, route: [[150, 300], [300, 300]], i: 1, speed: 72 },
-        { x: 476, y: 522, route: [[476, 522], [680, 522], [680, 430], [476, 430]], i: 1, speed: 62 },
-      ],
-    },
-    {
-      name: "Warm Box",
-      floor: "#211d18",
-      wall: "#584a3e",
-      trim: "#8f7458",
-      start: { x: 70, y: 124 },
-      doors: [
-        {
-          x: 0, y: 76, w: 38, h: 112,
-          to: 2,
-          need: 3,
-          label: "LASER",
-          approach: { x: 70, y: 124 },
-          spawn: { x: 690, y: 132 },
-        },
-      ],
-      tuna: { x: 660, y: 520, taken: false },
-      intel: { x: 644, y: 92, w: 42, h: 48, done: false, text: "FINAL ROOM: STUN ONLY WHEN CLOSE." },
-      briefings: [
-        "ZERO: the tuna scent will wake the base.",
-        "ZERO: evac is back at the entry pad.",
-        "ZERO: do not fight the room, bend it.",
-      ],
-      rations: [{ x: 262, y: 532, taken: false }, { x: 104, y: 300, taken: false }],
-      catnipPickups: [{ x: 458, y: 330, taken: false }],
-      hiding: [{ x: 132, y: 494, w: 84, h: 58 }, { x: 636, y: 96, w: 84, h: 58 }],
-      shadows: [{ x: 70, y: 146, w: 96, h: 80 }, { x: 606, y: 446, w: 110, h: 82 }],
-      vents: [{ x: 454, y: 64, w: 54, h: 32, tx: 252, ty: 532 }],
-      props: [
-        { type: "pipe", x: 124, y: 84, w: 234, h: 14 },
-        { type: "crate", x: 650, y: 92, w: 74, h: 58 },
-        { type: "drums", x: 80, y: 276, w: 94, h: 62 },
-      ],
-      cameras: [
-        { x: 712, y: 584, base: -Math.PI * 0.72, sweep: 0.58, range: 190, phase: 3.1 },
-      ],
-      panels: [{ x: 644, y: 92, w: 42, h: 48, done: false }],
-      alarm: { x: 224, y: 500, w: 38, h: 42, disabled: false, triggered: false },
-      sweeps: [
-        { x: 218, y: 252, w: 414, h: 116, axis: "y", phase: 0.7, speed: 0.00125 },
-      ],
-      walls: [
-        { x: 0, y: 0, w: PLAY_W, h: 28 }, { x: 0, y: H - 28, w: PLAY_W, h: 28 },
-        { x: 0, y: 0, w: 28, h: 76 }, { x: 0, y: 188, w: 28, h: H - 188 }, { x: PLAY_W - 28, y: 0, w: 28, h: H },
-        { x: 186, y: 206, w: 500, h: 38 }, { x: 186, y: 406, w: 500, h: 38 },
-        { x: 368, y: 244, w: 38, h: 162 }, { x: 560, y: 244, w: 38, h: 162 },
-      ],
-      guards: [
-        { x: 200, y: 124, route: [[200, 124], [690, 124]], i: 1, speed: 82 },
-        { x: 630, y: 324, route: [[630, 324], [690, 324], [690, 276], [630, 276]], i: 1, speed: 76 },
-        { x: 470, y: 526, route: [[470, 526], [680, 526], [680, 470], [470, 470]], i: 1, speed: 55 },
-      ],
-    },
-    {
-      name: "Service Hall",
-      width: PLAY_W * 2,
-      height: H,
-      floor: "#181f20",
-      wall: "#3f5050",
-      trim: "#7aa6a0",
-      start: { x: 72, y: 328 },
-      doors: [
-        {
-          x: 0, y: 286, w: 38, h: 86,
-          to: 0,
-          need: 0,
-          label: "KENNEL",
-          approach: { x: 68, y: 328 },
-          spawn: { x: 656, y: 335 },
-        },
-        {
-          x: 454, y: 0, w: 96, h: 34,
-          to: 1,
-          need: 1,
-          progress: 1,
-          label: "PANTRY",
-          approach: { x: 506, y: 58 },
-          trigger: { x: 464, y: 28, w: 72, h: 26 },
-          spawn: { x: 506, y: 520 },
-        },
-        {
-          x: PLAY_W * 2 - 38, y: 280, w: 38, h: 96,
-          to: 2,
-          need: 2,
-          progress: 2,
-          label: "LASER",
-          approach: { x: PLAY_W * 2 - 80, y: 328 },
-          spawn: { x: 120, y: 308 },
-        },
-      ],
-      intel: { x: 364, y: 282, w: 40, h: 48, done: false, text: "ADJACENT PATROLS CAN ANSWER ALERTS THROUGH DOORS." },
-      briefings: [
-        "ZERO: this hall connects the whole kennel block.",
-        "ZERO: alerts travel through adjacent doors.",
-        "ZERO: use the hub to shake a pursuit.",
-      ],
-      rations: [{ x: 404, y: 480, taken: false }],
-      catnipPickups: [{ x: 120, y: 194, taken: false }],
-      hiding: [{ x: 180, y: 112, w: 82, h: 58 }, { x: 540, y: 454, w: 88, h: 58 }, { x: 1052, y: 112, w: 88, h: 58 }],
-      shadows: [{ x: 48, y: 286, w: 112, h: 92 }, { x: 72, y: 420, w: 126, h: 84 }, { x: 520, y: 116, w: 112, h: 78 }, { x: 968, y: 420, w: 150, h: 82 }],
-      props: [
-        { type: "pipe", x: 86, y: 264, w: 214, h: 14 },
-        { type: "pipe", x: 468, y: 364, w: 198, h: 14 },
-        { type: "pipe", x: 826, y: 264, w: 270, h: 14 },
-        { type: "crate", x: 982, y: 416, w: 92, h: 62 },
-        { type: "drums", x: 1288, y: 450, w: 94, h: 62 },
-        { type: "crate", x: 176, y: 108, w: 88, h: 62 },
-        { type: "crate", x: 538, y: 450, w: 92, h: 62 },
-        { type: "terminal", x: 364, y: 282, w: 40, h: 48 },
-      ],
-      cameras: [
-        { x: 478, y: 72, base: Math.PI * 0.72, sweep: 0.5, range: 170, phase: 0.5 },
-      ],
-      panels: [{ x: 364, y: 282, w: 40, h: 48, done: false }],
-      alarm: { x: 388, y: 330, w: 38, h: 42, disabled: false, triggered: false },
-      sweeps: [
-        { x: 298, y: 86, w: 168, h: 416, axis: "y", phase: 1.1, speed: 0.001 },
-      ],
-      walls: [
-        { x: 0, y: 0, w: 454, h: 28 }, { x: 550, y: 0, w: PLAY_W * 2 - 550, h: 28 }, { x: 0, y: H - 28, w: PLAY_W * 2, h: 28 },
-        { x: 0, y: 0, w: 28, h: 286 }, { x: 0, y: 372, w: 28, h: H - 372 },
-        { x: PLAY_W * 2 - 28, y: 0, w: 28, h: 280 }, { x: PLAY_W * 2 - 28, y: 376, w: 28, h: H - 376 },
-        { x: 132, y: 218, w: 176, h: 38 }, { x: 456, y: 218, w: 178, h: 38 },
-        { x: 132, y: 382, w: 176, h: 38 }, { x: 456, y: 382, w: 178, h: 38 },
-        { x: 820, y: 218, w: 204, h: 38 }, { x: 1188, y: 218, w: 184, h: 38 },
-        { x: 820, y: 382, w: 204, h: 38 }, { x: 1188, y: 382, w: 184, h: 38 },
-        { x: 1108, y: 28, w: 38, h: 166 },
-        { x: 312, y: 28, w: 38, h: 166 },
-        { x: 414, y: 446, w: 38, h: 166 },
-      ],
-      guards: [
-        { x: 236, y: 328, route: [[236, 328], [292, 328], [292, 156], [156, 156]], i: 1, speed: 64 },
-        { x: 622, y: 328, route: [[622, 328], [466, 328], [466, 502], [622, 502]], i: 1, speed: 60 },
-        { x: 1038, y: 328, route: [[1038, 328], [1328, 328], [1328, 504], [1038, 504]], i: 1, speed: 58 },
-      ],
-    },
-  ];
+    briefings: [
+      "ZERO: this harbor is all timing. The straight line is bait.",
+      "ZERO: release the rowboat to cross the black water.",
+      "ZERO: three tags before the tuna. No cameras tonight.",
+    ],
+    rations: [
+      { x: 300, y: 636, taken: false },
+      { x: 730, y: 454, taken: false },
+      { x: 1098, y: 1124, taken: false },
+    ],
+    catnipPickups: [
+      { x: 178, y: 730, taken: false },
+      { x: 1058, y: 936, taken: false },
+    ],
+    hiding: [
+      { x: 372, y: 1088, w: 68, h: 54 },
+      { x: 510, y: 608, w: 96, h: 58 },
+      { x: 702, y: 248, w: 94, h: 58 },
+      { x: 604, y: 404, w: 84, h: 58 },
+      { x: 1002, y: 562, w: 96, h: 58 },
+      { x: 1052, y: 890, w: 86, h: 60 },
+      { x: 1228, y: 1016, w: 86, h: 60 },
+    ],
+    shadows: [
+      { x: 300, y: 1122, w: 116, h: 72 },
+      { x: 152, y: 604, w: 120, h: 72 },
+      { x: 370, y: 430, w: 76, h: 86 },
+      { x: 610, y: 430, w: 112, h: 60 },
+      { x: 870, y: 76, w: 74, h: 72 },
+      { x: 1140, y: 404, w: 80, h: 94 },
+      { x: 1138, y: 734, w: 96, h: 70 },
+      { x: 1326, y: 306, w: 76, h: 82 },
+    ],
+    lightPools: [
+      { x: 410, y: 810, radius: 124, alpha: 0.18 },
+      { x: 650, y: 606, radius: 132, alpha: 0.2 },
+      { x: 642, y: 280, radius: 136, alpha: 0.2 },
+      { x: 912, y: 240, radius: 112, alpha: 0.16 },
+      { x: 1080, y: 586, radius: 136, alpha: 0.2 },
+      { x: 1182, y: 760, radius: 128, alpha: 0.18 },
+      { x: 1358, y: 248, radius: 116, alpha: 0.17 },
+    ],
+    vents: [],
+    boatTransfers: [
+      { id: "west-ferry", x: 730, y: 584, w: 60, h: 54, tx: 972, ty: 612, label: "BOAT" },
+      { id: "east-ferry", x: 944, y: 584, w: 60, h: 54, tx: 756, ty: 612, label: "BOAT" },
+      { id: "service-exit-boat", x: 1384, y: 1052, w: 70, h: 48, tx: 1358, ty: 240, label: "NEXT" },
+    ],
+    props: dockProps,
+    cameras: [],
+    panels: [
+      { x: 626, y: 238, w: 44, h: 48, done: false },
+      { x: 1162, y: 548, w: 44, h: 48, done: false },
+    ],
+    alarm: { x: 1324, y: 206, w: 42, h: 46, disabled: false, triggered: false },
+    sweeps: [
+      { x: 616, y: 230, w: 360, h: 104, axis: "x", phase: 0.3, speed: 0.00085 },
+      { x: 1116, y: 548, w: 112, h: 330, axis: "y", phase: 1.1, speed: 0.00095 },
+    ],
+    walkBounds: dockWalkBounds,
+    walls: [
+      { id: "barrels-start-base", x: 378, y: 1098, w: 56, h: 40 },
+      { id: "crates-left-base", x: 518, y: 614, w: 84, h: 44 },
+      { id: "crates-upper-base", x: 700, y: 254, w: 84, h: 38 },
+      { id: "barrels-upper-base", x: 614, y: 420, w: 64, h: 42 },
+      { id: "crates-east-base", x: 1004, y: 574, w: 76, h: 42 },
+      { id: "barrels-center-base", x: 1062, y: 906, w: 66, h: 42 },
+      { id: "barrels-east-base", x: 1236, y: 1032, w: 58, h: 42 },
+      { id: "lantern-left-base", x: 400, y: 792, w: 22, h: 24 },
+      { id: "lantern-upper-base", x: 632, y: 262, w: 22, h: 24 },
+      { id: "lantern-east-base", x: 1172, y: 742, w: 22, h: 24 },
+      { id: "lantern-tuna-base", x: 1348, y: 230, w: 22, h: 24 },
+      { id: "panel-upper-base", x: 624, y: 260, w: 48, h: 28 },
+      { id: "panel-east-base", x: 1160, y: 570, w: 48, h: 28 },
+      { id: "alarm-base", x: 1322, y: 228, w: 46, h: 30 },
+    ],
+    lasers: [],
+    guards: [
+      { x: 410, y: 1040, route: [[410, 1040], [410, 785], [220, 635], [562, 635]], i: 1, speed: 58 },
+      { x: 190, y: 398, route: [[190, 398], [410, 398], [410, 628], [640, 584]], i: 1, speed: 48 },
+      { x: 654, y: 584, route: [[654, 584], [654, 278], [914, 278], [914, 112], [742, 278]], i: 1, speed: 54 },
+      { x: 980, y: 590, route: [[980, 590], [1182, 590], [1182, 915], [1264, 936], [1182, 590], [1356, 382]], i: 1, speed: 56 },
+    ],
+    navPoints: [
+      { x: 386, y: 1168 }, { x: 410, y: 1040 }, { x: 410, y: 830 }, { x: 410, y: 635 },
+      { x: 172, y: 398 }, { x: 190, y: 635 }, { x: 654, y: 584 }, { x: 654, y: 278 },
+      { x: 912, y: 104 }, { x: 742, y: 278 }, { x: 756, y: 612 }, { x: 972, y: 612 },
+      { x: 980, y: 590 }, { x: 1182, y: 590 }, { x: 1182, y: 760 }, { x: 1182, y: 915 },
+      { x: 1264, y: 1050 }, { x: 1384, y: 1086 }, { x: 1356, y: 382 }, { x: 1362, y: 240 },
+    ],
+  },
+];
 
-  const authoredRoomPlacements = [
-    { room: 0, col: 0, row: 1 },
-    { room: 4, col: 1, row: 1 },
-    { room: 1, col: 1, row: 0 },
-    { room: 2, col: 3, row: 1 },
-    { room: 3, col: 4, row: 1 },
-  ];
-
-  function authoredRoomOffset(index) {
-    const placement = authoredRoomPlacements.find((candidate) => candidate.room === index) || { col: index, row: 0 };
-    return {
-      x: Number.isFinite(placement.x) ? placement.x : placement.col * PLAY_W,
-      y: Number.isFinite(placement.y) ? placement.y : placement.row * H,
-    };
-  }
-
-  function offsetRect(rect, offset) {
-    return { ...rect, x: rect.x + offset.x, y: rect.y + offset.y };
-  }
-
-  function offsetPoint(point, offset) {
-    return point ? { x: point.x + offset.x, y: point.y + offset.y } : point;
-  }
-
-  function offsetDoor(door, offset, sourceRoom) {
-    return {
-      ...offsetRect(door, offset),
-      sourceRoom,
-      targetRoom: door.to,
-      connectionKey: [sourceRoom, door.to].sort((a, b) => a - b).join(":"),
-      to: 0,
-      approach: offsetPoint(door.approach, offset),
-      spawn: offsetPoint(door.spawn, offset),
-      trigger: door.trigger ? offsetRect(door.trigger, offset) : door.trigger,
-    };
-  }
-
-  function offsetGuard(guard, offset, roomIndex) {
-    return {
-      ...guard,
-      x: guard.x + offset.x,
-      y: guard.y + offset.y,
-      route: guard.route.map((point) => [point[0] + offset.x, point[1] + offset.y]),
-      homeRoom: 0,
-      sourceRoom: roomIndex,
-    };
-  }
-
-  function mergedDoorTrigger(door) {
-    return door.trigger || { x: door.x, y: door.y, w: door.w, h: door.h };
-  }
-
-  function mergeAuthoredRooms() {
-    const sourceRooms = rooms.slice();
-    const bounds = sourceRooms.reduce((rect, room, index) => {
-      const offset = authoredRoomOffset(index);
-      return {
-        w: Math.max(rect.w, offset.x + (room.width || PLAY_W)),
-        h: Math.max(rect.h, offset.y + (room.height || H)),
-      };
-    }, { w: 0, h: 0 });
-    const startOffset = authoredRoomOffset(0);
-    const finalOffset = authoredRoomOffset(3);
-    const merged = {
-      unified: true,
-      name: "Kennel Block",
-      width: bounds.w,
-      height: bounds.h,
-      sectors: sourceRooms.map((room, index) => {
-        const offset = authoredRoomOffset(index);
-        return {
-          room: index,
-          name: room.name,
-          x: offset.x,
-          y: offset.y,
-          w: room.width || PLAY_W,
-          h: room.height || H,
-        };
-      }),
-      floor: "#181f20",
-      wall: "#4c5742",
-      trim: "#7aa6a0",
-      start: offsetPoint(sourceRooms[0].start, startOffset),
-      doors: [],
-      keycards: [],
-      tuna: offsetPoint(sourceRooms[3].tuna, finalOffset),
-      intel: offsetRect(sourceRooms[0].intel, startOffset),
-      briefings: sourceRooms.flatMap((room) => room.briefings || []),
-      rations: [],
-      catnipPickups: [],
-      hiding: [],
-      shadows: [],
-      vents: [],
-      props: [],
-      cameras: [],
-      panels: [],
-      sweeps: [],
-      walls: [],
-      lasers: [],
-      guards: [],
-    };
-
-    const doorsByConnection = new Map();
-    sourceRooms.forEach((room, index) => {
-      const offset = authoredRoomOffset(index);
-      if (room.keycard) merged.keycards.push(offsetPoint(room.keycard, offset));
-      (room.doors || []).forEach((door) => {
-        const offsetedDoor = offsetDoor(door, offset, index);
-        const existing = doorsByConnection.get(offsetedDoor.connectionKey);
-        if (!existing) {
-          doorsByConnection.set(offsetedDoor.connectionKey, offsetedDoor);
-        } else {
-          existing.x = Math.round((existing.x + offsetedDoor.x) / 2);
-          existing.y = Math.round((existing.y + offsetedDoor.y) / 2);
-          existing.w = Math.max(existing.w, offsetedDoor.w);
-          existing.h = Math.max(existing.h, offsetedDoor.h);
-          existing.need = Math.max(existing.need || 0, offsetedDoor.need || 0);
-          existing.progress = Math.max(existing.progress || 0, offsetedDoor.progress || 0) || undefined;
-          const existingTrigger = mergedDoorTrigger(existing);
-          const offsetedTrigger = mergedDoorTrigger(offsetedDoor);
-          existing.trigger = {
-            x: Math.round((existingTrigger.x + offsetedTrigger.x) / 2),
-            y: Math.round((existingTrigger.y + offsetedTrigger.y) / 2),
-            w: Math.max(existingTrigger.w, offsetedTrigger.w),
-            h: Math.max(existingTrigger.h, offsetedTrigger.h),
-          };
-          existing.approach = {
-            x: Math.round((existing.approach.x + offsetedDoor.approach.x) / 2),
-            y: Math.round((existing.approach.y + offsetedDoor.approach.y) / 2),
-          };
-        }
-      });
-      merged.rations.push(...(room.rations || []).map((ration) => offsetPoint(ration, offset)));
-      merged.catnipPickups.push(...(room.catnipPickups || []).map((pickup) => offsetPoint(pickup, offset)));
-      merged.hiding.push(...(room.hiding || []).map((spot) => offsetRect(spot, offset)));
-      merged.shadows.push(...(room.shadows || []).map((shadow) => offsetRect(shadow, offset)));
-      merged.vents.push(...(room.vents || []).map((vent) => ({ ...offsetRect(vent, offset), tx: vent.tx + offset.x, ty: vent.ty + offset.y })));
-      merged.props.push(...(room.props || []).map((prop) => offsetRect(prop, offset)));
-      merged.cameras.push(...(room.cameras || []).map((camera) => ({ ...camera, x: camera.x + offset.x, y: camera.y + offset.y })));
-      merged.panels.push(...(room.panels || []).map((panel) => offsetRect(panel, offset)));
-      merged.sweeps.push(...(room.sweeps || []).map((sweep) => offsetRect(sweep, offset)));
-      merged.walls.push(...(room.walls || []).map((wall) => offsetRect(wall, offset)));
-      merged.lasers.push(...(room.lasers || []).map((laser) => offsetRect(laser, offset)));
-      merged.guards.push(...(room.guards || []).map((guard) => offsetGuard(guard, offset, index)));
-    });
-    merged.doors.push(...doorsByConnection.values());
-
-    rooms.length = 0;
-    rooms.push(merged);
-  }
-
-  mergeAuthoredRooms();
-
-  const START_ROOM = 0;
-  const FINAL_ROOM = 3;
-  const REQUIRED_TAGS = 3;
-  const baseGuardLayouts = rooms.map((room, roomIndex) => room.guards.map((guard, guardIndex) => ({
-    ...guard,
-    id: `r${roomIndex}g${guardIndex}`,
-    homeRoom: roomIndex,
-    route: guard.route.map((point) => [point[0], point[1]]),
-  })));
-  const facilityMapLayout = [
-    { room: 0, code: "KEN", x: 0.04, y: 0.48, w: 0.31, h: 0.30 },
-    { room: 4, code: "HALL", x: 0.43, y: 0.38, w: 0.22, h: 0.40 },
-    { room: 1, code: "PAN", x: 0.40, y: 0.05, w: 0.28, h: 0.26 },
-    { room: 2, code: "LAS", x: 0.72, y: 0.44, w: 0.25, h: 0.31 },
-    { room: 3, code: "TUNA", x: 0.72, y: 0.05, w: 0.25, h: 0.27 },
-  ];
+const START_ROOM = 0;
+const FINAL_ROOM = 0;
+const REQUIRED_TAGS = 3;
+const baseGuardLayouts = rooms.map((room, roomIndex) => room.guards.map((guard, guardIndex) => ({
+  ...guard,
+  id: `r${roomIndex}g${guardIndex}`,
+  homeRoom: roomIndex,
+  route: guard.route.map((point) => [point[0], point[1]]),
+})));
+const facilityMapLayout = [
+  { room: 0, code: "DOCK", x: 0.06, y: 0.06, w: 0.88, h: 0.86 },
+];

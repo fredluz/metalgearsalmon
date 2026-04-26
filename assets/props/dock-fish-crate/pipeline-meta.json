@@ -1,0 +1,59 @@
+{
+  "target": "asset",
+  "mode": "single",
+  "prompt": "Single prop, centered, full object visible: rectangular open wooden fish crate with fish and ice hints, wet planks mood, top-down / slightly 3/4 from above pixel-art prop for an MSX-era stealth game, nighttime fishing-village dock, 1950s Southeast Asian/Vietnam-war-film mood, crisp dark pixel outlines, compact readable collision silhouette. Background exactly solid #FF00FF magenta, no gradients, no texture, no shadows, no floor plane. No text, no labels, no UI, no watermark. Generous magenta margin; no part touches image edge.",
+  "role": "",
+  "input": "/Users/ines/.codex/generated_images/019dcadf-7b4f-7dc1-9a9a-6e2c6e67d24c/ig_0321fd50666161cb0169ee4dd32cf08191b6163495b78db3d1.png",
+  "threshold": 100,
+  "edge_threshold": 150,
+  "duration": 200,
+  "rows": 1,
+  "cols": 1,
+  "cell_size": 256,
+  "fit_scale": 0.82,
+  "trim_border": 4,
+  "edge_clean_depth": 3,
+  "align": "center",
+  "shared_scale": false,
+  "component_mode": "all",
+  "component_padding": 0,
+  "min_component_area": 1,
+  "edge_touch_margin": 0,
+  "frame_labels": [
+    "prop-1"
+  ],
+  "frames": [
+    {
+      "grid": [
+        0,
+        0
+      ],
+      "source_box": [
+        0,
+        0,
+        1254,
+        1254
+      ],
+      "component_mode": "all",
+      "component_count": 1,
+      "selected_component_area": null,
+      "selected_component_bbox": null,
+      "crop_bbox": [
+        261,
+        288,
+        985,
+        926
+      ],
+      "edge_touch": false,
+      "output_size": [
+        209,
+        184
+      ],
+      "paste_position": [
+        23,
+        36
+      ]
+    }
+  ],
+  "edge_touch_frames": []
+}

@@ -1,0 +1,541 @@
+{
+  "mapSize": {
+    "width": 1520,
+    "height": 1280
+  },
+  "asset": {
+    "base": "assets/maps/dock-village/dock-village-base.png",
+    "source": "assets/maps/dock-village/dock-village-base.svg"
+  },
+  "walkableDockRects": [
+    {
+      "id": "entry-landing",
+      "type": "rect",
+      "x": 310,
+      "y": 1040,
+      "w": 220,
+      "h": 142
+    },
+    {
+      "id": "entry-step",
+      "type": "rect",
+      "x": 356,
+      "y": 1168,
+      "w": 128,
+      "h": 58
+    },
+    {
+      "id": "main-pier-lower",
+      "type": "rect",
+      "x": 370,
+      "y": 620,
+      "w": 84,
+      "h": 492
+    },
+    {
+      "id": "main-pier-upper",
+      "type": "rect",
+      "x": 370,
+      "y": 330,
+      "w": 84,
+      "h": 310
+    },
+    {
+      "id": "left-cross",
+      "type": "rect",
+      "x": 155,
+      "y": 598,
+      "w": 520,
+      "h": 74
+    },
+    {
+      "id": "left-dead-end",
+      "type": "rect",
+      "x": 126,
+      "y": 360,
+      "w": 328,
+      "h": 74
+    },
+    {
+      "id": "left-dead-end-leg",
+      "type": "rect",
+      "x": 150,
+      "y": 360,
+      "w": 78,
+      "h": 238
+    },
+    {
+      "id": "left-lower-finger",
+      "type": "rect",
+      "x": 152,
+      "y": 598,
+      "w": 76,
+      "h": 184
+    },
+    {
+      "id": "central-approach",
+      "type": "rect",
+      "x": 610,
+      "y": 548,
+      "w": 174,
+      "h": 74
+    },
+    {
+      "id": "central-spine",
+      "type": "rect",
+      "x": 616,
+      "y": 230,
+      "w": 82,
+      "h": 392
+    },
+    {
+      "id": "upper-cross",
+      "type": "rect",
+      "x": 616,
+      "y": 230,
+      "w": 360,
+      "h": 74
+    },
+    {
+      "id": "tag-two-finger",
+      "type": "rect",
+      "x": 870,
+      "y": 70,
+      "w": 84,
+      "h": 234
+    },
+    {
+      "id": "ferry-west-landing",
+      "type": "rect",
+      "x": 716,
+      "y": 566,
+      "w": 86,
+      "h": 92
+    },
+    {
+      "id": "ferry-east-landing",
+      "type": "rect",
+      "x": 930,
+      "y": 566,
+      "w": 86,
+      "h": 92
+    },
+    {
+      "id": "east-cross",
+      "type": "rect",
+      "x": 930,
+      "y": 548,
+      "w": 438,
+      "h": 84
+    },
+    {
+      "id": "east-spine",
+      "type": "rect",
+      "x": 1138,
+      "y": 350,
+      "w": 86,
+      "h": 612
+    },
+    {
+      "id": "east-upper-cross",
+      "type": "rect",
+      "x": 1048,
+      "y": 350,
+      "w": 360,
+      "h": 74
+    },
+    {
+      "id": "tuna-pier",
+      "type": "rect",
+      "x": 1320,
+      "y": 184,
+      "w": 86,
+      "h": 240
+    },
+    {
+      "id": "east-lower-cross",
+      "type": "rect",
+      "x": 1040,
+      "y": 890,
+      "w": 310,
+      "h": 84
+    },
+    {
+      "id": "tag-three-finger",
+      "type": "rect",
+      "x": 1220,
+      "y": 890,
+      "w": 86,
+      "h": 226
+    },
+    {
+      "id": "service-boat-exit",
+      "type": "rect",
+      "x": 1305,
+      "y": 1032,
+      "w": 170,
+      "h": 84
+    }
+  ],
+  "walkableDockPolygons": [
+    {
+      "id": "south-muddy-shore",
+      "type": "polygon",
+      "surface": "shore",
+      "points": [
+        [
+          0,
+          1058
+        ],
+        [
+          236,
+          1018
+        ],
+        [
+          438,
+          1034
+        ],
+        [
+          560,
+          1132
+        ],
+        [
+          560,
+          1280
+        ],
+        [
+          0,
+          1280
+        ]
+      ]
+    },
+    {
+      "id": "upper-village-shore",
+      "type": "polygon",
+      "surface": "shore",
+      "points": [
+        [
+          1245,
+          0
+        ],
+        [
+          1520,
+          0
+        ],
+        [
+          1520,
+          305
+        ],
+        [
+          1398,
+          324
+        ],
+        [
+          1318,
+          206
+        ],
+        [
+          1212,
+          128
+        ]
+      ]
+    }
+  ],
+  "suggestedPropAnchors": [
+    {
+      "id": "barrels-start-cover",
+      "imageKey": "dockBarrelStack",
+      "x": 405,
+      "y": 1130,
+      "w": 86,
+      "h": 86,
+      "sortY": 1130,
+      "fallback": "#6d5735"
+    },
+    {
+      "id": "crates-left-cross",
+      "imageKey": "dockFishCrate",
+      "x": 560,
+      "y": 654,
+      "w": 112,
+      "h": 86,
+      "sortY": 654,
+      "fallback": "#77683e"
+    },
+    {
+      "id": "lantern-left-spine",
+      "imageKey": "dockLanternPost",
+      "x": 410,
+      "y": 810,
+      "w": 64,
+      "h": 132,
+      "sortY": 810,
+      "fallback": "#9f7b3d"
+    },
+    {
+      "id": "boat-left-mooring",
+      "imageKey": "dockFishingBoatSmall",
+      "x": 276,
+      "y": 555,
+      "w": 212,
+      "h": 106,
+      "sortY": 555,
+      "fallback": "#394b54"
+    },
+    {
+      "id": "hanging-lantern-left-cross",
+      "imageKey": "dockHangingLantern",
+      "x": 650,
+      "y": 606,
+      "w": 54,
+      "h": 68,
+      "sortY": 606,
+      "fallback": "#d89a43"
+    },
+    {
+      "id": "crates-upper-mid",
+      "imageKey": "dockFishCrate",
+      "x": 742,
+      "y": 292,
+      "w": 112,
+      "h": 82,
+      "sortY": 292,
+      "fallback": "#77683e"
+    },
+    {
+      "id": "barrels-upper-crawl",
+      "imageKey": "dockBarrelStack",
+      "x": 646,
+      "y": 454,
+      "w": 82,
+      "h": 82,
+      "sortY": 454,
+      "fallback": "#6d5735"
+    },
+    {
+      "id": "lantern-upper-central",
+      "imageKey": "dockLanternPost",
+      "x": 642,
+      "y": 280,
+      "w": 64,
+      "h": 132,
+      "sortY": 280,
+      "fallback": "#9f7b3d"
+    },
+    {
+      "id": "ferry-rowboat-west",
+      "imageKey": "dockRowboat",
+      "x": 852,
+      "y": 654,
+      "w": 170,
+      "h": 94,
+      "sortY": 654,
+      "fallback": "#475b5f"
+    },
+    {
+      "id": "lantern-east-spine",
+      "imageKey": "dockLanternPost",
+      "x": 1182,
+      "y": 760,
+      "w": 64,
+      "h": 132,
+      "sortY": 760,
+      "fallback": "#9f7b3d"
+    },
+    {
+      "id": "crates-east-mid",
+      "imageKey": "dockFishCrate",
+      "x": 1038,
+      "y": 610,
+      "w": 110,
+      "h": 82,
+      "sortY": 610,
+      "fallback": "#77683e"
+    },
+    {
+      "id": "barrels-center-bottom",
+      "imageKey": "dockBarrelStack",
+      "x": 1095,
+      "y": 936,
+      "w": 86,
+      "h": 86,
+      "sortY": 936,
+      "fallback": "#6d5735"
+    },
+    {
+      "id": "boat-east-mooring",
+      "imageKey": "dockFishingBoatSmall",
+      "x": 1288,
+      "y": 528,
+      "w": 232,
+      "h": 116,
+      "sortY": 528,
+      "fallback": "#394b54"
+    },
+    {
+      "id": "barrels-east-dead-end",
+      "imageKey": "dockBarrelStack",
+      "x": 1264,
+      "y": 1058,
+      "w": 80,
+      "h": 80,
+      "sortY": 1058,
+      "fallback": "#6d5735"
+    },
+    {
+      "id": "hanging-lantern-tuna-gate",
+      "imageKey": "dockHangingLantern",
+      "x": 1358,
+      "y": 248,
+      "w": 54,
+      "h": 70,
+      "sortY": 248,
+      "fallback": "#d89a43"
+    },
+    {
+      "id": "exit-rowboat",
+      "imageKey": "dockRowboat",
+      "x": 1420,
+      "y": 1086,
+      "w": 178,
+      "h": 98,
+      "sortY": 1086,
+      "fallback": "#475b5f"
+    }
+  ],
+  "guardRouteSuggestions": [
+    {
+      "id": "guard-1",
+      "waypoints": [
+        {
+          "x": 410,
+          "y": 1040
+        },
+        {
+          "x": 410,
+          "y": 785
+        },
+        {
+          "x": 220,
+          "y": 635
+        },
+        {
+          "x": 562,
+          "y": 635
+        }
+      ]
+    },
+    {
+      "id": "guard-2",
+      "waypoints": [
+        {
+          "x": 190,
+          "y": 398
+        },
+        {
+          "x": 410,
+          "y": 398
+        },
+        {
+          "x": 410,
+          "y": 628
+        },
+        {
+          "x": 640,
+          "y": 584
+        }
+      ]
+    },
+    {
+      "id": "guard-3",
+      "waypoints": [
+        {
+          "x": 654,
+          "y": 584
+        },
+        {
+          "x": 654,
+          "y": 278
+        },
+        {
+          "x": 914,
+          "y": 278
+        },
+        {
+          "x": 914,
+          "y": 112
+        },
+        {
+          "x": 742,
+          "y": 278
+        }
+      ]
+    },
+    {
+      "id": "guard-4",
+      "waypoints": [
+        {
+          "x": 980,
+          "y": 590
+        },
+        {
+          "x": 1182,
+          "y": 590
+        },
+        {
+          "x": 1182,
+          "y": 915
+        },
+        {
+          "x": 1264,
+          "y": 936
+        },
+        {
+          "x": 1182,
+          "y": 590
+        },
+        {
+          "x": 1356,
+          "y": 382
+        }
+      ]
+    }
+  ],
+  "boatTransfers": [
+    {
+      "id": "west-ferry",
+      "x": 730,
+      "y": 584,
+      "w": 60,
+      "h": 54,
+      "tx": 972,
+      "ty": 612,
+      "label": "BOAT"
+    },
+    {
+      "id": "east-ferry",
+      "x": 944,
+      "y": 584,
+      "w": 60,
+      "h": 54,
+      "tx": 756,
+      "ty": 612,
+      "label": "BOAT"
+    },
+    {
+      "id": "service-exit-boat",
+      "x": 1384,
+      "y": 1052,
+      "w": 70,
+      "h": 48,
+      "tx": 1358,
+      "ty": 240,
+      "label": "NEXT"
+    }
+  ],
+  "notes": [
+    "This metadata is synced from src/rooms.js.",
+    "Water is non-walkable by omission from walkBounds.",
+    "Boat transfer rectangles replace the previous vent shortcuts for this dock level."
+  ]
+}

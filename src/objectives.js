@@ -394,6 +394,9 @@
     room.hiding?.forEach((spot) => {
       points.push({ x: spot.x + spot.w / 2, y: spot.y + spot.h / 2, label: "BOX" });
     });
+    room.boatTransfers?.forEach((boat) => {
+      points.push({ x: boat.x + boat.w / 2, y: boat.y + boat.h / 2, label: boat.label || "BOAT" });
+    });
     room.vents?.forEach((vent) => {
       points.push({ x: vent.x + vent.w / 2, y: vent.y + vent.h / 2, label: "VENT" });
     });

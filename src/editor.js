@@ -2,6 +2,7 @@
 
 const EDITOR_STORAGE_KEY = "whisker-dock-editor-v2";
 const EDITOR_PANEL_POSITION_KEY = "whisker-dock-editor-panel-v1";
+const EDITOR_RESET_CONFIRM_MS = 4200;
 const EDITOR_MAP_W = 1511;
 const EDITOR_MAP_H = 1041;
 const EDITOR_PROPS = [
@@ -23,6 +24,9 @@ const editorState = {
   draft: null,
   panel: null,
   output: null,
+  resetButton: null,
+  resetConfirmUntil: 0,
+  resetConfirmReadyAt: 0,
 };
 
 function clonePlain(value) {
@@ -157,6 +161,47 @@ function updateEditorOutput() {
   if (editorState.output) editorState.output.value = editorJson();
 }
 
+function updateEditorResetButton() {
+  if (!editorState.resetButton) return;
+  const armed = Date.now() < editorState.resetConfirmUntil;
+  editorState.resetButton.textContent = armed ? "Confirm Reset" : "Reset Draft";
+  editorState.resetButton.classList.toggle("is-danger", armed);
+}
+
+function cancelEditorResetConfirmation() {
+  if (!editorState.resetConfirmUntil) return;
+  editorState.resetConfirmUntil = 0;
+  editorState.resetConfirmReadyAt = 0;
+  updateEditorResetButton();
+}
+
+function resetEditorDraftWithConfirmation() {
+  const now = Date.now();
+  if (now >= editorState.resetConfirmUntil) {
+    editorState.resetConfirmUntil = now + EDITOR_RESET_CONFIRM_MS;
+    editorState.resetConfirmReadyAt = now + 650;
+    updateEditorResetButton();
+    notice("CLICK CONFIRM RESET TO CLEAR DRAFT", 1.25);
+    window.setTimeout(() => {
+      if (Date.now() >= editorState.resetConfirmUntil) cancelEditorResetConfirmation();
+    }, EDITOR_RESET_CONFIRM_MS + 80);
+    return;
+  }
+  if (now < editorState.resetConfirmReadyAt) {
+    notice("RESET ARMED: CLICK AGAIN AFTER THE FLASH", 0.9);
+    return;
+  }
+
+  editorState.resetConfirmUntil = 0;
+  editorState.resetConfirmReadyAt = 0;
+  localStorage.removeItem(EDITOR_STORAGE_KEY);
+  editorState.draft = createEditorDraft(rooms[START_ROOM]);
+  syncEditorDraftToRoom();
+  saveEditorDraft();
+  updateEditorResetButton();
+  notice("EDITOR DRAFT RESET", 0.9);
+}
+
 function editorPointFromEvent(event) {
   const bounds = canvas.getBoundingClientRect();
   const canvasX = (event.clientX - bounds.left) * (VIEW_W / bounds.width);
@@ -248,6 +293,7 @@ function eraseEditorThing(point) {
 }
 
 function finishEditorDrag(end) {
+  cancelEditorResetConfirmation();
   const start = editorState.dragStart;
   if (!start) return;
   const rect = rectFromPoints(start, end);
@@ -269,6 +315,7 @@ function finishEditorDrag(end) {
 }
 
 function setEditorTool(tool) {
+  cancelEditorResetConfirmation();
   editorState.tool = tool;
   editorState.panel?.querySelectorAll("[data-editor-tool]").forEach((button) => {
     button.classList.toggle("is-active", button.dataset.editorTool === tool);
@@ -327,18 +374,22 @@ function createEditorPanel() {
     propSelect.appendChild(option);
   });
   propSelect.addEventListener("change", () => {
+    cancelEditorResetConfirmation();
     editorState.propIndex = Number(propSelect.value) || 0;
   });
 
   panel.querySelector("[data-editor-objective]").addEventListener("change", (event) => {
+    cancelEditorResetConfirmation();
     editorState.objective = event.target.value;
   });
   panel.querySelector("[data-editor-copy]").addEventListener("click", async () => {
+    cancelEditorResetConfirmation();
     updateEditorOutput();
     await navigator.clipboard.writeText(editorJson());
     notice("EDITOR JSON COPIED", 0.9);
   });
   panel.querySelector("[data-editor-apply]").addEventListener("click", () => {
+    cancelEditorResetConfirmation();
     try {
       editorState.draft = JSON.parse(editorState.output.value);
       syncEditorDraftToRoom();
@@ -348,13 +399,8 @@ function createEditorPanel() {
       notice("EDITOR JSON INVALID", 0.9);
     }
   });
-  panel.querySelector("[data-editor-reset]").addEventListener("click", () => {
-    localStorage.removeItem(EDITOR_STORAGE_KEY);
-    editorState.draft = createEditorDraft(rooms[START_ROOM]);
-    syncEditorDraftToRoom();
-    saveEditorDraft();
-    notice("EDITOR DRAFT RESET", 0.9);
-  });
+  editorState.resetButton = panel.querySelector("[data-editor-reset]");
+  editorState.resetButton.addEventListener("click", resetEditorDraftWithConfirmation);
   editorState.output = panel.querySelector("[data-editor-output]");
   document.body.appendChild(panel);
   editorState.panel = panel;

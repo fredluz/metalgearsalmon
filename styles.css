@@ -271,6 +271,11 @@ kbd {
   color: #071110;
 }
 
+.editor-panel button.is-danger {
+  border-color: #f35d4c;
+  color: #ffd4cf;
+}
+
 .editor-panel label {
   color: #98a08f;
   display: grid;

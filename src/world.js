@@ -233,6 +233,9 @@ function clearSectorTransients() {
 function enterRoomSeamlessly(door, localX, localY) {
   const fromRoom = rooms[player.room];
   const next = transferPointForDoor(fromRoom, door, localX, localY);
+  const targetDoor = reverseDoorFor(door);
+  markDoorOpen(door, DOOR_OPEN_HOLD);
+  markDoorOpen(targetDoor, DOOR_OPEN_HOLD);
   player.room = door.to;
   player.x = next.x;
   player.y = next.y;
@@ -307,7 +310,7 @@ function activeRooms(tier = "hot") {
 }
 
 function visibleRooms() {
-  return world.active.filter((entry) => entry.visible);
+  return world.active.filter((entry) => entry.visible && (entry.room.unified || roomVisibleFromCurrent(entry.index)));
 }
 
 function playerWorldX() {

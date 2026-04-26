@@ -192,18 +192,19 @@ function drawRadioCallout() {
 }
 
 function drawPauseOverlay() {
-  if (!paused) return;
+  if (!paused && !restartConfirm) return;
   ctx.fillStyle = "rgba(0, 0, 0, 0.72)";
   ctx.fillRect(0, 0, VIEW_W, H);
   ctx.fillStyle = "#071110";
   ctx.fillRect(254, 238, 452, 136);
-  ctx.strokeStyle = "#ffd65a";
+  ctx.strokeStyle = restartConfirm ? "#f35d4c" : "#ffd65a";
   ctx.strokeRect(254.5, 238.5, 452, 136);
   ctx.fillStyle = "#f0edcf";
   ctx.font = "700 28px monospace";
-  ctx.fillText("PAUSED", 426, 292);
+  ctx.fillText(restartConfirm ? "RESTART?" : "PAUSED", restartConfirm ? 392 : 426, 292);
   ctx.fillStyle = "#98a08f";
   ctx.font = "700 13px monospace";
   ctx.fillText(`TIME ${formatTime(missionTime)}   ALERTS ${stats.alerts}   HITS ${stats.hits}`, 336, 326);
-  ctx.fillText("PRESS P OR ESC TO RESUME", 382, 350);
+  ctx.fillText(restartConfirm ? "PRESS R AGAIN TO CONFIRM" : "PRESS P OR ESC TO RESUME", restartConfirm ? 380 : 382, 350);
+  if (restartConfirm) ctx.fillText("PRESS ANY OTHER KEY TO CANCEL", 366, 366);
 }

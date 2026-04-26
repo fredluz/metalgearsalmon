@@ -348,6 +348,7 @@ function drawEvacPad(x, y) {
 }
 
 function drawDoorwayCutout(room, door) {
+  if (!doorIsOpen(room, door)) return;
   const center = doorCenter(door);
   const trigger = doorTriggerRect(door);
   const point = { x: trigger.x + trigger.w / 2, y: trigger.y + trigger.h / 2 };
@@ -380,44 +381,64 @@ function drawDoorwayCutout(room, door) {
 
 function drawDoor(room, door) {
   const unlocked = doorUnlocked(door);
+  const open = doorIsOpen(room, door);
   const activeAlert = alert > 0;
   const trigger = doorTriggerRect(door);
   const triggerCenter = { x: trigger.x + trigger.w / 2, y: trigger.y + trigger.h / 2 };
+  const innerX = door.x + 7;
+  const innerY = door.y + 7;
+  const innerW = Math.max(8, door.w - 14);
+  const innerH = Math.max(8, door.h - 14);
   drawHazardStripe(door.x, door.y, door.w, door.h);
-  ctx.fillStyle = unlocked ? (activeAlert ? "#725231" : "#b99a35") : "#864b3f";
-  ctx.fillRect(door.x + 7, door.y + 7, Math.max(8, door.w - 14), Math.max(8, door.h - 14));
-  ctx.fillStyle = "rgba(0,0,0,0.22)";
-  if (door.h >= door.w) {
-    for (let y = door.y + 12; y < door.y + door.h - 8; y += 16) {
-      ctx.fillRect(door.x + 7, y, Math.max(8, door.w - 14), 4);
+
+  if (open) {
+    ctx.fillStyle = room.floor;
+    ctx.fillRect(innerX, innerY, innerW, innerH);
+    ctx.fillStyle = "rgba(240, 237, 207, 0.18)";
+    if (door.h >= door.w) {
+      const panelH = Math.max(10, innerH * 0.25);
+      ctx.fillRect(innerX, innerY, innerW, panelH);
+      ctx.fillRect(innerX, innerY + innerH - panelH, innerW, panelH);
+    } else {
+      const panelW = Math.max(10, innerW * 0.25);
+      ctx.fillRect(innerX, innerY, panelW, innerH);
+      ctx.fillRect(innerX + innerW - panelW, innerY, panelW, innerH);
     }
+    ctx.strokeStyle = "rgba(240, 237, 207, 0.52)";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(innerX + 0.5, innerY + 0.5, innerW, innerH);
   } else {
-    for (let x = door.x + 12; x < door.x + door.w - 8; x += 16) {
-      ctx.fillRect(x, door.y + 7, 4, Math.max(8, door.h - 14));
+    ctx.fillStyle = unlocked ? "#56615c" : "#5f3430";
+    ctx.fillRect(innerX, innerY, innerW, innerH);
+    ctx.fillStyle = "rgba(5, 9, 9, 0.32)";
+    if (door.h >= door.w) {
+      for (let y = door.y + 12; y < door.y + door.h - 8; y += 14) {
+        ctx.fillRect(innerX, y, innerW, 4);
+      }
+    } else {
+      for (let x = door.x + 12; x < door.x + door.w - 8; x += 14) {
+        ctx.fillRect(x, innerY, 4, innerH);
+      }
     }
   }
+
   if (activeAlert) {
     ctx.fillStyle = "rgba(243, 93, 76, 0.24)";
-    ctx.fillRect(door.x + 7, door.y + 7, Math.max(8, door.w - 14), Math.max(8, door.h - 14));
+    ctx.fillRect(innerX, innerY, innerW, innerH);
   }
-  ctx.strokeStyle = unlocked ? "rgba(255, 214, 90, 0.78)" : "rgba(243, 93, 76, 0.42)";
-  ctx.lineWidth = unlocked ? 3 : 2;
-  ctx.setLineDash([4, 5]);
-  ctx.beginPath();
-  const center = doorCenter(door);
-  ctx.moveTo(center.x, center.y);
-  ctx.lineTo(triggerCenter.x, triggerCenter.y);
-  ctx.stroke();
+  ctx.strokeStyle = open ? "rgba(240, 237, 207, 0.78)" : unlocked ? "rgba(152, 160, 143, 0.9)" : "rgba(243, 93, 76, 0.66)";
+  ctx.lineWidth = open ? 3 : 2;
+  ctx.strokeRect(door.x + 4.5, door.y + 4.5, Math.max(10, door.w - 9), Math.max(10, door.h - 9));
   ctx.lineWidth = 1;
   ctx.setLineDash([]);
-  const label = unlocked ? (door.label || rooms[door.to].name).slice(0, 7).toUpperCase() : `TAG ${door.need}`;
+  const label = open ? "OPEN" : unlocked ? "CLOSED" : `TAG ${door.need}`;
   const labelX = clamp(triggerCenter.x - label.length * 3 - 4, 34, roomWidth(room) - 82);
   const labelY = clamp(trigger.y - 18, 40, roomHeight(room) - 38);
   ctx.fillStyle = "rgba(5, 9, 9, 0.86)";
   ctx.fillRect(labelX, labelY, label.length * 6 + 8, 14);
-  ctx.strokeStyle = unlocked ? "#ffd65a" : "#f35d4c";
+  ctx.strokeStyle = open ? "#f0edcf" : unlocked ? "#98a08f" : "#f35d4c";
   ctx.strokeRect(labelX + 0.5, labelY + 0.5, label.length * 6 + 8, 14);
-  ctx.fillStyle = unlocked ? "#ffd65a" : "#f35d4c";
+  ctx.fillStyle = open ? "#f0edcf" : unlocked ? "#98a08f" : "#f35d4c";
   ctx.font = "700 10px monospace";
   ctx.fillText(label, labelX + 4, labelY + 10);
 }

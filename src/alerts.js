@@ -131,6 +131,9 @@
   function transferGuardToRoom(fromRoomIndex, guard, toRoomIndex, door) {
     const fromRoom = rooms[fromRoomIndex];
     const toRoom = rooms[toRoomIndex];
+    const reverseDoor = roomDoors(toRoom).find((candidate) => candidate.to === fromRoomIndex);
+    markDoorOpen(door, DOOR_OPEN_HOLD);
+    markDoorOpen(reverseDoor, DOOR_OPEN_HOLD);
     const index = fromRoom.guards.indexOf(guard);
     if (index >= 0) fromRoom.guards.splice(index, 1);
     const spawn = door.spawn || toRoom.start;

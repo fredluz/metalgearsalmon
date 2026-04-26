@@ -32,6 +32,8 @@
   const STUCK_REPATH_TIME = 0.35;
   const NORMAL_ROOM_GUARD_CAP = 3;
   const EXTRACTION_ROOM_GUARD_CAP = 4;
+  const DOOR_OPEN_RANGE = 58;
+  const DOOR_OPEN_HOLD = 0.95;
   const YARN_THROW_SPEED = 320;
   const YARN_THROW_RANGE = 170;
   const keys = new Set();

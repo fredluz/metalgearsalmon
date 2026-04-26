@@ -15,6 +15,11 @@ function draw() {
   ctx.translate(jitterX, jitterY);
   visibleRooms().forEach((entry) => {
     withRoomView(entry.room, (visibleRoom) => {
+      const clipRects = roomRenderClipRects(visibleRoom);
+      ctx.save();
+      ctx.beginPath();
+      clipRects.forEach((rect) => ctx.rect(rect.x, rect.y, rect.w, rect.h));
+      ctx.clip();
       drawRoom(visibleRoom);
       visibleRoom.cameras?.forEach((camera) => drawCameraVision(visibleRoom, camera));
       visibleRoom.guards.forEach((guard) => drawVision(visibleRoom, guard));
@@ -22,6 +27,7 @@ function draw() {
         if (rectVisibleInRoom(visibleRoom, wall)) drawWall(visibleRoom, wall);
       });
       visibleRoom.guards.forEach(drawGuard);
+      ctx.restore();
     });
   });
   withRoomView(room, () => {
@@ -29,7 +35,6 @@ function draw() {
     drawObjectiveMarker(room);
     drawTacticalRoute(room);
     drawGuardForecasts(room);
-    drawObjectiveCompass(room);
     drawWhiskerSense(room);
     drawNoises();
     drawRadioLinks(room);
@@ -77,11 +82,31 @@ window.addEventListener("keydown", (event) => {
   }
   if ((key === "p" || key === "escape") && !won && !gameOver) {
     paused = !paused;
+    restartConfirm = false;
     notice(paused ? "MISSION PAUSED" : "MISSION RESUMED", 0.8);
     return;
   }
+  if (restartConfirm) {
+    if (key === "r") {
+      reset();
+      return;
+    }
+    restartConfirm = false;
+    if (!won && !gameOver) paused = false;
+    notice("RESTART CANCELLED", 0.8);
+    return;
+  }
+  if (key === "r" && !event.repeat && (won || gameOver)) {
+    reset();
+    return;
+  }
+  if (key === "r" && !event.repeat) {
+    restartConfirm = true;
+    paused = true;
+    notice("PRESS R AGAIN TO RESTART", 1);
+    return;
+  }
   keys.add(key);
-  if (key === "r") reset();
   if (paused) return;
   if (key === "e") interact();
   if (key === " ") emitMeow();

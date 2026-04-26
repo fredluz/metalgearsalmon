@@ -200,6 +200,100 @@
     return door.block || { x: door.x, y: door.y, w: door.w, h: door.h };
   }
 
+  function doorTriggerCenter(door) {
+    const trigger = doorTriggerRect(door);
+    return { x: trigger.x + trigger.w / 2, y: trigger.y + trigger.h / 2 };
+  }
+
+  function markDoorOpen(door, seconds = DOOR_OPEN_HOLD) {
+    if (!door || !doorUnlocked(door)) return;
+    door.openUntil = Math.max(door.openUntil || 0, performance.now() / 1000 + seconds);
+  }
+
+  function playerHoldingDoorOpen(room, door) {
+    if (!room || room.index !== player.room || !doorUnlocked(door)) return false;
+    const center = doorTriggerCenter(door);
+    return Math.hypot(player.x - center.x, player.y - center.y) <= DOOR_OPEN_RANGE;
+  }
+
+  function doorIsOpen(room, door) {
+    if (!doorUnlocked(door)) return false;
+    return (door.openUntil || 0) > performance.now() / 1000 || playerHoldingDoorOpen(room, door);
+  }
+
+  function currentUnifiedSector(room) {
+    if (!room?.unified || !room.sectors?.length) return null;
+    const containingSector = room.sectors.find((sector) => (
+      player.x >= sector.x
+      && player.x <= sector.x + sector.w
+      && player.y >= sector.y
+      && player.y <= sector.y + sector.h
+    ));
+    if (containingSector) return containingSector;
+    return room.sectors
+      .map((sector) => {
+        const x = clamp(player.x, sector.x, sector.x + sector.w);
+        const y = clamp(player.y, sector.y, sector.y + sector.h);
+        return { sector, distance: Math.hypot(player.x - x, player.y - y) };
+      })
+      .sort((a, b) => a.distance - b.distance)[0].sector;
+  }
+
+  function visibleUnifiedSectorSet(room) {
+    const visible = new Set();
+    const start = currentUnifiedSector(room);
+    if (!start) return visible;
+    visible.add(start.room);
+    let changed = true;
+    while (changed) {
+      changed = false;
+      roomDoors(room).forEach((door) => {
+        if (!doorIsOpen(room, door)) return;
+        const a = door.sourceRoom;
+        const b = door.targetRoom;
+        if (!Number.isFinite(a) || !Number.isFinite(b)) return;
+        if (visible.has(a) && !visible.has(b)) {
+          visible.add(b);
+          changed = true;
+        } else if (visible.has(b) && !visible.has(a)) {
+          visible.add(a);
+          changed = true;
+        }
+      });
+    }
+    return visible;
+  }
+
+  function roomRenderClipRects(room) {
+    if (!room?.unified || !room.sectors?.length) return [roomLocalRect(room)];
+    const visible = visibleUnifiedSectorSet(room);
+    const clips = room.sectors
+      .filter((sector) => visible.has(sector.room))
+      .map((sector) => ({ x: sector.x, y: sector.y, w: sector.w, h: sector.h }));
+    roomDoors(room).forEach((door) => {
+      if (visible.has(door.sourceRoom) || visible.has(door.targetRoom)) {
+        const rect = doorBlockRect(door);
+        clips.push({ x: rect.x - 3, y: rect.y - 3, w: rect.w + 6, h: rect.h + 6 });
+      }
+    });
+    return clips;
+  }
+
+  function roomVisibleFromCurrent(roomIndex) {
+    const currentRoom = rooms[player.room];
+    if (currentRoom?.unified) return visibleUnifiedSectorSet(currentRoom).has(roomIndex);
+    if (roomIndex === player.room) return true;
+    const current = rooms[player.room];
+    const target = rooms[roomIndex];
+    return roomDoors(current).some((door) => door.to === roomIndex && doorIsOpen(current, door))
+      || roomDoors(target).some((door) => door.to === player.room && doorIsOpen(target, door));
+  }
+
+  function shouldDrawDoor(room, door) {
+    if (room.index === player.room) return true;
+    return door.to !== player.room;
+  }
+
   function connectedDoors(roomIndex, ignoreLocks = false) {
     return roomDoors(rooms[roomIndex]).filter((door) => ignoreLocks || doorUnlocked(door));
   }

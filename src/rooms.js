@@ -339,9 +339,12 @@
     return point ? { x: point.x + offset.x, y: point.y + offset.y } : point;
   }
 
-  function offsetDoor(door, offset) {
+  function offsetDoor(door, offset, sourceRoom) {
     return {
       ...offsetRect(door, offset),
+      sourceRoom,
+      targetRoom: door.to,
+      connectionKey: [sourceRoom, door.to].sort((a, b) => a - b).join(":"),
       to: 0,
       approach: offsetPoint(door.approach, offset),
       spawn: offsetPoint(door.spawn, offset),
@@ -360,6 +363,10 @@
     };
   }
 
+  function mergedDoorTrigger(door) {
+    return door.trigger || { x: door.x, y: door.y, w: door.w, h: door.h };
+  }
+
   function mergeAuthoredRooms() {
     const sourceRooms = rooms.slice();
     const bounds = sourceRooms.reduce((rect, room, index) => {
@@ -376,6 +383,17 @@
       name: "Kennel Block",
       width: bounds.w,
       height: bounds.h,
+      sectors: sourceRooms.map((room, index) => {
+        const offset = authoredRoomOffset(index);
+        return {
+          room: index,
+          name: room.name,
+          x: offset.x,
+          y: offset.y,
+          w: room.width || PLAY_W,
+          h: room.height || H,
+        };
+      }),
       floor: "#181f20",
       wall: "#4c5742",
       trim: "#7aa6a0",
@@ -399,10 +417,36 @@
       guards: [],
     };
 
+    const doorsByConnection = new Map();
     sourceRooms.forEach((room, index) => {
       const offset = authoredRoomOffset(index);
       if (room.keycard) merged.keycards.push(offsetPoint(room.keycard, offset));
-      merged.doors.push(...(room.doors || []).map((door) => offsetDoor(door, offset)));
+      (room.doors || []).forEach((door) => {
+        const offsetedDoor = offsetDoor(door, offset, index);
+        const existing = doorsByConnection.get(offsetedDoor.connectionKey);
+        if (!existing) {
+          doorsByConnection.set(offsetedDoor.connectionKey, offsetedDoor);
+        } else {
+          existing.x = Math.round((existing.x + offsetedDoor.x) / 2);
+          existing.y = Math.round((existing.y + offsetedDoor.y) / 2);
+          existing.w = Math.max(existing.w, offsetedDoor.w);
+          existing.h = Math.max(existing.h, offsetedDoor.h);
+          existing.need = Math.max(existing.need || 0, offsetedDoor.need || 0);
+          existing.progress = Math.max(existing.progress || 0, offsetedDoor.progress || 0) || undefined;
+          const existingTrigger = mergedDoorTrigger(existing);
+          const offsetedTrigger = mergedDoorTrigger(offsetedDoor);
+          existing.trigger = {
+            x: Math.round((existingTrigger.x + offsetedTrigger.x) / 2),
+            y: Math.round((existingTrigger.y + offsetedTrigger.y) / 2),
+            w: Math.max(existingTrigger.w, offsetedTrigger.w),
+            h: Math.max(existingTrigger.h, offsetedTrigger.h),
+          };
+          existing.approach = {
+            x: Math.round((existing.approach.x + offsetedDoor.approach.x) / 2),
+            y: Math.round((existing.approach.y + offsetedDoor.approach.y) / 2),
+          };
+        }
+      });
       merged.rations.push(...(room.rations || []).map((ration) => offsetPoint(ration, offset)));
       merged.catnipPickups.push(...(room.catnipPickups || []).map((pickup) => offsetPoint(pickup, offset)));
       merged.hiding.push(...(room.hiding || []).map((spot) => offsetRect(spot, offset)));
@@ -416,6 +460,7 @@
       merged.lasers.push(...(room.lasers || []).map((laser) => offsetRect(laser, offset)));
       merged.guards.push(...(room.guards || []).map((guard) => offsetGuard(guard, offset, index)));
     });
+    merged.doors.push(...doorsByConnection.values());
 
     rooms.length = 0;
     rooms.push(merged);

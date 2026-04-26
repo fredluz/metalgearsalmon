@@ -89,9 +89,10 @@ function drawRoom(room) {
   room.walls.forEach((wall) => {
     if (rectVisibleInRoom(room, wall)) drawWall(room, wall);
   });
-  roomDoors(room).forEach((door) => drawDoorwayCutout(room, door));
+  const visibleDoors = roomDoors(room).filter((door) => shouldDrawDoor(room, door));
+  visibleDoors.forEach((door) => drawDoorwayCutout(room, door));
 
-  roomDoors(room).forEach((door) => drawDoor(room, door));
+  visibleDoors.forEach((door) => drawDoor(room, door));
 
   roomKeycards(room).forEach((keycard) => {
     if (!keycard.taken) drawKeycard(keycard.x, keycard.y);

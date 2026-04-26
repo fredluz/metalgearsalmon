@@ -159,9 +159,10 @@ function drawFacilityMap(room) {
       const from = facilityRectFor(sourceIndex, mapX, mapY, mapW, mapH);
       const to = facilityRectFor(door.to, mapX, mapY, mapW, mapH);
       if (!from || !to) return;
-      const unlocked = doorUnlocked(door);
-      ctx.strokeStyle = unlocked ? "rgba(255, 214, 90, 0.72)" : "rgba(134, 75, 63, 0.7)";
-      ctx.lineWidth = unlocked ? 4 : 3;
+      const open = doorIsOpen(sourceRoom, door);
+      const locked = !doorUnlocked(door);
+      ctx.strokeStyle = open ? "rgba(240, 237, 207, 0.85)" : locked ? "rgba(134, 75, 63, 0.7)" : "rgba(111, 123, 112, 0.52)";
+      ctx.lineWidth = open ? 4 : 3;
       ctx.beginPath();
       ctx.moveTo(from.x + from.w / 2, from.y + from.h / 2);
       ctx.lineTo(to.x + to.w / 2, to.y + to.h / 2);
@@ -175,14 +176,20 @@ function drawFacilityMap(room) {
     const sourceRoom = rooms[spec.room];
     if (!rect || !sourceRoom) return;
     const current = spec.room === player.room;
+    const visible = roomVisibleFromCurrent(spec.room);
     const lockedAhead = roomDoors(sourceRoom).some((door) => !doorUnlocked(door));
-    ctx.fillStyle = current ? "rgba(255, 214, 90, 0.22)" : "rgba(5, 9, 9, 0.82)";
+    ctx.fillStyle = current ? "rgba(255, 214, 90, 0.22)" : visible ? "rgba(5, 9, 9, 0.82)" : "rgba(70, 80, 74, 0.34)";
     ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
-    ctx.strokeStyle = current ? "#ffd65a" : lockedAhead ? "#864b3f" : "#0cc083";
+    ctx.strokeStyle = current ? "#ffd65a" : !visible ? "#6f7b70" : lockedAhead ? "#864b3f" : "#0cc083";
     ctx.strokeRect(rect.x + 0.5, rect.y + 0.5, rect.w, rect.h);
-    ctx.fillStyle = current ? "#ffd65a" : "#7ed6c8";
+    ctx.fillStyle = current ? "#ffd65a" : visible ? "#7ed6c8" : "#98a08f";
     ctx.font = "700 7px monospace";
     ctx.fillText(spec.code, rect.x + 3, rect.y + 8);
+    if (!visible) {
+      ctx.fillStyle = "rgba(2, 4, 4, 0.52)";
+      ctx.fillRect(rect.x + 2, rect.y + 11, rect.w - 4, rect.h - 13);
+      return;
+    }
     sourceRoom.guards.forEach((guard) => {
       const gx = rect.x + 3 + clamp(guard.x / roomWidth(sourceRoom), 0, 1) * Math.max(1, rect.w - 7);
       const gy = rect.y + 10 + clamp(guard.y / roomHeight(sourceRoom), 0, 1) * Math.max(1, rect.h - 14);
@@ -209,7 +216,7 @@ function drawFacilityMap(room) {
 
   ctx.fillStyle = "#98a08f";
   ctx.font = "700 7px monospace";
-  ctx.fillText("WHITE YOU  RED PATROLS  GOLD LINKS", x + 8, y + h - 4);
+  ctx.fillText("WHITE YOU  RED PATROLS  PALE OPEN", x + 8, y + h - 4);
 }
 
 function drawSideBox(x, y, w, h, title, accent) {

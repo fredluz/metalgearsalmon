@@ -40,6 +40,7 @@
   let won = false;
   let gameOver = false;
   let paused = false;
+  let restartConfirm = false;
   let extractionActive = false;
   let missionTime = 0;
   let roomTime = 0;
@@ -103,6 +104,7 @@
 
   function resetRoomSystems(room) {
     room.systemDown = false;
+    roomDoors(room).forEach((door) => { door.openUntil = 0; });
     if (room.keycard) room.keycard.taken = false;
     room.keycards?.forEach((keycard) => { keycard.taken = false; });
     if (room.tuna) room.tuna.taken = false;
@@ -158,6 +160,7 @@
     securityLevel = 0;
     won = false;
     paused = false;
+    restartConfirm = false;
     extractionActive = false;
     missionTime = 0;
     roomTime = 0;

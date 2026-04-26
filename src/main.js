@@ -9,13 +9,18 @@ function draw() {
   ctx.fillStyle = "#000";
   ctx.fillRect(0, 0, VIEW_W, H);
   ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, 0, PLAY_W, H);
+  ctx.clip();
   ctx.translate(jitterX, jitterY);
   visibleRooms().forEach((entry) => {
     withRoomView(entry.room, (visibleRoom) => {
       drawRoom(visibleRoom);
-      visibleRoom.cameras?.forEach(drawCameraVision);
-      visibleRoom.guards.forEach((guard) => drawVision(guard));
-      visibleRoom.walls.forEach((wall) => drawWall(visibleRoom, wall));
+      visibleRoom.cameras?.forEach((camera) => drawCameraVision(visibleRoom, camera));
+      visibleRoom.guards.forEach((guard) => drawVision(visibleRoom, guard));
+      visibleRoom.walls.forEach((wall) => {
+        if (rectVisibleInRoom(visibleRoom, wall)) drawWall(visibleRoom, wall);
+      });
       visibleRoom.guards.forEach(drawGuard);
     });
   });
@@ -31,6 +36,7 @@ function draw() {
     drawLastKnown();
     drawAimTelegraphs(room);
     drawShots();
+    drawGuardBarks();
     drawPlayer();
     drawPrompts(room);
   });

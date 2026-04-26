@@ -10,6 +10,35 @@
     radioTimer = seconds;
   }
 
+  function guardLine(text) {
+    return text.replace(/^GUARD:\s*/i, "");
+  }
+
+  function sayGuard(guard, text, seconds = 1.35) {
+    if (!guard || guard.stunned > 0) return;
+    const line = guardLine(text);
+    const existing = guardBarks.find((bark) => bark.guard === guard);
+    if (existing) {
+      existing.text = line;
+      existing.ttl = seconds;
+      existing.maxTtl = seconds;
+      return;
+    }
+    guardBarks.push({ guard, text: line, ttl: seconds, maxTtl: seconds });
+  }
+
+  function nearestGuard(room, x, y, range = 220) {
+    return (room.guards || [])
+      .filter((guard) => guard.stunned <= 0)
+      .map((guard) => ({ guard, dist: Math.hypot(guard.x - x, guard.y - y) }))
+      .filter((candidate) => candidate.dist <= range)
+      .sort((a, b) => a.dist - b.dist)[0]?.guard || null;
+  }
+
+  function sayNearestGuard(room, x, y, text, seconds = 1.35, range = 220) {
+    sayGuard(nearestGuard(room, x, y, range), text, seconds);
+  }
+
   function ensureAudio() {
     if (!audioContext) {
       const AudioCtor = window.AudioContext || window.webkitAudioContext;
@@ -66,6 +95,14 @@
     return room.rations?.filter((ration) => !ration.taken).length || 0;
   }
 
+  function roomKeycards(room) {
+    return room.keycards || (room.keycard ? [room.keycard] : []);
+  }
+
+  function nextKeycard(room) {
+    return roomKeycards(room).find((keycard) => !keycard.taken) || null;
+  }
+
   function inShadow(room) {
     return room.shadows?.some((shadow) => circleRect(player.x, player.y, player.r, shadow)) || false;
   }
@@ -119,7 +156,7 @@
   }
 
   function roomDoors(room) {
-    return room.doors || [];
+    return room?.doors || [];
   }
 
   function doorCenter(door) {
@@ -128,6 +165,10 @@
 
   function doorApproach(door) {
     return door.approach || doorCenter(door);
+  }
+
+  function roomForDoor(door) {
+    return Number.isFinite(door.roomIndex) ? rooms[door.roomIndex] : rooms[player.room];
   }
 
   function doorTarget(door) {
@@ -144,10 +185,13 @@
 
   function doorTriggerRect(door) {
     if (door.trigger) return door.trigger;
+    const room = roomForDoor(door);
+    const w = roomWidth(room);
+    const h = roomHeight(room);
     if (door.y <= 0) return { x: door.x + 10, y: 28, w: Math.max(20, door.w - 20), h: 18 };
-    if (door.y + door.h >= H) return { x: door.x + 10, y: H - 46, w: Math.max(20, door.w - 20), h: 18 };
+    if (door.y + door.h >= h) return { x: door.x + 10, y: h - 46, w: Math.max(20, door.w - 20), h: 18 };
     if (door.x <= 0) return { x: 28, y: door.y + 10, w: 18, h: Math.max(20, door.h - 20) };
-    if (door.x + door.w >= PLAY_W) return { x: PLAY_W - 46, y: door.y + 10, w: 18, h: Math.max(20, door.h - 20) };
+    if (door.x + door.w >= w) return { x: w - 46, y: door.y + 10, w: 18, h: Math.max(20, door.h - 20) };
     const point = doorApproach(door);
     return { x: point.x - 30, y: point.y - 30, w: 60, h: 60 };
   }
@@ -202,8 +246,8 @@
     if (sweepTimer > 0) return "AVOID SWEEP";
     if (boxCover(room)) return "BOX COVER";
     if (player.soft && inShadow(room)) return "SHADOW COVER";
-    if (room.tuna && !room.tuna.taken) return "SECURE TUNA";
-    if (room.keycard && !room.keycard.taken && player.keys < REQUIRED_TAGS) return `FIND TAG ${player.keys + 1}`;
+    if (room.tuna && !room.tuna.taken && player.keys >= REQUIRED_TAGS) return "SECURE TUNA";
+    if (nextKeycard(room) && player.keys < REQUIRED_TAGS) return `FIND TAG ${player.keys + 1}`;
     const doorObjective = primaryDoorObjective(room);
     if (doorObjective && !doorUnlocked(doorObjective)) return `TAG ${doorObjective.need} NEEDED`;
     const lockedDoor = doorObjective ? null : lockedProgressDoor(room);
@@ -219,9 +263,10 @@
       const door = primaryDoorObjective(room);
       return door ? doorTarget(door) : null;
     }
-    if (room.tuna && !room.tuna.taken) return { x: room.tuna.x, y: room.tuna.y, r: 32 };
-    if (room.keycard && !room.keycard.taken && player.keys < REQUIRED_TAGS) {
-      return { x: room.keycard.x, y: room.keycard.y, r: 24 };
+    if (room.tuna && !room.tuna.taken && player.keys >= REQUIRED_TAGS) return { x: room.tuna.x, y: room.tuna.y, r: 32 };
+    const keycard = nextKeycard(room);
+    if (keycard && player.keys < REQUIRED_TAGS) {
+      return { x: keycard.x, y: keycard.y, r: 24 };
     }
     const panel = room.panels?.find((candidate) => !candidate.done);
     if (panel && (room.sweeps?.length || room.cameras?.some((camera) => camera.disabledBySystem))) {
@@ -245,7 +290,9 @@
       const point = doorApproach(door);
       points.push({ x: point.x, y: point.y, label: door.label || "DOOR" });
     });
-    if (room.keycard && !room.keycard.taken) points.push({ x: room.keycard.x, y: room.keycard.y, label: "TAG" });
+    roomKeycards(room).forEach((keycard) => {
+      if (!keycard.taken) points.push({ x: keycard.x, y: keycard.y, label: "TAG" });
+    });
     if (room.tuna && !room.tuna.taken) points.push({ x: room.tuna.x, y: room.tuna.y, label: "TUNA" });
     room.panels?.forEach((panel) => {
       if (!panel.done) points.push({ x: panel.x + panel.w / 2, y: panel.y + panel.h / 2, label: "SYS" });

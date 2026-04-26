@@ -80,10 +80,10 @@ A future ES module conversion is possible, but it should be done as one coherent
 : DOM handles, canvas constants, global arrays, sprite loading, and small utilities.
 
 `src/rooms.js`
-: Authored map/sector data. This is where maps live.
+: Authored source room data plus the merge step that creates the single `Kennel Block` gameplay room. This is where maps live.
 
 `src/world.js`
-: Sector placement, camera, visible-sector queries, simulation tiers, and spatial indexes.
+: Unified-room camera, visible-room query compatibility, and spatial indexes.
 
 `src/state.js`
 : Player state, mission state, reset logic, ranking, best-run persistence.
@@ -101,7 +101,7 @@ A future ES module conversion is possible, but it should be done as one coherent
 : Player verbs and nearby interactive systems.
 
 `src/ai.js`
-: Guard vision, camera vision, sensor sweeps, full hot-sector AI, and cheap warm-sector simulation.
+: Guard vision, camera vision, sensor sweeps, and full unified-room AI.
 
 `src/update.js`
 : Main gameplay frame and interaction/transition orchestration.
@@ -110,7 +110,7 @@ A future ES module conversion is possible, but it should be done as one coherent
 : Low-level map/environment drawing helpers.
 
 `src/render-room.js`
-: Composes one sector from environment helpers.
+: Composes the unified room from environment helpers.
 
 `src/render-actors.js`
 : Player, guards, sprites, shots, noises, paw prints, last-known markers.
@@ -135,11 +135,13 @@ A future ES module conversion is possible, but it should be done as one coherent
 const rooms = [ ... ];
 ```
 
-Each room is a sector authored in room-local coordinates:
+Source rooms are authored in readable room-local coordinates:
 
 ```js
 {
   name,
+  width,
+  height,
   floor,
   wall,
   trim,
@@ -164,6 +166,10 @@ Each room is a sector authored in room-local coordinates:
   guards
 }
 ```
+
+`mergeAuthoredRooms()` offsets those source rooms into one large `rooms[0]` object. Runtime systems should treat `rooms[0]` as the playable map.
+
+`width` and `height` are optional on source rooms. If omitted, a source room defaults to the visible playfield size. Systems that need runtime bounds should use `roomWidth(room)` and `roomHeight(room)`.
 
 Important supporting globals:
 

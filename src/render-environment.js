@@ -1,10 +1,17 @@
 "use strict";
 
 function drawFloor(room) {
+  const w = roomWidth(room);
+  const h = roomHeight(room);
+  const view = roomViewRect(room, TILE);
+  const startX = Math.max(28, Math.floor(view.x / TILE) * TILE);
+  const endX = Math.min(w - 28, Math.ceil((view.x + view.w) / TILE) * TILE);
+  const startY = Math.max(28, Math.floor(view.y / TILE) * TILE);
+  const endY = Math.min(h - 28, Math.ceil((view.y + view.h) / TILE) * TILE);
   ctx.fillStyle = room.floor;
-  ctx.fillRect(0, 0, PLAY_W, H);
-  for (let y = 28; y < H - 28; y += TILE) {
-    for (let x = 28; x < PLAY_W - 28; x += TILE) {
+  ctx.fillRect(0, 0, w, h);
+  for (let y = startY; y < endY; y += TILE) {
+    for (let x = startX; x < endX; x += TILE) {
       const alt = ((x / TILE) + (y / TILE)) % 2;
       ctx.fillStyle = alt ? "rgba(255,255,255,0.035)" : "rgba(0,0,0,0.055)";
       ctx.fillRect(x, y, TILE, TILE);
@@ -20,7 +27,7 @@ function drawFloor(room) {
 }
 
 function drawWall(room, wall) {
-  const face = wall.y + wall.h + DEPTH <= H ? DEPTH : 0;
+  const face = wall.y + wall.h + DEPTH <= roomHeight(room) ? DEPTH : 0;
   ctx.fillStyle = "rgba(0,0,0,0.32)";
   ctx.fillRect(wall.x + 7, wall.y + 9, wall.w, wall.h + face);
 
@@ -193,7 +200,7 @@ function drawShadowZone(shadow) {
   ctx.strokeRect(shadow.x + 0.5, shadow.y + 0.5, shadow.w, shadow.h);
 }
 
-function drawProp(prop) {
+function drawProp(prop, room) {
   if (prop.type === "crate") {
     drawCrate(prop, "#6f7044");
   } else if (prop.type === "pipe") {
@@ -215,7 +222,6 @@ function drawProp(prop) {
       ctx.fillRect(x + 3, prop.y + prop.h - 14, 16, 8);
     }
   } else if (prop.type === "terminal") {
-    const room = rooms[player.room];
     drawPanel(prop, room.intel?.done || false);
   }
 }
@@ -405,8 +411,8 @@ function drawDoor(room, door) {
   ctx.lineWidth = 1;
   ctx.setLineDash([]);
   const label = unlocked ? (door.label || rooms[door.to].name).slice(0, 7).toUpperCase() : `TAG ${door.need}`;
-  const labelX = clamp(triggerCenter.x - label.length * 3 - 4, 34, PLAY_W - 82);
-  const labelY = clamp(trigger.y - 18, 40, H - 38);
+  const labelX = clamp(triggerCenter.x - label.length * 3 - 4, 34, roomWidth(room) - 82);
+  const labelY = clamp(trigger.y - 18, 40, roomHeight(room) - 38);
   ctx.fillStyle = "rgba(5, 9, 9, 0.86)";
   ctx.fillRect(labelX, labelY, label.length * 6 + 8, 14);
   ctx.strokeStyle = unlocked ? "#ffd65a" : "#f35d4c";
@@ -416,8 +422,7 @@ function drawDoor(room, door) {
   ctx.fillText(label, labelX + 4, labelY + 10);
 }
 
-function drawSensorSweep(sweep) {
-  const room = rooms[player.room];
+function drawSensorSweep(room, sweep) {
   if (room.systemDown) {
     ctx.fillStyle = "rgba(70, 80, 74, 0.055)";
     ctx.fillRect(sweep.x, sweep.y, sweep.w, sweep.h);
@@ -445,4 +450,3 @@ function drawSensorSweep(sweep) {
     drawHazardStripe(sweep.x + sweep.w - 10, sweep.y + sweep.h - 4, 18, 12);
   }
 }
-

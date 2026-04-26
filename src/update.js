@@ -24,7 +24,7 @@
         makeNoise(entryX, entryY, 128, 0.46, "rgba(126, 214, 200, 0.62)", "GRATE", "vent");
         makeNoise(player.x, player.y, 116, 0.46, "rgba(126, 214, 200, 0.6)", "VENT", "vent");
         alert = Math.max(0, alert - 0.9);
-        radio("GUARD: vent rattle");
+        sayNearestGuard(room, entryX, entryY, "vent rattle");
         playCue("room");
         notice("DUCT ROUTE USED: STAY LOW", 1.1);
         return;
@@ -69,8 +69,9 @@
       return;
     }
 
-    if (room.keycard && !room.keycard.taken && Math.hypot(player.x - room.keycard.x, player.y - room.keycard.y) < 44) {
-      room.keycard.taken = true;
+    const keycard = roomKeycards(room).find((candidate) => !candidate.taken && Math.hypot(player.x - candidate.x, player.y - candidate.y) < 44);
+    if (keycard) {
+      keycard.taken = true;
       player.keys += 1;
       roomFlash = 0.55;
       playCue("pickup");
@@ -113,39 +114,6 @@
     }
   }
 
-  function changeRoom(door) {
-    const next = door.to;
-    const spawn = door.spawn || rooms[next].start;
-    player.room = next;
-    player.x = spawn.x;
-    player.y = spawn.y;
-    player.hidden = false;
-    player.boxed = false;
-    player.ventHidden = 0;
-    player.entryGrace = 1.15;
-    player.doorCooldown = 0.55;
-    noises.length = 0;
-    shots.length = 0;
-    pawPrints.length = 0;
-    catnips.length = 0;
-    ventRattles.length = 0;
-    tacticalPings.length = 0;
-    if (alert > 0) {
-      markLastKnown(player.x, player.y, "ROOM BREACH");
-      orderAlarmCall(rooms[next], { x: player.x, y: player.y }, "ROOM BREACH");
-    } else {
-      alertReason = "";
-      lastKnown = null;
-      sweepTimer = 0;
-    }
-    roomTime = 0;
-    briefingIndex = 0;
-    directorTimer = patrolShiftDelay();
-    roomFlash = 1;
-    playCue("room");
-    notice(`ENTERING ${rooms[next].name.toUpperCase()}`, 1.4);
-  }
-
   function update(dt) {
     if (paused) {
       updateHud();
@@ -186,6 +154,7 @@
     updateTunaScent(dt);
     updateVentRattles(dt);
     updateTacticalPings(dt);
+    updateGuardBarks(dt);
     applyFreshNoises(room);
     applyFreshPawPrints(room);
     updateNoises(dt);
@@ -212,16 +181,12 @@
     }
     if (sweepTimer > 0) sweepTimer = Math.max(0, sweepTimer - dt);
 
-    const door = player.doorCooldown <= 0
-      ? roomDoors(room).find((candidate) => circleRect(player.x, player.y, player.r, doorTriggerRect(candidate)))
+    const lockedDoor = player.doorCooldown <= 0
+      ? roomDoors(room).find((candidate) => !doorUnlocked(candidate) && circleRect(player.x, player.y, player.r, doorTriggerRect(candidate)))
       : null;
-    if (door) {
-      if (doorUnlocked(door)) {
-        changeRoom(door);
-      } else {
-        roomFlash = 0.16;
-        notice(`TAG ${door.need} REQUIRED`, 0.5);
-      }
+    if (lockedDoor) {
+      roomFlash = 0.16;
+      notice(`TAG ${lockedDoor.need} REQUIRED`, 0.5);
     }
 
     if (room.lasers && !room.systemDown) {

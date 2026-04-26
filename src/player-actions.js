@@ -30,11 +30,12 @@
       return;
     }
     const facing = player.facing || { x: 1, y: 0 };
+    const room = rooms[player.room];
     player.catnip -= 1;
     stats.catnips += 1;
     catnips.push({
-      x: clamp(player.x + facing.x * 18, 40, PLAY_W - 40),
-      y: clamp(player.y + facing.y * 18, 40, H - 40),
+      x: clamp(player.x + facing.x * 18, 40, roomWidth(room) - 40),
+      y: clamp(player.y + facing.y * 18, 40, roomHeight(room) - 40),
       vx: facing.x * YARN_THROW_SPEED,
       vy: facing.y * YARN_THROW_SPEED,
       traveled: 0,
@@ -70,8 +71,16 @@
     const speed = baseSpeed * (extractionActive ? 0.86 : 1);
     const nx = player.x + dx * speed * dt;
     const ny = player.y + dy * speed * dt;
-    if (!blocked(nx, player.y)) player.x = nx;
-    if (!blocked(player.x, ny)) player.y = ny;
+    if (!blocked(nx, player.y)) {
+      player.x = nx;
+    } else if (tryPlayerSectorTransfer(nx, player.y)) {
+      return;
+    }
+    if (!blocked(player.x, ny)) {
+      player.y = ny;
+    } else if (tryPlayerSectorTransfer(player.x, ny)) {
+      return;
+    }
 
     if (player.boxed) {
       footstepTimer -= dt;
@@ -142,11 +151,11 @@
         });
       }
       if (responders > 0) {
-        if (sound.kind === "meow") radio("GUARD: heard a meow");
-        else if (sound.kind === "yarn") radio("GUARD: what's that?");
-        else if (sound.kind === "tuna") radio("GUARD: tuna scent");
-        else if (sound.kind === "box") radio("GUARD: box rustle");
-        else if (sound.kind === "step") radio("GUARD: movement");
+        if (sound.kind === "meow") sayNearestGuard(room, sound.x, sound.y, "heard a meow");
+        else if (sound.kind === "yarn") sayNearestGuard(room, sound.x, sound.y, "what's that?");
+        else if (sound.kind === "tuna") sayNearestGuard(room, sound.x, sound.y, "tuna scent");
+        else if (sound.kind === "box") sayNearestGuard(room, sound.x, sound.y, "box rustle");
+        else if (sound.kind === "step") sayNearestGuard(room, sound.x, sound.y, "movement");
       }
       sound.fresh = false;
     });
@@ -165,8 +174,8 @@
       if (!pouch.landed) {
         const stepX = pouch.vx * dt;
         const stepY = pouch.vy * dt;
-        const nextX = clamp(pouch.x + stepX, 40, PLAY_W - 40);
-        const nextY = clamp(pouch.y + stepY, 40, H - 40);
+        const nextX = clamp(pouch.x + stepX, 40, roomWidth(room) - 40);
+        const nextY = clamp(pouch.y + stepY, 40, roomHeight(room) - 40);
         pouch.traveled += Math.hypot(stepX, stepY);
         pouch.trail.push({ x: pouch.x, y: pouch.y });
         if (pouch.trail.length > 8) pouch.trail.shift();
@@ -208,9 +217,10 @@
   }
 
   function addTacticalPing(x, y, label, color = "#ffd65a") {
+    const room = rooms[player.room];
     tacticalPings.push({
-      x: clamp(x, 36, PLAY_W - 36),
-      y: clamp(y, 36, H - 36),
+      x: clamp(x, 36, roomWidth(room) - 36),
+      y: clamp(y, 36, roomHeight(room) - 36),
       label,
       color,
       ttl: 2.6,
@@ -222,6 +232,14 @@
     for (let i = tacticalPings.length - 1; i >= 0; i -= 1) {
       tacticalPings[i].ttl -= dt;
       if (tacticalPings[i].ttl <= 0) tacticalPings.splice(i, 1);
+    }
+  }
+
+  function updateGuardBarks(dt) {
+    for (let i = guardBarks.length - 1; i >= 0; i -= 1) {
+      const bark = guardBarks[i];
+      bark.ttl -= dt;
+      if (bark.ttl <= 0 || !rooms[player.room].guards.includes(bark.guard)) guardBarks.splice(i, 1);
     }
   }
 
@@ -298,7 +316,7 @@
           guard.suspicion = Math.max(guard.suspicion, 0.24);
           clearGuardNavigation(guard);
           print.fresh = false;
-          radio("GUARD: fresh paw prints");
+          sayGuard(guard, "fresh paw prints");
         }
       });
     });
@@ -351,7 +369,7 @@
     const dy = player.y - guard.y;
     const dist = Math.hypot(dx, dy) || 1;
     guard.dir = { x: dx / dist, y: dy / dist };
-    radio("GUARD: taking aim", 0.9);
+    sayGuard(guard, "taking aim", 0.9);
   }
 
   function updateGuardAim(room, guard, dt) {
@@ -423,4 +441,3 @@
     makeNoise(guard.x, guard.y, 105, 0.34, "rgba(255, 214, 90, 0.62)", "HISS", "scratch");
     notice("SILENT SCRATCH: GUARD STUNNED", 1.2);
   }
-

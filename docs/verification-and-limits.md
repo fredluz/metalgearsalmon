@@ -32,7 +32,8 @@ Check:
 - the HUD shows a room name,
 - movement works,
 - interaction still works,
-- door transition still works,
+- walking through former room boundaries does not change `player.room`,
+- large-room camera follows and clamps,
 - pause/resume works,
 - browser console has no errors.
 
@@ -42,6 +43,10 @@ Useful automated expectations:
 - `document.getElementById("roomLabel").textContent` is nonempty
 - `document.scripts` includes all expected `src/` files
 - canvas has nonblack pixels
+- `rooms.length === 1`
+- `rooms[0].name === "Kennel Block"`
+- `rooms[0].guards.length` includes all authored guards
+- camera pans across former room boundaries without a cut
 - no `pageerror` events
 - no console errors
 
@@ -57,9 +62,8 @@ Docs may be longer when needed, but prefer focused files in `docs/` over one hug
 
 Current expected limitations:
 
-- Door traversal is still teleport-based through `changeRoom`.
-- Most gameplay state is room-local.
-- Current transient arrays are current-sector-local.
+- The playable facility is one large room.
+- Current transient arrays are unified-room-local.
 - The minimap is hand-authored through `facilityMapLayout`.
 - There is no formal test suite.
 - There is no save schema beyond best-run localStorage.
@@ -70,14 +74,13 @@ Do not treat these as bugs unless the task specifically targets them.
 
 ## Recommended Next Architecture Steps
 
-For MSX-style connected sectors:
+For the unified facility:
 
-1. Add a sector-boundary transition layer before removing `changeRoom`.
-2. Separate current-sector transient effects from future world-space effects.
-3. Add debug overlay for camera bounds, visible sectors, and sim tiers.
-4. Derive or co-locate minimap layout with world placement.
-5. Add a small smoke test script for load, movement, transition, and no console errors.
-6. Consider an explicit input action map once gameplay verbs grow.
+1. Separate transient effects from future persistent world event objects.
+2. Add debug overlay for camera bounds, gates, and spatial cells.
+3. Derive or co-locate minimap layout with world placement.
+4. Add a small smoke test script for load, movement, gate collision, guard movement, and no console errors.
+5. Consider an explicit input action map once gameplay verbs grow.
 
 ## Anti-Patterns
 
@@ -94,7 +97,7 @@ Avoid:
 - making render functions mutate simulation state,
 - adding mutable room state without reset logic,
 - hardcoding new room indexes across many files,
-- adding cross-sector behavior without graph/tier thinking.
+- adding fake room transitions for normal traversal.
 
 ## Common Failure Modes
 
@@ -115,7 +118,7 @@ Canvas is blank:
 - check console errors,
 - verify `src/main.js` loaded,
 - verify `reset()` and `requestAnimationFrame(loop)` ran,
-- verify camera transform did not move all visible sectors offscreen.
+- verify camera transform did not move the unified room offscreen.
 
 Collision feels wrong:
 

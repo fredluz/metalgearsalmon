@@ -65,9 +65,11 @@ function drawPlayer() {
 
 function drawPrompts(room) {
   const prompts = [];
-  if (room.keycard && !room.keycard.taken && Math.hypot(player.x - room.keycard.x, player.y - room.keycard.y) < 52) {
-    prompts.push({ x: room.keycard.x, y: room.keycard.y - 28, text: "E" });
-  }
+  roomKeycards(room).forEach((keycard) => {
+    if (!keycard.taken && Math.hypot(player.x - keycard.x, player.y - keycard.y) < 52) {
+      prompts.push({ x: keycard.x, y: keycard.y - 28, text: "E" });
+    }
+  });
   if (room.tuna && !room.tuna.taken && Math.hypot(player.x - room.tuna.x, player.y - room.tuna.y) < 58) {
     prompts.push({ x: room.tuna.x, y: room.tuna.y - 34, text: "E" });
   }
@@ -171,6 +173,7 @@ function drawFacilityMap(room) {
   facilityMapLayout.forEach((spec) => {
     const rect = facilityRectFor(spec.room, mapX, mapY, mapW, mapH);
     const sourceRoom = rooms[spec.room];
+    if (!rect || !sourceRoom) return;
     const current = spec.room === player.room;
     const lockedAhead = roomDoors(sourceRoom).some((door) => !doorUnlocked(door));
     ctx.fillStyle = current ? "rgba(255, 214, 90, 0.22)" : "rgba(5, 9, 9, 0.82)";
@@ -181,14 +184,14 @@ function drawFacilityMap(room) {
     ctx.font = "700 7px monospace";
     ctx.fillText(spec.code, rect.x + 3, rect.y + 8);
     sourceRoom.guards.forEach((guard) => {
-      const gx = rect.x + 3 + clamp(guard.x / PLAY_W, 0, 1) * Math.max(1, rect.w - 7);
-      const gy = rect.y + 10 + clamp(guard.y / H, 0, 1) * Math.max(1, rect.h - 14);
+      const gx = rect.x + 3 + clamp(guard.x / roomWidth(sourceRoom), 0, 1) * Math.max(1, rect.w - 7);
+      const gy = rect.y + 10 + clamp(guard.y / roomHeight(sourceRoom), 0, 1) * Math.max(1, rect.h - 14);
       ctx.fillStyle = guard.state === "reinforce" || guard.suspicion > 0.5 ? "#f35d4c" : "#d16d4d";
       ctx.fillRect(gx - 1.5, gy - 1.5, 3, 3);
     });
     if (spec.room === player.room) {
-      const px = rect.x + 3 + clamp(player.x / PLAY_W, 0, 1) * Math.max(1, rect.w - 7);
-      const py = rect.y + 10 + clamp(player.y / H, 0, 1) * Math.max(1, rect.h - 14);
+      const px = rect.x + 3 + clamp(player.x / roomWidth(sourceRoom), 0, 1) * Math.max(1, rect.w - 7);
+      const py = rect.y + 10 + clamp(player.y / roomHeight(sourceRoom), 0, 1) * Math.max(1, rect.h - 14);
       ctx.fillStyle = "#f0edcf";
       ctx.fillRect(px - 2, py - 2, 5, 5);
     }
@@ -198,8 +201,8 @@ function drawFacilityMap(room) {
     const rect = facilityRectFor(START_ROOM, mapX, mapY, mapW, mapH);
     ctx.fillStyle = "#ffd65a";
     ctx.strokeStyle = "#ffd65a";
-    const ex = rect.x + 3 + clamp(rooms[START_ROOM].start.x / PLAY_W, 0, 1) * Math.max(1, rect.w - 7);
-    const ey = rect.y + 10 + clamp(rooms[START_ROOM].start.y / H, 0, 1) * Math.max(1, rect.h - 14);
+    const ex = rect.x + 3 + clamp(rooms[START_ROOM].start.x / roomWidth(rooms[START_ROOM]), 0, 1) * Math.max(1, rect.w - 7);
+    const ey = rect.y + 10 + clamp(rooms[START_ROOM].start.y / roomHeight(rooms[START_ROOM]), 0, 1) * Math.max(1, rect.h - 14);
     ctx.strokeRect(ex - 3, ey - 3, 10, 10);
     ctx.fillRect(ex, ey, 4, 4);
   }
@@ -248,4 +251,3 @@ function drawHazardStripe(x, y, w, h) {
 function drawHazardStrip(x, y, w) {
   drawHazardStripe(x, y, w, 20);
 }
-

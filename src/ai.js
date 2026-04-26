@@ -144,7 +144,7 @@
     markLastKnown(downed.x, downed.y, "GUARD DOWN");
     if (!downed.reported) {
       downed.reported = true;
-      radio("GUARD: unit down");
+      sayGuard(guard, "unit down");
       notice("GUARD FOUND: SEARCH EXPANDING", 1.1);
     }
   }
@@ -263,7 +263,7 @@
         markLastKnown(player.x, player.y, "BOX");
         if (guard.boxRadioCooldown <= 0) {
           guard.boxRadioCooldown = 3.8;
-          radio(player.moving ? "GUARD: moving box" : "GUARD: stray box");
+          sayGuard(guard, player.moving ? "moving box" : "stray box");
           addTacticalPing(player.x, player.y, "BOX", guard.suspicion > 0.65 ? "#f35d4c" : "#ffd65a");
         }
       }

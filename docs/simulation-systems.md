@@ -31,9 +31,9 @@ Current frame order:
 7. Update current-room item/effect systems.
 8. Apply fresh noises and paw prints.
 9. Update current-room sensors, cameras, and guards.
-10. Update offscreen warm-sector reinforcement/timer state.
+10. Update legacy offscreen reinforcement/timer state.
 11. Decay alert and sweep state.
-12. Handle door transition.
+12. Show locked-door feedback.
 13. Handle lasers.
 14. Check extraction completion.
 15. Update DOM HUD.
@@ -104,7 +104,7 @@ Effect/update systems:
 - `applyFreshNoises`
 - `applyFreshPawPrints`
 
-Most player action logic is hot-sector-only. If an effect must exist across sectors, decide whether it should become world-space or remain room-local.
+Most player action logic runs in `rooms[player.room]`. In the unified map, that is the full `Kennel Block`.
 
 ## Interaction System
 
@@ -126,7 +126,7 @@ The order matters. A nearby scratchable guard can consume the interaction before
 
 If a new interaction is added, choose its priority deliberately.
 
-## Door Transitions
+## Gates
 
 Doors are authored in room data:
 
@@ -145,24 +145,21 @@ Doors are authored in room data:
 }
 ```
 
-`update()` checks `doorTriggerRect(door)` and calls `changeRoom(door)` if unlocked.
+Player traversal does not use trigger-based room teleporting. In the unified map, doors are collision gates inside one large room.
 
-`changeRoom(door)`:
+Current gate flow:
 
-- changes `player.room`,
-- moves player to destination `spawn`,
-- clears current-room transient arrays,
-- applies entry grace,
-- updates alert state,
-- resets room timers,
-- plays room cue,
-- shows notice text.
+- `movePlayer()` attempts normal movement.
+- `blocked()` checks walls and locked doors.
+- If a door is unlocked, it no longer blocks and does not move the player.
+- If a door is locked, `update()` uses `doorTriggerRect(door)` for tag requirement feedback.
+- No room cue, flash, notice, or arbitrary destination spawn is used for normal traversal.
 
-The next seamless traversal refactor should preserve room authoring but replace teleport transitions with boundary/passage crossing.
+`spawn` still exists on door data because guard reinforcement transfer uses destination spawn points. Do not use `spawn` for player movement unless the task is explicitly adding a non-continuous transport mechanic.
 
 ## Guard AI
 
-`src/ai.js` owns full hot-sector guard behavior.
+`src/ai.js` owns full guard behavior. Since the facility is now one unified room, all guards in `rooms[0]` are eligible for the normal guard update.
 
 Important guard states:
 
@@ -193,7 +190,7 @@ This handles:
 - caught triggers,
 - shooting.
 
-Full AI should only run in the hot/current sector.
+Full AI runs in the current unified room.
 
 ## Warm-Sector Simulation
 
@@ -237,7 +234,30 @@ Important functions:
 
 Alert state is global, but guard reactions are usually room-local.
 
-Cross-sector reinforcements should use room graph decisions before local guard movement. Do not run global pathfinding over the whole world.
+Legacy reinforcement helpers still exist, but normal adjacent-room idling is gone because adjacent authored rooms are part of the same gameplay room.
+
+## Radio And Guard Speech
+
+Radio and guard dialogue are intentionally separate.
+
+Use `radio(text, seconds)` only for command/radio communication that should appear in the top-left radio callout. Examples include mission guidance, extraction messages, and remote support.
+
+Use `sayGuard(guard, text, seconds)` when an in-world guard is speaking. This creates a `guardBarks` entry that follows the guard and renders above that guard's head. Do not prefix guard speech with `GUARD:`; `sayGuard` strips that legacy prefix for compatibility, but new call sites should pass the actual spoken line.
+
+Use `sayNearestGuard(room, x, y, text, seconds, range)` when the event is world-positioned and the system does not already know which guard should react. This is used for noises such as meows, yarn, tuna scent, box rustles, steps, and vent rattles.
+
+Guard speech state lives in `guardBarks` in `src/core.js`. `updateGuardBarks(dt)` in `src/player-actions.js` expires speech bubbles and drops them if the speaking guard is no longer in the current room.
+
+Reset functions must clear `guardBarks`. Current reset coverage is:
+
+- `reset()`
+- `resetCurrentRoomAfterCatch()`
+- `clearSectorTransients()`
+
+When adding new guard reactions, pick the channel deliberately:
+
+- guard notices, suspicion, alarm movement, and local tactical barks: `sayGuard` or `sayNearestGuard`
+- support calls, objectives, mission status, and offscreen radio chatter: `radio`
 
 ## Mutable Room State
 

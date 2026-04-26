@@ -104,6 +104,7 @@
   function resetRoomSystems(room) {
     room.systemDown = false;
     if (room.keycard) room.keycard.taken = false;
+    room.keycards?.forEach((keycard) => { keycard.taken = false; });
     if (room.tuna) room.tuna.taken = false;
     if (room.intel) room.intel.done = false;
     room.rations?.forEach((ration) => { ration.taken = false; });
@@ -126,6 +127,7 @@
     catnips.length = 0;
     ventRattles.length = 0;
     tacticalPings.length = 0;
+    guardBarks.length = 0;
     player.room = START_ROOM;
     player.x = rooms[START_ROOM].start.x;
     player.y = rooms[START_ROOM].start.y;
@@ -243,9 +245,9 @@
     catnips.length = 0;
     ventRattles.length = 0;
     tacticalPings.length = 0;
+    guardBarks.length = 0;
     lastKnown = null;
     room.guards.forEach(resetGuard);
     roomFlash = 1.1;
     notice("BACK TO ENTRY POINT", 1.4);
   }
-

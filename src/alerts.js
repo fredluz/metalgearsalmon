@@ -1,9 +1,10 @@
 "use strict";
   function makeNoise(x, y, radius, ttl, color, label, kind) {
+    const room = rooms[player.room];
     soundMeter = Math.max(soundMeter, kind === "meow" ? 1 : kind === "shot" ? 0.9 : kind === "scratch" ? 0.7 : kind === "step" ? 0.42 : 0.32);
     noises.push({
-      x: clamp(x, 36, PLAY_W - 36),
-      y: clamp(y, 36, H - 36),
+      x: clamp(x, 36, roomWidth(room) - 36),
+      y: clamp(y, 36, roomHeight(room) - 36),
       radius,
       ttl,
       maxTtl: ttl,
@@ -15,9 +16,10 @@
   }
 
   function markLastKnown(x, y, reason) {
+    const room = rooms[player.room];
     lastKnown = {
-      x: clamp(x, 32, PLAY_W - 32),
-      y: clamp(y, 32, H - 32),
+      x: clamp(x, 32, roomWidth(room) - 32),
+      y: clamp(y, 32, roomHeight(room) - 32),
       ttl: 2.8,
       maxTtl: 2.8,
       reason,
@@ -104,7 +106,7 @@
     caller.alarmReason = reason;
     clearGuardNavigation(caller);
     addTacticalPing(point.x, point.y, "ALARM", "#f35d4c");
-    radio("GUARD: reaching alarm", 1.15);
+    sayGuard(caller, "reaching alarm", 1.15);
     return true;
   }
 
@@ -159,9 +161,10 @@
     if (won || gameOver) return;
     const wasClear = alert <= 0;
     const sourceRoomIndex = player.room;
+    const room = rooms[sourceRoomIndex];
     const target = {
-      x: clamp(player.x, 44, PLAY_W - 44),
-      y: clamp(player.y, 44, H - 44),
+      x: clamp(player.x, 44, roomWidth(room) - 44),
+      y: clamp(player.y, 44, roomHeight(room) - 44),
     };
     alert = Math.max(alert, 4.2);
     alertReason = reason;
@@ -179,8 +182,8 @@
       guard.searchTimer = 1.6;
       guard.suspicion = 1;
       guard.target = {
-        x: clamp(target.x + Math.cos(angle) * offset, 44, PLAY_W - 44),
-        y: clamp(target.y + Math.sin(angle) * offset, 44, H - 44),
+        x: clamp(target.x + Math.cos(angle) * offset, 44, roomWidth(room) - 44),
+        y: clamp(target.y + Math.sin(angle) * offset, 44, roomHeight(room) - 44),
       };
       clearGuardNavigation(guard);
     });
@@ -254,4 +257,3 @@
     message.innerHTML = `Mission complete.<br>The smoked tuna is secure.<br><small>Rank ${result.rank} | Time ${formatTime(result.time)} | Alerts ${result.alerts} | Hits ${result.hits} | Scratches ${stats.scratches}${isBetter ? "<br>New best infiltration." : `<br>Best ${best.rank} | ${formatTime(best.time)}`}<br>Press R to infiltrate again.</small>`;
     message.hidden = false;
   }
-

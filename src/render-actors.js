@@ -1,13 +1,12 @@
 "use strict";
 
-function drawVision(guard) {
+function drawVision(room, guard) {
   const dir = guard.dir || { x: 1, y: 0 };
   const angle = Math.atan2(dir.y, dir.x);
   const heightened = guard.state === "investigate" || guard.state === "callAlarm" || guard.state === "reinforce" || guard.state === "search" || guard.state === "sweep";
   const range = heightened ? 205 : 176;
   const spread = guard.state === "search" || guard.state === "sweep" ? 0.68 : 0.52;
   const tint = guard.suspicion > 0.6 ? "243, 93, 76" : "255, 214, 90";
-  const room = rooms[player.room];
   const rays = 24;
   const points = [];
   for (let i = 0; i <= rays; i += 1) {
@@ -25,8 +24,7 @@ function drawVision(guard) {
   ctx.stroke();
 }
 
-function drawCameraVision(camera) {
-  const room = rooms[player.room];
+function drawCameraVision(room, camera) {
   if (!cameraActive(room, camera)) return;
   const angle = cameraAngle(camera);
   const spread = 0.38;
@@ -210,6 +208,51 @@ function drawGuard(guard) {
   }
 }
 
+function wrapBubbleText(text, maxChars = 18) {
+  const words = text.toUpperCase().split(/\s+/);
+  const lines = [];
+  let line = "";
+  words.forEach((word) => {
+    const next = line ? `${line} ${word}` : word;
+    if (next.length > maxChars && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = next;
+    }
+  });
+  if (line) lines.push(line);
+  return lines.slice(0, 2);
+}
+
+function drawGuardBarks() {
+  guardBarks.forEach((bark) => {
+    const guard = bark.guard;
+    if (!guard || guard.stunned > 0) return;
+    const alpha = clamp(bark.ttl / bark.maxTtl, 0, 1);
+    const lines = wrapBubbleText(bark.text);
+    const textWidth = Math.max(...lines.map((line) => line.length)) * 6;
+    const w = Math.max(42, textWidth + 14);
+    const h = 14 + lines.length * 10;
+    const x = Math.round(guard.x - w / 2);
+    const y = Math.round(guard.y - 76 - (1 - alpha) * 6);
+
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, alpha * 1.25);
+    ctx.fillStyle = "rgba(5, 9, 9, 0.9)";
+    ctx.fillRect(x, y, w, h);
+    ctx.fillRect(guard.x - 4, y + h - 1, 8, 8);
+    ctx.strokeStyle = guard.suspicion > 0.65 ? "#f35d4c" : "#ffd65a";
+    ctx.strokeRect(x + 0.5, y + 0.5, w, h);
+    ctx.fillStyle = guard.suspicion > 0.65 ? "#ffb0a5" : "#f0edcf";
+    ctx.font = "700 9px monospace";
+    lines.forEach((line, index) => {
+      ctx.fillText(line, x + 7, y + 12 + index * 10);
+    });
+    ctx.restore();
+  });
+}
+
 function drawNoises() {
   noises.forEach((sound) => {
     const progress = 1 - sound.ttl / sound.maxTtl;
@@ -293,4 +336,3 @@ function drawLastKnown() {
   ctx.stroke();
   ctx.lineWidth = 1;
 }
-

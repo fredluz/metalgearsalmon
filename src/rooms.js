@@ -46,7 +46,8 @@
       ],
       walls: [
         { x: 0, y: 0, w: PLAY_W, h: 28 }, { x: 0, y: H - 28, w: PLAY_W, h: 28 },
-        { x: 0, y: 0, w: 28, h: H }, { x: PLAY_W - 28, y: 0, w: 28, h: H },
+        { x: 0, y: 0, w: 28, h: H },
+        { x: PLAY_W - 28, y: 0, w: 28, h: 292 }, { x: PLAY_W - 28, y: 378, w: 28, h: H - 378 },
         { x: 150, y: 170, w: 300, h: 36 }, { x: 540, y: 170, w: 164, h: 36 },
         { x: 150, y: 350, w: 120, h: 36 }, { x: 390, y: 350, w: 300, h: 36 },
         { x: 600, y: 450, w: 42, h: 130 }, { x: 320, y: 28, w: 36, h: 108 },
@@ -101,7 +102,7 @@
         { x: 66, y: 78, w: 488, h: 112, axis: "x", phase: 1.6, speed: 0.001 },
       ],
       walls: [
-        { x: 0, y: 0, w: PLAY_W, h: 28 }, { x: 0, y: H - 28, w: PLAY_W, h: 28 },
+        { x: 0, y: 0, w: PLAY_W, h: 28 }, { x: 0, y: H - 28, w: 454, h: 28 }, { x: 550, y: H - 28, w: PLAY_W - 550, h: 28 },
         { x: 0, y: 0, w: 28, h: H }, { x: PLAY_W - 28, y: 0, w: 28, h: H },
         { x: 96, y: 230, w: 300, h: 38 }, { x: 506, y: 230, w: 198, h: 38 },
         { x: 318, y: 398, w: 42, h: 170 }, { x: 584, y: 70, w: 42, h: 198 },
@@ -162,7 +163,8 @@
       ],
       walls: [
         { x: 0, y: 0, w: PLAY_W, h: 28 }, { x: 0, y: H - 28, w: PLAY_W, h: 28 },
-        { x: 0, y: 0, w: 28, h: H }, { x: PLAY_W - 28, y: 0, w: 28, h: H },
+        { x: 0, y: 0, w: 28, h: 268 }, { x: 0, y: 364, w: 28, h: H - 364 },
+        { x: PLAY_W - 28, y: 0, w: 28, h: 76 }, { x: PLAY_W - 28, y: 188, w: 28, h: H - 188 },
         { x: 124, y: 190, w: 580, h: 34 }, { x: 124, y: 376, w: 570, h: 34 },
         { x: 330, y: 224, w: 38, h: 152 }, { x: 618, y: 224, w: 38, h: 152 },
       ],
@@ -218,7 +220,7 @@
       ],
       walls: [
         { x: 0, y: 0, w: PLAY_W, h: 28 }, { x: 0, y: H - 28, w: PLAY_W, h: 28 },
-        { x: 0, y: 0, w: 28, h: H }, { x: PLAY_W - 28, y: 0, w: 28, h: H },
+        { x: 0, y: 0, w: 28, h: 76 }, { x: 0, y: 188, w: 28, h: H - 188 }, { x: PLAY_W - 28, y: 0, w: 28, h: H },
         { x: 186, y: 206, w: 500, h: 38 }, { x: 186, y: 406, w: 500, h: 38 },
         { x: 368, y: 244, w: 38, h: 162 }, { x: 560, y: 244, w: 38, h: 162 },
       ],
@@ -230,6 +232,8 @@
     },
     {
       name: "Service Hall",
+      width: PLAY_W * 2,
+      height: H,
       floor: "#181f20",
       wall: "#3f5050",
       trim: "#7aa6a0",
@@ -244,22 +248,22 @@
           spawn: { x: 656, y: 335 },
         },
         {
-          x: 366, y: 0, w: 92, h: 34,
+          x: 454, y: 0, w: 96, h: 34,
           to: 1,
           need: 1,
           progress: 1,
           label: "PANTRY",
-          approach: { x: 412, y: 58 },
-          trigger: { x: 376, y: 28, w: 72, h: 26 },
+          approach: { x: 506, y: 58 },
+          trigger: { x: 464, y: 28, w: 72, h: 26 },
           spawn: { x: 506, y: 520 },
         },
         {
-          x: 722, y: 280, w: 38, h: 96,
+          x: PLAY_W * 2 - 38, y: 280, w: 38, h: 96,
           to: 2,
           need: 2,
           progress: 2,
           label: "LASER",
-          approach: { x: 680, y: 328 },
+          approach: { x: PLAY_W * 2 - 80, y: 328 },
           spawn: { x: 120, y: 308 },
         },
       ],
@@ -271,11 +275,14 @@
       ],
       rations: [{ x: 404, y: 480, taken: false }],
       catnipPickups: [{ x: 120, y: 194, taken: false }],
-      hiding: [{ x: 180, y: 112, w: 82, h: 58 }, { x: 540, y: 454, w: 88, h: 58 }],
-      shadows: [{ x: 48, y: 286, w: 112, h: 92 }, { x: 72, y: 420, w: 126, h: 84 }, { x: 520, y: 116, w: 112, h: 78 }],
+      hiding: [{ x: 180, y: 112, w: 82, h: 58 }, { x: 540, y: 454, w: 88, h: 58 }, { x: 1052, y: 112, w: 88, h: 58 }],
+      shadows: [{ x: 48, y: 286, w: 112, h: 92 }, { x: 72, y: 420, w: 126, h: 84 }, { x: 520, y: 116, w: 112, h: 78 }, { x: 968, y: 420, w: 150, h: 82 }],
       props: [
         { type: "pipe", x: 86, y: 264, w: 214, h: 14 },
         { type: "pipe", x: 468, y: 364, w: 198, h: 14 },
+        { type: "pipe", x: 826, y: 264, w: 270, h: 14 },
+        { type: "crate", x: 982, y: 416, w: 92, h: 62 },
+        { type: "drums", x: 1288, y: 450, w: 94, h: 62 },
         { type: "crate", x: 176, y: 108, w: 88, h: 62 },
         { type: "crate", x: 538, y: 450, w: 92, h: 62 },
         { type: "terminal", x: 364, y: 282, w: 40, h: 48 },
@@ -289,19 +296,132 @@
         { x: 298, y: 86, w: 168, h: 416, axis: "y", phase: 1.1, speed: 0.001 },
       ],
       walls: [
-        { x: 0, y: 0, w: 366, h: 28 }, { x: 458, y: 0, w: PLAY_W - 458, h: 28 }, { x: 0, y: H - 28, w: PLAY_W, h: 28 },
-        { x: 0, y: 0, w: 28, h: H }, { x: PLAY_W - 28, y: 0, w: 28, h: H },
+        { x: 0, y: 0, w: 454, h: 28 }, { x: 550, y: 0, w: PLAY_W * 2 - 550, h: 28 }, { x: 0, y: H - 28, w: PLAY_W * 2, h: 28 },
+        { x: 0, y: 0, w: 28, h: 286 }, { x: 0, y: 372, w: 28, h: H - 372 },
+        { x: PLAY_W * 2 - 28, y: 0, w: 28, h: 280 }, { x: PLAY_W * 2 - 28, y: 376, w: 28, h: H - 376 },
         { x: 132, y: 218, w: 176, h: 38 }, { x: 456, y: 218, w: 178, h: 38 },
         { x: 132, y: 382, w: 176, h: 38 }, { x: 456, y: 382, w: 178, h: 38 },
+        { x: 820, y: 218, w: 204, h: 38 }, { x: 1188, y: 218, w: 184, h: 38 },
+        { x: 820, y: 382, w: 204, h: 38 }, { x: 1188, y: 382, w: 184, h: 38 },
+        { x: 1108, y: 28, w: 38, h: 166 },
         { x: 312, y: 28, w: 38, h: 166 },
         { x: 414, y: 446, w: 38, h: 166 },
       ],
       guards: [
         { x: 236, y: 328, route: [[236, 328], [292, 328], [292, 156], [156, 156]], i: 1, speed: 64 },
         { x: 622, y: 328, route: [[622, 328], [466, 328], [466, 502], [622, 502]], i: 1, speed: 60 },
+        { x: 1038, y: 328, route: [[1038, 328], [1328, 328], [1328, 504], [1038, 504]], i: 1, speed: 58 },
       ],
     },
   ];
+
+  const authoredRoomPlacements = [
+    { room: 0, col: 0, row: 1 },
+    { room: 4, col: 1, row: 1 },
+    { room: 1, col: 1, row: 0 },
+    { room: 2, col: 3, row: 1 },
+    { room: 3, col: 4, row: 1 },
+  ];
+
+  function authoredRoomOffset(index) {
+    const placement = authoredRoomPlacements.find((candidate) => candidate.room === index) || { col: index, row: 0 };
+    return {
+      x: Number.isFinite(placement.x) ? placement.x : placement.col * PLAY_W,
+      y: Number.isFinite(placement.y) ? placement.y : placement.row * H,
+    };
+  }
+
+  function offsetRect(rect, offset) {
+    return { ...rect, x: rect.x + offset.x, y: rect.y + offset.y };
+  }
+
+  function offsetPoint(point, offset) {
+    return point ? { x: point.x + offset.x, y: point.y + offset.y } : point;
+  }
+
+  function offsetDoor(door, offset) {
+    return {
+      ...offsetRect(door, offset),
+      to: 0,
+      approach: offsetPoint(door.approach, offset),
+      spawn: offsetPoint(door.spawn, offset),
+      trigger: door.trigger ? offsetRect(door.trigger, offset) : door.trigger,
+    };
+  }
+
+  function offsetGuard(guard, offset, roomIndex) {
+    return {
+      ...guard,
+      x: guard.x + offset.x,
+      y: guard.y + offset.y,
+      route: guard.route.map((point) => [point[0] + offset.x, point[1] + offset.y]),
+      homeRoom: 0,
+      sourceRoom: roomIndex,
+    };
+  }
+
+  function mergeAuthoredRooms() {
+    const sourceRooms = rooms.slice();
+    const bounds = sourceRooms.reduce((rect, room, index) => {
+      const offset = authoredRoomOffset(index);
+      return {
+        w: Math.max(rect.w, offset.x + (room.width || PLAY_W)),
+        h: Math.max(rect.h, offset.y + (room.height || H)),
+      };
+    }, { w: 0, h: 0 });
+    const startOffset = authoredRoomOffset(0);
+    const finalOffset = authoredRoomOffset(3);
+    const merged = {
+      unified: true,
+      name: "Kennel Block",
+      width: bounds.w,
+      height: bounds.h,
+      floor: "#181f20",
+      wall: "#4c5742",
+      trim: "#7aa6a0",
+      start: offsetPoint(sourceRooms[0].start, startOffset),
+      doors: [],
+      keycards: [],
+      tuna: offsetPoint(sourceRooms[3].tuna, finalOffset),
+      intel: offsetRect(sourceRooms[0].intel, startOffset),
+      briefings: sourceRooms.flatMap((room) => room.briefings || []),
+      rations: [],
+      catnipPickups: [],
+      hiding: [],
+      shadows: [],
+      vents: [],
+      props: [],
+      cameras: [],
+      panels: [],
+      sweeps: [],
+      walls: [],
+      lasers: [],
+      guards: [],
+    };
+
+    sourceRooms.forEach((room, index) => {
+      const offset = authoredRoomOffset(index);
+      if (room.keycard) merged.keycards.push(offsetPoint(room.keycard, offset));
+      merged.doors.push(...(room.doors || []).map((door) => offsetDoor(door, offset)));
+      merged.rations.push(...(room.rations || []).map((ration) => offsetPoint(ration, offset)));
+      merged.catnipPickups.push(...(room.catnipPickups || []).map((pickup) => offsetPoint(pickup, offset)));
+      merged.hiding.push(...(room.hiding || []).map((spot) => offsetRect(spot, offset)));
+      merged.shadows.push(...(room.shadows || []).map((shadow) => offsetRect(shadow, offset)));
+      merged.vents.push(...(room.vents || []).map((vent) => ({ ...offsetRect(vent, offset), tx: vent.tx + offset.x, ty: vent.ty + offset.y })));
+      merged.props.push(...(room.props || []).map((prop) => offsetRect(prop, offset)));
+      merged.cameras.push(...(room.cameras || []).map((camera) => ({ ...camera, x: camera.x + offset.x, y: camera.y + offset.y })));
+      merged.panels.push(...(room.panels || []).map((panel) => offsetRect(panel, offset)));
+      merged.sweeps.push(...(room.sweeps || []).map((sweep) => offsetRect(sweep, offset)));
+      merged.walls.push(...(room.walls || []).map((wall) => offsetRect(wall, offset)));
+      merged.lasers.push(...(room.lasers || []).map((laser) => offsetRect(laser, offset)));
+      merged.guards.push(...(room.guards || []).map((guard) => offsetGuard(guard, offset, index)));
+    });
+
+    rooms.length = 0;
+    rooms.push(merged);
+  }
+
+  mergeAuthoredRooms();
 
   const START_ROOM = 0;
   const FINAL_ROOM = 3;

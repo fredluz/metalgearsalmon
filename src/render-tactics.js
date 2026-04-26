@@ -16,8 +16,8 @@ function drawRadioLinks(room) {
 
 function tacticalRoute(room, target) {
   const cell = 32;
-  const cols = Math.floor(PLAY_W / cell);
-  const rows = Math.floor(H / cell);
+  const cols = Math.floor(roomWidth(room) / cell);
+  const rows = Math.floor(roomHeight(room) / cell);
   const key = (x, y) => `${x},${y}`;
   const start = {
     x: clamp(Math.floor(player.x / cell), 0, cols - 1),
@@ -322,4 +322,3 @@ function drawWhiskerSense(room) {
   ctx.restore();
   ctx.lineWidth = 1;
 }
-

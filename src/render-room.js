@@ -62,24 +62,40 @@ function drawRoom(room) {
   drawFloor(room);
   drawIntelOverlay(room);
   if (extractionActive && room.index === START_ROOM) drawEvacPad(rooms[START_ROOM].start.x, rooms[START_ROOM].start.y);
-  room.props?.forEach(drawProp);
-  room.shadows?.forEach(drawShadowZone);
-  room.hiding.forEach((spot) => drawCrate(spot, "#726b3e"));
-  room.vents?.forEach(drawVent);
+  room.props?.forEach((prop) => {
+    if (rectVisibleInRoom(room, prop)) drawProp(prop, room);
+  });
+  room.shadows?.forEach((shadow) => {
+    if (rectVisibleInRoom(room, shadow)) drawShadowZone(shadow);
+  });
+  room.hiding.forEach((spot) => {
+    if (rectVisibleInRoom(room, spot)) drawCrate(spot, "#726b3e");
+  });
+  room.vents?.forEach((vent) => {
+    if (rectVisibleInRoom(room, vent)) drawVent(vent);
+  });
   if (current) {
     drawVentRattles();
     drawTacticalPings();
   }
-  room.panels?.forEach((panel) => drawPanel(panel, panel.done));
-  if (room.alarm) drawAlarmPanel(room.alarm);
+  room.panels?.forEach((panel) => {
+    if (rectVisibleInRoom(room, panel)) drawPanel(panel, panel.done);
+  });
+  if (room.alarm && rectVisibleInRoom(room, room.alarm)) drawAlarmPanel(room.alarm);
   room.cameras?.forEach((camera) => drawCamera(camera, cameraActive(room, camera)));
-  room.sweeps?.forEach(drawSensorSweep);
-  room.walls.forEach((wall) => drawWall(room, wall));
+  room.sweeps?.forEach((sweep) => {
+    if (rectVisibleInRoom(room, sweep)) drawSensorSweep(room, sweep);
+  });
+  room.walls.forEach((wall) => {
+    if (rectVisibleInRoom(room, wall)) drawWall(room, wall);
+  });
   roomDoors(room).forEach((door) => drawDoorwayCutout(room, door));
 
   roomDoors(room).forEach((door) => drawDoor(room, door));
 
-  if (room.keycard && !room.keycard.taken) drawKeycard(room.keycard.x, room.keycard.y);
+  roomKeycards(room).forEach((keycard) => {
+    if (!keycard.taken) drawKeycard(keycard.x, keycard.y);
+  });
   room.rations?.forEach((ration) => {
     if (!ration.taken) drawTunaCan(ration.x, ration.y);
   });

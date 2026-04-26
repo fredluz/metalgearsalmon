@@ -15,23 +15,27 @@
 
   function blocked(x, y) {
     const room = rooms[player.room];
+    const w = roomWidth(room);
+    const h = roomHeight(room);
     const rect = { x: x - player.r, y: y - player.r, w: player.r * 2, h: player.r * 2 };
-    if (x < player.r || x > PLAY_W - player.r || y < player.r || y > H - player.r) return true;
+    if (x < player.r || x > w - player.r || y < player.r || y > h - player.r) return true;
     if (queryRoomSpatial(room, "doors", rect).some((door) => !doorUnlocked(door) && circleRect(x, y, player.r, doorBlockRect(door)))) return true;
     return queryRoomSpatial(room, "walls", rect).some((wall) => circleRect(x, y, player.r, wall));
   }
 
   function guardBlocked(room, x, y) {
+    const w = roomWidth(room);
+    const h = roomHeight(room);
     const rect = { x: x - GUARD_RADIUS, y: y - GUARD_RADIUS, w: GUARD_RADIUS * 2, h: GUARD_RADIUS * 2 };
-    if (x < GUARD_RADIUS || x > PLAY_W - GUARD_RADIUS || y < GUARD_RADIUS || y > H - GUARD_RADIUS) return true;
+    if (x < GUARD_RADIUS || x > w - GUARD_RADIUS || y < GUARD_RADIUS || y > h - GUARD_RADIUS) return true;
     if (queryRoomSpatial(room, "doors", rect).some((door) => !doorUnlocked(door) && circleRect(x, y, GUARD_RADIUS, doorBlockRect(door)))) return true;
     return queryRoomSpatial(room, "walls", rect).some((wall) => circleRect(x, y, GUARD_RADIUS, wall));
   }
 
   function openTacticalPoint(room, x, y, fallback) {
     const point = {
-      x: clamp(x, 44, PLAY_W - 44),
-      y: clamp(y, 44, H - 44),
+      x: clamp(x, 44, roomWidth(room) - 44),
+      y: clamp(y, 44, roomHeight(room) - 44),
     };
     return guardBlocked(room, point.x, point.y)
       ? { x: fallback[0], y: fallback[1] }
@@ -58,8 +62,8 @@
 
   function addNavNode(nodes, room, x, y) {
     const point = {
-      x: clamp(x, 36, PLAY_W - 36),
-      y: clamp(y, 36, H - 36),
+      x: clamp(x, 36, roomWidth(room) - 36),
+      y: clamp(y, 36, roomHeight(room) - 36),
     };
     if (guardBlocked(room, point.x, point.y)) return;
     if (nodes.some((node) => Math.hypot(node.x - point.x, node.y - point.y) < NAV_POINT_EPSILON)) return;

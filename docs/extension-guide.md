@@ -6,21 +6,41 @@ Check:
 
 - which file owns the behavior,
 - whether the change is authored data, simulation, render, or state,
-- whether it is hot-sector-only, warm-sector, cold-sector, or global,
+- whether it belongs in authored source-room data or runtime unified-room logic,
 - whether reset logic needs updates,
 - whether line counts stay under 500.
 
-## Adding A Sector
+## Adding Source Room Content
 
-1. Add a room object to `rooms` in `src/rooms.js`.
+1. Add or edit a source room object in `src/rooms.js`.
 2. Add local geometry: `start`, `walls`, `doors`, and content.
-3. Add placement in `roomPlacements` in `src/world.js`.
-4. Add forward and reverse doors when AI/reinforcements need bidirectional routing.
-5. Add minimap data to `facilityMapLayout` if the sector should appear in the sidebar map.
+3. Add placement in `authoredRoomPlacements` in `src/rooms.js`.
+4. Add gates when progression needs locked boundaries.
+5. Add minimap data to `facilityMapLayout` if needed.
 6. Confirm `baseGuardLayouts` clones new guard data correctly.
 7. Run checks and a browser smoke test.
 
-Common mistake: one-way door links. The player may move, but graph routing and reinforcements may fail.
+Common mistake: adding runtime-only coordinates by hand. Keep source-room content local and let `mergeAuthoredRooms()` offset it.
+
+## Adding A Larger Room
+
+Rooms can be larger than the visible playfield.
+
+1. Add `width` and/or `height` to the room object.
+2. Use `roomWidth(room)` and `roomHeight(room)` in systems that need boundaries.
+3. Put boundary walls at the actual room dimensions.
+4. Put edge doors on the actual room edge, not at `PLAY_W` unless the room is exactly one screen wide.
+5. Keep props, guards, vents, panels, pickups, and routes in room-local coordinates.
+6. Update `authoredRoomPlacements` so the larger source room lands in the intended unified-map location.
+7. Browser-test camera behavior at left/top edge, middle, and right/bottom edge.
+
+Expected camera behavior:
+
+- edge of room: player is off-center and the camera is pinned,
+- middle of room: player is centered or close to centered,
+- far edge: camera clamps before showing blank space beyond walls.
+
+Do not convert a large room to world coordinates internally. The current architecture still expects room-local simulation coordinates.
 
 ## Adding A Door
 
@@ -46,10 +66,17 @@ Rules:
 - `to` is the destination room index.
 - `need` is required tag count.
 - `approach` helps objectives and AI.
-- `spawn` controls destination player/guard placement.
-- `trigger` overrides default player transition rectangle.
+- `spawn` controls guard reinforcement placement, not normal player traversal.
+- `trigger` is only used for locked-door feedback and special interaction zones.
 
 After adding doors, consider whether reverse connectivity is needed.
+
+For unified-map traversal:
+
+- unlocked doors should behave like open gates,
+- locked doors should block through `doorBlockRect(door)`,
+- wall gaps must line up with gates,
+- do not reintroduce trigger-based player teleporting.
 
 ## Adding A Guard
 
@@ -77,12 +104,12 @@ Good flow:
 
 1. Author config in `src/rooms.js` only if needed.
 2. Initialize/reset fields in `src/state.js`.
-3. Implement full hot-sector behavior in `src/ai.js`.
-4. Add warm-sector approximation only if offscreen persistence matters.
+3. Implement full behavior in `src/ai.js`.
+4. Add timers/cooldowns only if persistence matters.
 5. Add visual feedback in render files.
 6. Smoke test alert, reset, room transition, and pause.
 
-If behavior crosses rooms, use the room graph for high-level routing and local pathfinding for one sector at a time.
+The runtime map is one room, so avoid cross-room special cases unless you are editing source-room authoring.
 
 ## Adding A Pickup
 
@@ -93,7 +120,7 @@ If behavior crosses rooms, use the room graph for high-level routing and local p
 5. Add prompt logic in `drawPrompts` if it uses `E`.
 6. Update HUD/objective logic if the pickup affects progression.
 
-Keep pickup checks current-sector-local unless the pickup is intentionally global.
+Pickup checks run in the unified room. Use arrays for repeated pickup types.
 
 ## Adding A Player Verb
 
@@ -110,7 +137,7 @@ Current input is physical-key based. Do not partially migrate to an action map u
 
 Decide coordinate space first.
 
-Current-sector-local:
+Unified-room-local:
 
 - add a transient array in `src/core.js`,
 - update it in a simulation file,
@@ -165,6 +192,7 @@ Before adding a loop, ask:
 - Does it scan all guards?
 - Does it scan all walls?
 - Can it use `visibleRooms()`, `activeRooms()`, or `queryRoomSpatial()`?
+- In a large room, can it cull to `roomViewRect()` or `rectVisibleInRoom()`?
 
 Prefer:
 

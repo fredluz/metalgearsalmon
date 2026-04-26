@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const buildId = window.__BUILD_ID__ || "1ac3c0e";
+  const buildId = window.__BUILD_ID__ || "guard-barks-20260426";
   const sources = [
     "src/core.js",
     "src/rooms.js",

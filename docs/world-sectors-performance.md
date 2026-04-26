@@ -1,10 +1,17 @@
-# World, Sectors, And Performance
+# Unified World And Performance
 
 ## Mental Model
 
-Rooms are authored as discrete sectors, then placed into a larger world by `src/world.js`.
+`src/rooms.js` still keeps the original room authoring readable, but the runtime no longer plays them as separate rooms.
 
-The game currently keeps gameplay in room-local coordinates:
+At load time, `mergeAuthoredRooms()` converts the authored room list into one large gameplay room:
+
+```js
+rooms.length === 1
+rooms[0].name === "Kennel Block"
+```
+
+All gameplay coordinates are now local to that single large room:
 
 ```js
 player.x
@@ -15,44 +22,37 @@ wall.x
 wall.y
 ```
 
-The world layer adds placement and camera state:
+That removes room-transition cuts. Moving from the kennel into the hall is just movement across a larger coordinate space.
+
+## Source Room Placement
+
+The source rooms are offset by `authoredRoomPlacements` in `src/rooms.js` before being merged:
 
 ```js
-room.worldX
-room.worldY
-camera.x
-camera.y
-```
-
-This lets rendering behave like a larger connected map without requiring every gameplay system to be rewritten to global coordinates at once.
-
-## Room Placement
-
-`roomPlacements` in `src/world.js` maps room indexes onto a grid:
-
-```js
-const roomPlacements = [
+const authoredRoomPlacements = [
   { room: 0, col: 0, row: 1 },
   { room: 4, col: 1, row: 1 },
   { room: 1, col: 1, row: 0 },
-  { room: 2, col: 2, row: 1 },
-  { room: 3, col: 2, row: 0 },
+  { room: 2, col: 3, row: 1 },
+  { room: 3, col: 4, row: 1 },
 ];
 ```
 
-During `initializeWorld()`, each room receives:
+Room 4, Service Hall, is authored at `PLAY_W * 2` width. The merge step preserves that larger span.
 
-- `room.index`
-- `room.worldX`
-- `room.worldY`
-- `room.worldBounds`
-- `room.spatial`
+The merged room receives:
 
-If a new room is added to `src/rooms.js`, add it to `roomPlacements`.
+- one `start`,
+- one `width` and `height`,
+- combined `walls`,
+- combined `doors`,
+- combined `guards`,
+- combined pickups and hazards,
+- combined cameras, panels, sweeps, and lasers.
 
 ## Camera
 
-The camera is world-space:
+The camera follows the player inside the unified room:
 
 ```js
 const camera = {
@@ -63,90 +63,45 @@ const camera = {
 };
 ```
 
-Player world position is computed from the current room placement:
+`updateCamera()` centers on `playerWorldX()` and `playerWorldY()` where possible, then clamps to the unified room bounds.
 
-```js
-playerWorldX() = rooms[player.room].worldX + player.x
-playerWorldY() = rooms[player.room].worldY + player.y
-```
+Expected behavior:
 
-`updateCamera()` centers the camera on the player and clamps it to world bounds.
+- no camera cut when crossing former room boundaries,
+- player is centered in open middle areas,
+- camera pins near outer map edges,
+- no blank space beyond the unified room bounds.
 
-Rendering should use:
+## Doors And Gates
 
-```js
-withRoomView(room, () => {
-  drawRoom(room);
-});
-```
+Doors are now gates inside the single room.
 
-Inside the callback, draw functions still use room-local coordinates. The canvas transform handles world/camera offset.
+Important behavior:
+
+- unlocked doors do not teleport,
+- locked doors still block collision through `doorBlockRect(door)`,
+- locked doors still show tag requirement feedback through `doorTriggerRect(door)`,
+- `spawn` remains for legacy guard reinforcement helpers, not player movement.
+
+Do not reintroduce player room teleporting for normal map traversal.
 
 ## Activity Records
 
-`refreshWorldActivity()` builds `world.active`, one record per room:
+`refreshWorldActivity()` still builds `world.active`, but in the unified map it contains only the single room.
+
+This keeps the render/update code shape stable:
 
 ```js
-{
-  room,
-  index,
-  tier: "hot" | "warm" | "cold",
-  visible
-}
+visibleRooms().forEach((entry) => {
+  withRoomView(entry.room, drawRoom);
+});
 ```
 
-Use:
-
-- `visibleRooms()` for playfield rendering,
-- `activeRooms("hot")` for current full-simulation sector,
-- `activeRooms("warm")` for hot plus warm sectors.
-
-## Simulation Tiers
-
-The game must not fully simulate every sector every frame.
-
-Current tier policy:
-
-- `hot`: current room only.
-- `warm`: directly connected neighboring rooms.
-- `cold`: all other rooms.
-
-Constants:
-
-```js
-const HOT_SECTOR_GRAPH_DISTANCE = 0;
-const WARM_SECTOR_GRAPH_DISTANCE = 1;
-```
-
-`prepareSectorSimulation()` refreshes world activity and assigns:
-
-```js
-room.simTier
-guard.simTier
-```
-
-Rules:
-
-- Full guard AI belongs in hot sectors only.
-- Warm sectors may decay timers, cooldowns, suspicion, and reinforcement state.
-- Cold sectors should not run per-frame simulation.
-
-Increase warm range only with a clear reason.
-
-## Door Graph
-
-Room connectivity comes from `doors`.
-
-`roomGraphNeighbors(roomIndex)` reads:
-
-- outgoing doors from the room,
-- reverse doors from other rooms that point back.
-
-This graph supports tiering and cross-sector decisions. Cross-sector AI should use this graph first, then local pathfinding inside one sector.
+The old hot/warm/cold tier helpers remain for compatibility, but all active guard gameplay is now in `rooms[0]`.
 
 ## Spatial Index
 
-Every room gets a fixed-cell spatial index:
+The unified room gets a fixed-cell spatial index:
 
 ```js
 room.spatial = {
@@ -188,31 +143,26 @@ Mutable gameplay state like pickups, guards, cameras, alarms, and panels is not 
 
 Hard rules:
 
-- Do not render every sector every frame.
-- Do not full-update every guard every frame.
+- Do not scan every wall directly for collision or line-of-sight.
 - Do not pathfind every frame.
-- Do not line-of-sight check against all walls.
-- Do not make warm/cold sectors run player-facing AI.
 - Do not put expensive unfiltered queries inside render functions.
+- Do not re-split gameplay into hidden inactive rooms just to save work.
 
 Preferred patterns:
 
 - draw playfield content through `visibleRooms()`,
-- run full simulation only for `rooms[player.room]`,
-- run abstract background simulation through `activeRooms("warm")`,
-- use room graph routing for cross-sector behavior,
+- run guard AI against `rooms[player.room]`,
 - use spatial queries for geometry,
-- cache pathfinding and repath only on target changes or stuck state.
+- cache pathfinding and repath only on target changes or stuck state,
+- cull large-room rendering with `roomViewRect()` and `rectVisibleInRoom()`.
 
 ## Current Limits
 
-The world layer is a foundation, not a complete seamless traversal rewrite.
+Current expected limitations:
 
-Current limitations:
+- The minimap is still hand-authored through `facilityMapLayout`.
+- Some systems still use old room/gate vocabulary for compatibility.
+- Transient arrays are unified-room-local, not true world event objects.
+- `FINAL_ROOM` remains a legacy constant, but normal progression now uses keycards and tuna inside the unified room.
 
-- `player.room` is still the primary gameplay room.
-- Doors still call `changeRoom(door)`.
-- Transient arrays are current-sector-local.
-- Room object coordinates are still local, not global.
-
-This is deliberate. It gives camera/windowing and performance boundaries before the harder traversal refactor.
+These are not bugs unless the task targets them directly.

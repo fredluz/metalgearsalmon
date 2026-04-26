@@ -41,6 +41,7 @@
   const catnips = [];
   const ventRattles = [];
   const tacticalPings = [];
+  const guardBarks = [];
   const spriteSheet = new Image();
   const playerWalkSheet = new Image();
   const enemyWalkSheet = new Image();

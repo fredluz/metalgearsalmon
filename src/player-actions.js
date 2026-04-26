@@ -60,6 +60,12 @@
     player.moving = Boolean(dx || dy);
     player.soft = keys.has("shift");
     player.boxed = keys.has("c");
+    if (player.insideProp) {
+      player.moving = false;
+      player.soft = false;
+      player.boxed = false;
+      return;
+    }
     if (!player.moving) return;
 
     const len = Math.hypot(dx, dy);

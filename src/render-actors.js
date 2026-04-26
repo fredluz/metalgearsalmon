@@ -20,9 +20,9 @@ function drawVision(room, guard) {
   ctx.moveTo(guard.x, guard.y);
   points.forEach((point) => ctx.lineTo(point.x, point.y));
   ctx.closePath();
-  ctx.fillStyle = `rgba(${tint}, ${0.12 + guard.suspicion * 0.12})`;
+  ctx.fillStyle = `rgba(${tint}, ${0.035 + guard.suspicion * 0.085})`;
   ctx.fill();
-  ctx.strokeStyle = `rgba(${tint}, 0.18)`;
+  ctx.strokeStyle = `rgba(${tint}, ${0.08 + guard.suspicion * 0.08})`;
   ctx.stroke();
 }
 
@@ -41,9 +41,9 @@ function drawCameraVision(room, camera) {
   ctx.moveTo(camera.x, camera.y);
   points.forEach((point) => ctx.lineTo(point.x, point.y));
   ctx.closePath();
-  ctx.fillStyle = `rgba(${tint}, ${0.10 + (camera.suspicion || 0) * 0.1})`;
+  ctx.fillStyle = `rgba(${tint}, ${0.035 + (camera.suspicion || 0) * 0.075})`;
   ctx.fill();
-  ctx.strokeStyle = `rgba(${tint}, 0.18)`;
+  ctx.strokeStyle = `rgba(${tint}, 0.1)`;
   ctx.stroke();
 }
 

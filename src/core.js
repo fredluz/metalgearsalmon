@@ -27,7 +27,7 @@
   const SIDEBAR = 190;
   const PLAY_W = VIEW_W - SIDEBAR;
   const H = canvas.height;
-  const CAMERA_ZOOM = 2;
+  const CAMERA_ZOOM = 1.5;
   const PANEL_X = PLAY_W;
   const PANEL_W = SIDEBAR;
   const TILE = 32;

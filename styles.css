@@ -241,8 +241,10 @@ kbd {
 
 .editor-title {
   color: #7ed6c8;
+  cursor: move;
   font-size: 13px;
   font-weight: 700;
+  user-select: none;
 }
 
 .editor-row,
@@ -273,6 +275,10 @@ kbd {
   color: #98a08f;
   display: grid;
   gap: 4px;
+}
+
+.editor-panel [hidden] {
+  display: none !important;
 }
 
 .editor-panel textarea {

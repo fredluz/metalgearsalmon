@@ -11,6 +11,7 @@
     moving: false,
     soft: false,
     boxed: false,
+    insideProp: null,
     catnip: 2,
     meowCooldown: 0,
     ventHidden: 0,
@@ -148,6 +149,7 @@
     player.facing = { x: 1, y: 0 };
     player.hidden = false;
     player.boxed = false;
+    player.insideProp = null;
     player.catnip = 2;
     player.rationsHeld = 0;
     player.meowCooldown = 0;
@@ -249,6 +251,7 @@
     player.y = room.start.y;
     player.hidden = false;
     player.moving = false;
+    player.insideProp = null;
     player.ventHidden = 0;
     player.entryGrace = 0.9;
     player.doorCooldown = 0.35;

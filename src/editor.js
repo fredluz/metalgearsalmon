@@ -1,6 +1,7 @@
 "use strict";
 
 const EDITOR_STORAGE_KEY = "whisker-dock-editor-v2";
+const EDITOR_PANEL_POSITION_KEY = "whisker-dock-editor-panel-v1";
 const EDITOR_MAP_W = 1511;
 const EDITOR_MAP_H = 1041;
 const EDITOR_PROPS = [
@@ -272,6 +273,10 @@ function setEditorTool(tool) {
   editorState.panel?.querySelectorAll("[data-editor-tool]").forEach((button) => {
     button.classList.toggle("is-active", button.dataset.editorTool === tool);
   });
+  const propRow = editorState.panel?.querySelector("[data-editor-prop-row]");
+  const objectiveRow = editorState.panel?.querySelector("[data-editor-objective-row]");
+  if (propRow) propRow.hidden = tool !== "prop";
+  if (objectiveRow) objectiveRow.hidden = tool !== "objective";
 }
 
 function createEditorButton(label, tool) {
@@ -287,10 +292,10 @@ function createEditorPanel() {
   const panel = document.createElement("aside");
   panel.className = "editor-panel";
   panel.innerHTML = `
-    <div class="editor-title">Dock Editor</div>
+    <div class="editor-title" data-editor-drag>Dock Editor</div>
     <div class="editor-row editor-tools"></div>
-    <label>Prop <select data-editor-prop></select></label>
-    <label>Objective <select data-editor-objective>
+    <label data-editor-prop-row>Prop <select data-editor-prop></select></label>
+    <label data-editor-objective-row>Objective <select data-editor-objective>
       <option value="backpack">Backpack</option>
       <option value="generator">Generator</option>
       <option value="start">Spawn</option>
@@ -353,8 +358,54 @@ function createEditorPanel() {
   editorState.output = panel.querySelector("[data-editor-output]");
   document.body.appendChild(panel);
   editorState.panel = panel;
+  restoreEditorPanelPosition();
+  makeEditorPanelDraggable();
   setEditorTool(editorState.tool);
   updateEditorOutput();
+}
+
+function restoreEditorPanelPosition() {
+  try {
+    const position = JSON.parse(localStorage.getItem(EDITOR_PANEL_POSITION_KEY) || "null");
+    if (!position) return;
+    editorState.panel.style.left = `${clamp(position.x, 0, window.innerWidth - 80)}px`;
+    editorState.panel.style.top = `${clamp(position.y, 0, window.innerHeight - 60)}px`;
+  } catch {
+    // Ignore stale editor panel positions.
+  }
+}
+
+function makeEditorPanelDraggable() {
+  const handle = editorState.panel?.querySelector("[data-editor-drag]");
+  if (!handle) return;
+  let dragging = false;
+  let offsetX = 0;
+  let offsetY = 0;
+  handle.addEventListener("pointerdown", (event) => {
+    dragging = true;
+    offsetX = event.clientX - editorState.panel.offsetLeft;
+    offsetY = event.clientY - editorState.panel.offsetTop;
+    handle.setPointerCapture(event.pointerId);
+    event.preventDefault();
+  });
+  handle.addEventListener("pointermove", (event) => {
+    if (!dragging) return;
+    const maxX = Math.max(0, window.innerWidth - editorState.panel.offsetWidth);
+    const maxY = Math.max(0, window.innerHeight - 48);
+    const x = clamp(event.clientX - offsetX, 0, maxX);
+    const y = clamp(event.clientY - offsetY, 0, maxY);
+    editorState.panel.style.left = `${x}px`;
+    editorState.panel.style.top = `${y}px`;
+  });
+  handle.addEventListener("pointerup", (event) => {
+    if (!dragging) return;
+    dragging = false;
+    handle.releasePointerCapture(event.pointerId);
+    localStorage.setItem(EDITOR_PANEL_POSITION_KEY, JSON.stringify({
+      x: editorState.panel.offsetLeft,
+      y: editorState.panel.offsetTop,
+    }));
+  });
 }
 
 function drawEditorRect(rect, fill, stroke) {

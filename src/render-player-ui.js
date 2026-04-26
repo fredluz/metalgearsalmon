@@ -30,6 +30,7 @@ function drawCardboardBox(x, y) {
 }
 
 function drawPlayer() {
+  if (playerInsideProp(rooms[player.room])) return;
   if (player.boxed) {
     drawCardboardBox(player.x, player.y);
     if (player.hidden) {
@@ -65,6 +66,19 @@ function drawPlayer() {
 
 function drawPrompts(room) {
   const prompts = [];
+  const drawPrompt = (prompt) => {
+    ctx.fillStyle = "#111514";
+    ctx.fillRect(prompt.x - 9, prompt.y - 15, 18, 18);
+    ctx.fillStyle = "#ffd65a";
+    ctx.font = "700 14px monospace";
+    ctx.fillText(prompt.text, prompt.x - 5, prompt.y - 1);
+  };
+  const insideProp = playerInsideProp(room);
+  if (insideProp) {
+    const rect = hidePropRect(insideProp);
+    drawPrompt({ x: rect.x + rect.w / 2, y: rect.y - 12, text: "E" });
+    return;
+  }
   roomKeycards(room).forEach((keycard) => {
     if (!keycard.taken && Math.hypot(player.x - keycard.x, player.y - keycard.y) < 52) {
       prompts.push({ x: keycard.x, y: keycard.y - 28, text: "E" });
@@ -95,6 +109,12 @@ function drawPrompts(room) {
   room.vents?.forEach((vent) => {
     if (nearRect(vent, 38)) prompts.push({ x: vent.x + vent.w / 2, y: vent.y - 12, text: "E" });
   });
+  if (!insideProp) {
+    enterableHideProps(room).forEach((prop) => {
+      const rect = hidePropRect(prop);
+      if (nearRect(rect, 44)) prompts.push({ x: rect.x + rect.w / 2, y: rect.y - 12, text: "E" });
+    });
+  }
   room.panels?.forEach((panel) => {
     if (!panel.done && nearRect(panel, 38)) prompts.push({ x: panel.x + panel.w / 2, y: panel.y - 12, text: "E" });
   });
@@ -106,13 +126,7 @@ function drawPrompts(room) {
   }
   const guard = scratchableGuard(room);
   if (guard) prompts.push({ x: guard.x, y: guard.y - 48, text: "E" });
-  prompts.forEach((prompt) => {
-    ctx.fillStyle = "#111514";
-    ctx.fillRect(prompt.x - 9, prompt.y - 15, 18, 18);
-    ctx.fillStyle = "#ffd65a";
-    ctx.font = "700 14px monospace";
-    ctx.fillText(prompt.text, prompt.x - 5, prompt.y - 1);
-  });
+  prompts.forEach(drawPrompt);
 }
 
 function facilityRectFor(roomIndex, x, y, w, h) {

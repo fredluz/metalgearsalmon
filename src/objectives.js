@@ -120,6 +120,38 @@
     return player.boxed && !player.moving && !boxCompromised(room);
   }
 
+  const ENTERABLE_PROP_IMAGE_KEYS = new Set(["dockFishCrate", "dockBarrelStack", "dockFishingBoatSmall"]);
+
+  function enterableHideProps(room) {
+    return (room.props || []).filter((prop) => ENTERABLE_PROP_IMAGE_KEYS.has(prop.imageKey));
+  }
+
+  function hidePropRect(prop) {
+    if (!prop?.imageKey) return prop;
+    return {
+      x: prop.x - prop.w / 2,
+      y: prop.y - prop.h,
+      w: prop.w,
+      h: prop.h,
+    };
+  }
+
+  function hidePropCenter(prop) {
+    const rect = hidePropRect(prop);
+    return { x: rect.x + rect.w / 2, y: rect.y + rect.h / 2 };
+  }
+
+  function playerInsideProp(room) {
+    if (!player.insideProp || player.insideProp.room !== player.room) return null;
+    return enterableHideProps(room).find((prop) => prop.id === player.insideProp.id) || null;
+  }
+
+  function propHideLabel(prop) {
+    if (prop?.imageKey === "dockFishingBoatSmall") return "FISH BOAT";
+    if (prop?.imageKey === "dockBarrelStack") return "BARRELS";
+    return "FISH CRATE";
+  }
+
   function nearPlausibleBoxSpot(room) {
     const playerRect = { x: player.x - 18, y: player.y - 14, w: 36, h: 28 };
     const coverRects = [

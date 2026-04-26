@@ -1,7 +1,82 @@
 "use strict";
+  function propExitCandidates(room, prop) {
+    const rect = hidePropRect(prop);
+    const center = hidePropCenter(prop);
+    const candidates = [];
+    if (player.insideProp && Number.isFinite(player.insideProp.exitX) && Number.isFinite(player.insideProp.exitY)) {
+      candidates.push({ x: player.insideProp.exitX, y: player.insideProp.exitY });
+    }
+    const distances = [player.r + 10, player.r + 24, player.r + 40];
+    const edges = [
+      { x: center.x, y: rect.y - player.r - 8 },
+      { x: center.x, y: rect.y + rect.h + player.r + 8 },
+      { x: rect.x - player.r - 8, y: center.y },
+      { x: rect.x + rect.w + player.r + 8, y: center.y },
+    ];
+    edges.forEach((point) => candidates.push(point));
+    for (let step = 0; step < 16; step += 1) {
+      const angle = (Math.PI * 2 * step) / 16;
+      distances.forEach((distance) => {
+        candidates.push({
+          x: center.x + Math.cos(angle) * (prop.w / 2 + distance),
+          y: center.y + Math.sin(angle) * (prop.h / 2 + distance),
+        });
+      });
+    }
+    return candidates
+      .map((point) => ({
+        x: clamp(point.x, player.r, roomWidth(room) - player.r),
+        y: clamp(point.y, player.r, roomHeight(room) - player.r),
+      }))
+      .sort((a, b) => Math.hypot(a.x - center.x, a.y - center.y) - Math.hypot(b.x - center.x, b.y - center.y));
+  }
+
+  function exitHideProp(room, prop) {
+    const exit = propExitCandidates(room, prop).find((point) => !movementBlocked(room, point.x, point.y, player.r));
+    if (!exit) {
+      notice("EXIT BLOCKED: STAY HIDDEN", 0.9);
+      return false;
+    }
+    player.x = exit.x;
+    player.y = exit.y;
+    player.insideProp = null;
+    player.hidden = false;
+    player.ventHidden = 0;
+    player.entryGrace = Math.max(player.entryGrace, 0.35);
+    roomFlash = 0.35;
+    playCue("pickup");
+    notice("COVER EXITED", 0.8);
+    return true;
+  }
+
+  function enterHideProp(room, prop) {
+    const center = hidePropCenter(prop);
+    player.insideProp = {
+      room: player.room,
+      id: prop.id,
+      exitX: player.x,
+      exitY: player.y,
+    };
+    player.x = center.x;
+    player.y = center.y;
+    player.hidden = true;
+    player.boxed = false;
+    player.ventHidden = 0;
+    player.moving = false;
+    roomFlash = 0.35;
+    playCue("pickup");
+    notice(`HIDDEN INSIDE ${propHideLabel(prop)}`, 1);
+  }
+
   function interact() {
     if (won || gameOver) return;
     const room = rooms[player.room];
+
+    const insideProp = playerInsideProp(room);
+    if (insideProp) {
+      exitHideProp(room, insideProp);
+      return;
+    }
 
     const guard = scratchableGuard(room);
     if (guard) {
@@ -18,6 +93,7 @@
         player.y = boat.ty;
         player.hidden = false;
         player.ventHidden = 0;
+        player.insideProp = null;
         player.entryGrace = Math.max(player.entryGrace, 0.45);
         roomFlash = 0.55;
         makeNoise(entryX, entryY, 128, 0.46, "rgba(255, 214, 90, 0.58)", "BOAT", "boat");
@@ -38,6 +114,7 @@
         player.y = vent.ty;
         player.hidden = true;
         player.ventHidden = 2.4;
+        player.insideProp = null;
         roomFlash = 0.55;
         addVentRattle(entryX, entryY);
         addVentRattle(player.x, player.y);
@@ -49,6 +126,12 @@
         notice("DUCT ROUTE USED: STAY LOW", 1.1);
         return;
       }
+    }
+
+    const hideProp = enterableHideProps(room).find((candidate) => nearRect(hidePropRect(candidate), 38));
+    if (hideProp) {
+      enterHideProp(room, hideProp);
+      return;
     }
 
     if (room.backpack && !room.backpack.taken && nearRect(room.backpack, 36)) {
@@ -188,6 +271,7 @@
 
     movePlayer(dt);
     player.hidden = player.ventHidden > 0
+      || Boolean(playerInsideProp(room))
       || room.hiding.some((spot) => circleRect(player.x, player.y, player.r, spot))
       || (player.soft && inShadow(room))
       || boxCover(room);

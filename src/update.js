@@ -1,0 +1,241 @@
+"use strict";
+  function interact() {
+    if (won || gameOver) return;
+    const room = rooms[player.room];
+
+    const guard = scratchableGuard(room);
+    if (guard) {
+      scratchGuard(room, guard);
+      return;
+    }
+
+    if (room.vents) {
+      const vent = room.vents.find((candidate) => nearRect(candidate, 30));
+      if (vent) {
+        const entryX = vent.x + vent.w / 2;
+        const entryY = vent.y + vent.h / 2;
+        player.x = vent.tx;
+        player.y = vent.ty;
+        player.hidden = true;
+        player.ventHidden = 2.4;
+        roomFlash = 0.55;
+        addVentRattle(entryX, entryY);
+        addVentRattle(player.x, player.y);
+        makeNoise(entryX, entryY, 128, 0.46, "rgba(126, 214, 200, 0.62)", "GRATE", "vent");
+        makeNoise(player.x, player.y, 116, 0.46, "rgba(126, 214, 200, 0.6)", "VENT", "vent");
+        alert = Math.max(0, alert - 0.9);
+        radio("GUARD: vent rattle");
+        playCue("room");
+        notice("DUCT ROUTE USED: STAY LOW", 1.1);
+        return;
+      }
+    }
+
+    if (room.panels) {
+      const panel = room.panels.find((candidate) => !candidate.done && nearRect(candidate, 32));
+      if (panel) {
+        panel.done = true;
+        if (room.intel && Math.abs((panel.x + panel.w / 2) - (room.intel.x + room.intel.w / 2)) < 8 && Math.abs((panel.y + panel.h / 2) - (room.intel.y + room.intel.h / 2)) < 8) {
+          room.intel.done = true;
+        }
+        room.systemDown = true;
+        if (room.alarm) room.alarm.disabled = true;
+        if (!extractionActive) securityLevel = Math.max(0, securityLevel - 1.1);
+        roomFlash = 0.7;
+        makeNoise(panel.x + panel.w / 2, panel.y + panel.h / 2, 124, 0.5, "rgba(255, 214, 90, 0.65)", "SCRATCH", "scratch");
+        playCue("pickup");
+        radio("CP: local security offline");
+        notice(room.intel?.text || "SECURITY PANEL CLAWED: ALARM OFF", 2.2);
+        return;
+      }
+    }
+
+    if (room.alarm && !room.alarm.disabled && nearRect(room.alarm, 34)) {
+      room.alarm.disabled = true;
+      room.alarm.triggered = false;
+      roomFlash = 0.58;
+      makeNoise(room.alarm.x + room.alarm.w / 2, room.alarm.y + room.alarm.h / 2, 92, 0.35, "rgba(255, 214, 90, 0.5)", "SNIP", "scratch");
+      playCue("pickup");
+      notice("ALARM BUTTON DISABLED", 1.15);
+      return;
+    }
+
+    if (room.intel && !room.intel.done && nearRect(room.intel, 34)) {
+      room.intel.done = true;
+      roomFlash = 0.5;
+      makeNoise(room.intel.x + room.intel.w / 2, room.intel.y + room.intel.h / 2, 94, 0.36, "rgba(126, 214, 200, 0.58)", "DATA", "intel");
+      playCue("pickup");
+      notice(room.intel.text, 2.2);
+      return;
+    }
+
+    if (room.keycard && !room.keycard.taken && Math.hypot(player.x - room.keycard.x, player.y - room.keycard.y) < 44) {
+      room.keycard.taken = true;
+      player.keys += 1;
+      roomFlash = 0.55;
+      playCue("pickup");
+      notice("COLLAR TAG ACQUIRED", 1.2);
+      return;
+    }
+
+    const ration = room.rations?.find((candidate) => !candidate.taken && Math.hypot(player.x - candidate.x, player.y - candidate.y) < 42);
+    if (ration) {
+      if (player.rationsHeld >= 3) {
+        notice("RATION POUCH FULL", 0.9);
+        return;
+      }
+      ration.taken = true;
+      player.rationsHeld += 1;
+      roomFlash = 0.45;
+      playCue("pickup");
+      notice("TUNA RATION STORED", 1.2);
+      return;
+    }
+
+    const catnipPickup = room.catnipPickups?.find((candidate) => !candidate.taken && Math.hypot(player.x - candidate.x, player.y - candidate.y) < 42);
+    if (catnipPickup) {
+      if (player.catnip >= 3) {
+        notice("YARN STASH FULL", 0.9);
+        return;
+      }
+      catnipPickup.taken = true;
+      player.catnip = Math.min(3, player.catnip + 1);
+      roomFlash = 0.38;
+      playCue("pickup");
+      notice("YARN BALL ACQUIRED", 1.05);
+      return;
+    }
+
+    if (room.tuna && !room.tuna.taken && Math.hypot(player.x - room.tuna.x, player.y - room.tuna.y) < 52) {
+      room.tuna.taken = true;
+      playCue("pickup");
+      startExtraction(room);
+    }
+  }
+
+  function changeRoom(door) {
+    const next = door.to;
+    const spawn = door.spawn || rooms[next].start;
+    player.room = next;
+    player.x = spawn.x;
+    player.y = spawn.y;
+    player.hidden = false;
+    player.boxed = false;
+    player.ventHidden = 0;
+    player.entryGrace = 1.15;
+    player.doorCooldown = 0.55;
+    noises.length = 0;
+    shots.length = 0;
+    pawPrints.length = 0;
+    catnips.length = 0;
+    ventRattles.length = 0;
+    tacticalPings.length = 0;
+    if (alert > 0) {
+      markLastKnown(player.x, player.y, "ROOM BREACH");
+      orderAlarmCall(rooms[next], { x: player.x, y: player.y }, "ROOM BREACH");
+    } else {
+      alertReason = "";
+      lastKnown = null;
+      sweepTimer = 0;
+    }
+    roomTime = 0;
+    briefingIndex = 0;
+    directorTimer = patrolShiftDelay();
+    roomFlash = 1;
+    playCue("room");
+    notice(`ENTERING ${rooms[next].name.toUpperCase()}`, 1.4);
+  }
+
+  function update(dt) {
+    if (paused) {
+      updateHud();
+      return;
+    }
+
+    if (won || gameOver) {
+      updateHud();
+      return;
+    }
+
+    missionTime += dt;
+    roomTime += dt;
+    if (player.meowCooldown > 0) player.meowCooldown = Math.max(0, player.meowCooldown - dt);
+    if (player.senseCooldown > 0) player.senseCooldown = Math.max(0, player.senseCooldown - dt);
+    if (player.senseTimer > 0) player.senseTimer = Math.max(0, player.senseTimer - dt);
+    if (player.ventHidden > 0) player.ventHidden = Math.max(0, player.ventHidden - dt);
+    if (player.entryGrace > 0) player.entryGrace = Math.max(0, player.entryGrace - dt);
+    if (player.doorCooldown > 0) player.doorCooldown = Math.max(0, player.doorCooldown - dt);
+    if (player.hitCooldown > 0) player.hitCooldown = Math.max(0, player.hitCooldown - dt);
+    if (noticeTimer > 0) noticeTimer = Math.max(0, noticeTimer - dt);
+    if (radioTimer > 0) radioTimer = Math.max(0, radioTimer - dt);
+    shake = Math.max(0, shake - dt * 18);
+    soundMeter = Math.max(0, soundMeter - dt * 1.7);
+    if (alert <= 0 && player.hidden) securityLevel = Math.max(0, securityLevel - dt * 0.075);
+    roomFlash = Math.max(0, roomFlash - dt);
+
+    const room = rooms[player.room];
+
+    movePlayer(dt);
+    player.hidden = player.ventHidden > 0
+      || room.hiding.some((spot) => circleRect(player.x, player.y, player.r, spot))
+      || (player.soft && inShadow(room))
+      || boxCover(room);
+
+    updateCatnips(room, dt);
+    updateTunaScent(dt);
+    updateVentRattles(dt);
+    updateTacticalPings(dt);
+    applyFreshNoises(room);
+    applyFreshPawPrints(room);
+    updateNoises(dt);
+    updateShots(dt);
+    updatePawPrints(dt);
+    updateSensorSweeps(room);
+    updateCameras(room, dt);
+    updateGuards(room, dt);
+    updateOffscreenReinforcements(dt);
+    updateDirector(room, dt);
+    updateBriefings(room);
+
+    if (alert > 0) {
+      const pressure = maxSuspicion();
+      const decay = player.hidden ? 1.65 : pressure < 0.3 ? 0.55 : 0.16;
+      alert = Math.max(0, alert - dt * decay);
+      if (alert <= 0) {
+        alertReason = "";
+        rooms.forEach((candidate) => {
+          if (candidate.alarm) candidate.alarm.triggered = false;
+        });
+        startRoomSweep(room);
+      }
+    }
+    if (sweepTimer > 0) sweepTimer = Math.max(0, sweepTimer - dt);
+
+    const door = player.doorCooldown <= 0
+      ? roomDoors(room).find((candidate) => circleRect(player.x, player.y, player.r, doorTriggerRect(candidate)))
+      : null;
+    if (door) {
+      if (doorUnlocked(door)) {
+        changeRoom(door);
+      } else {
+        roomFlash = 0.16;
+        notice(`TAG ${door.need} REQUIRED`, 0.5);
+      }
+    }
+
+    if (room.lasers && !room.systemDown) {
+      room.lasers.forEach((laser) => {
+        const active = Math.sin(performance.now() / 380 + laser.phase) > -0.15;
+        if (active && !player.hidden && circleRect(player.x, player.y, player.r, laser)) {
+          triggerCaught("LASER TRIP");
+        }
+      });
+    }
+
+    if (extractionActive && player.room === START_ROOM && Math.hypot(player.x - rooms[START_ROOM].start.x, player.y - rooms[START_ROOM].start.y) < 38) {
+      completeMission();
+    }
+
+    updateHud();
+  }
+

@@ -4,29 +4,36 @@ function draw() {
   const room = rooms[player.room];
   const jitterX = alert > 0 ? Math.round(Math.sin(performance.now() / 30) * shake) : 0;
   const jitterY = alert > 0 ? Math.round(Math.cos(performance.now() / 37) * shake) : 0;
+  refreshWorldActivity();
 
   ctx.fillStyle = "#000";
   ctx.fillRect(0, 0, VIEW_W, H);
   ctx.save();
   ctx.translate(jitterX, jitterY);
-  drawRoom(room);
-  drawPawPrints();
-  drawObjectiveMarker(room);
-  drawTacticalRoute(room);
-  drawGuardForecasts(room);
-  drawObjectiveCompass(room);
-  drawWhiskerSense(room);
-  drawNoises();
-  drawRadioLinks(room);
-  drawLastKnown();
-  room.cameras?.forEach(drawCameraVision);
-  room.guards.forEach((guard) => drawVision(guard));
-  drawAimTelegraphs(room);
-  drawShots();
-  room.walls.forEach((wall) => drawWall(room, wall));
-  room.guards.forEach(drawGuard);
-  drawPlayer();
-  drawPrompts(room);
+  visibleRooms().forEach((entry) => {
+    withRoomView(entry.room, (visibleRoom) => {
+      drawRoom(visibleRoom);
+      visibleRoom.cameras?.forEach(drawCameraVision);
+      visibleRoom.guards.forEach((guard) => drawVision(guard));
+      visibleRoom.walls.forEach((wall) => drawWall(visibleRoom, wall));
+      visibleRoom.guards.forEach(drawGuard);
+    });
+  });
+  withRoomView(room, () => {
+    drawPawPrints();
+    drawObjectiveMarker(room);
+    drawTacticalRoute(room);
+    drawGuardForecasts(room);
+    drawObjectiveCompass(room);
+    drawWhiskerSense(room);
+    drawNoises();
+    drawRadioLinks(room);
+    drawLastKnown();
+    drawAimTelegraphs(room);
+    drawShots();
+    drawPlayer();
+    drawPrompts(room);
+  });
   ctx.restore();
 
   drawSidebar(room);

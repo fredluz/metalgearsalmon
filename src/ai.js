@@ -49,7 +49,13 @@
     const dx = Math.cos(angle);
     const dy = Math.sin(angle);
     let distance = range;
-    room.walls.forEach((wall) => {
+    const walls = queryRoomSpatial(room, "walls", {
+      x: x - range,
+      y: y - range,
+      w: range * 2,
+      h: range * 2,
+    });
+    walls.forEach((wall) => {
       distance = Math.min(distance, rayRectDistance(x, y, dx, dy, wall, distance));
     });
     return {
@@ -281,8 +287,9 @@
   }
 
   function updateOffscreenReinforcements(dt) {
-    rooms.forEach((room, roomIndex) => {
+    activeRooms("warm").forEach(({ room, index: roomIndex, tier }) => {
       if (roomIndex === player.room) return;
+      if (tier === "warm") updateWarmRoom(room, dt);
       for (let i = room.guards.length - 1; i >= 0; i -= 1) {
         const guard = room.guards[i];
         if (guard.state !== "reinforce" || !guard.target || guard.stunned > 0) continue;
@@ -301,3 +308,26 @@
     });
   }
 
+  function updateWarmRoom(room, dt) {
+    room.cameras?.forEach((camera) => {
+      camera.suspicion = Math.max(0, (camera.suspicion || 0) - dt * 0.2);
+    });
+    room.guards.forEach((guard) => {
+      if (guard.stunned > 0) {
+        guard.stunned = Math.max(0, guard.stunned - dt);
+        guard.suspicion = 0;
+        return;
+      }
+      guard.fireCooldown = Math.max(0, (guard.fireCooldown || 0) - dt);
+      guard.boxRadioCooldown = Math.max(0, (guard.boxRadioCooldown || 0) - dt);
+      guard.suspicion = Math.max(0, (guard.suspicion || 0) - dt * 0.08);
+      if (guard.state === "search" || guard.state === "sweep") {
+        guard.searchTimer = Math.max(0, (guard.searchTimer || 0) - dt);
+        if (guard.searchTimer <= 0) {
+          guard.state = "patrol";
+          guard.target = null;
+          clearGuardNavigation(guard);
+        }
+      }
+    });
+  }

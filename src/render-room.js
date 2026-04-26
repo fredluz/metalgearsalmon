@@ -58,15 +58,18 @@ function drawIntelOverlay(room) {
 }
 
 function drawRoom(room) {
+  const current = room.index === player.room;
   drawFloor(room);
   drawIntelOverlay(room);
-  if (extractionActive && player.room === START_ROOM) drawEvacPad(rooms[START_ROOM].start.x, rooms[START_ROOM].start.y);
+  if (extractionActive && room.index === START_ROOM) drawEvacPad(rooms[START_ROOM].start.x, rooms[START_ROOM].start.y);
   room.props?.forEach(drawProp);
   room.shadows?.forEach(drawShadowZone);
   room.hiding.forEach((spot) => drawCrate(spot, "#726b3e"));
   room.vents?.forEach(drawVent);
-  drawVentRattles();
-  drawTacticalPings();
+  if (current) {
+    drawVentRattles();
+    drawTacticalPings();
+  }
   room.panels?.forEach((panel) => drawPanel(panel, panel.done));
   if (room.alarm) drawAlarmPanel(room.alarm);
   room.cameras?.forEach((camera) => drawCamera(camera, cameraActive(room, camera)));
@@ -83,7 +86,7 @@ function drawRoom(room) {
   room.catnipPickups?.forEach((pickup) => {
     if (!pickup.taken) drawYarnBall(pickup.x, pickup.y, true);
   });
-  catnips.forEach((pouch) => drawYarnBall(pouch.x, pouch.y, true, pouch.trail));
+  if (current) catnips.forEach((pouch) => drawYarnBall(pouch.x, pouch.y, true, pouch.trail));
   if (room.tuna && !room.tuna.taken) drawTuna(room.tuna.x, room.tuna.y);
 
   if (room.lasers) {
@@ -99,4 +102,3 @@ function drawRoom(room) {
     });
   }
 }
-

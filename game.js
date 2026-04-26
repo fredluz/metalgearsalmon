@@ -5,6 +5,7 @@
   const sources = [
     "src/core.js",
     "src/rooms.js",
+    "src/world.js",
     "src/state.js",
     "src/objectives.js",
     "src/navigation.js",

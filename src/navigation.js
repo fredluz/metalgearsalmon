@@ -15,15 +15,17 @@
 
   function blocked(x, y) {
     const room = rooms[player.room];
+    const rect = { x: x - player.r, y: y - player.r, w: player.r * 2, h: player.r * 2 };
     if (x < player.r || x > PLAY_W - player.r || y < player.r || y > H - player.r) return true;
-    if (roomDoors(room).some((door) => !doorUnlocked(door) && circleRect(x, y, player.r, doorBlockRect(door)))) return true;
-    return room.walls.some((wall) => circleRect(x, y, player.r, wall));
+    if (queryRoomSpatial(room, "doors", rect).some((door) => !doorUnlocked(door) && circleRect(x, y, player.r, doorBlockRect(door)))) return true;
+    return queryRoomSpatial(room, "walls", rect).some((wall) => circleRect(x, y, player.r, wall));
   }
 
   function guardBlocked(room, x, y) {
+    const rect = { x: x - GUARD_RADIUS, y: y - GUARD_RADIUS, w: GUARD_RADIUS * 2, h: GUARD_RADIUS * 2 };
     if (x < GUARD_RADIUS || x > PLAY_W - GUARD_RADIUS || y < GUARD_RADIUS || y > H - GUARD_RADIUS) return true;
-    if (roomDoors(room).some((door) => !doorUnlocked(door) && circleRect(x, y, GUARD_RADIUS, doorBlockRect(door)))) return true;
-    return room.walls.some((wall) => circleRect(x, y, GUARD_RADIUS, wall));
+    if (queryRoomSpatial(room, "doors", rect).some((door) => !doorUnlocked(door) && circleRect(x, y, GUARD_RADIUS, doorBlockRect(door)))) return true;
+    return queryRoomSpatial(room, "walls", rect).some((wall) => circleRect(x, y, GUARD_RADIUS, wall));
   }
 
   function openTacticalPoint(room, x, y, fallback) {
@@ -278,12 +280,12 @@
   }
 
   function hasLineOfSight(ax, ay, bx, by, walls) {
+    const candidates = queryWallsForLine(walls, ax, ay, bx, by);
     const steps = Math.ceil(Math.hypot(bx - ax, by - ay) / 11);
     for (let i = 1; i < steps; i += 1) {
       const t = i / steps;
       const p = { x: ax + (bx - ax) * t - 2, y: ay + (by - ay) * t - 2, w: 4, h: 4 };
-      if (walls.some((wall) => rectsOverlap(p, wall))) return false;
+      if (candidates.some((wall) => rectsOverlap(p, wall))) return false;
     }
     return true;
   }
-

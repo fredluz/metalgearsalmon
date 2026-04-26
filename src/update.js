@@ -173,6 +173,7 @@
     if (alert <= 0 && player.hidden) securityLevel = Math.max(0, securityLevel - dt * 0.075);
     roomFlash = Math.max(0, roomFlash - dt);
 
+    prepareSectorSimulation();
     const room = rooms[player.room];
 
     movePlayer(dt);
@@ -238,4 +239,3 @@
 
     updateHud();
   }
-

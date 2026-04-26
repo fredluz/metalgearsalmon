@@ -7,7 +7,14 @@
   const keyLabel = document.getElementById("keyLabel");
   const alertLabel = document.getElementById("alertLabel");
   const gadgetLabel = document.getElementById("gadgetLabel");
+  const buildBadge = document.getElementById("buildBadge");
   const message = document.getElementById("message");
+  const BUILD_ID = window.__BUILD_ID__ || "1ac3c0e";
+  const assetUrl = (path) => `${path}?v=${encodeURIComponent(BUILD_ID)}`;
+
+  if (buildBadge) {
+    buildBadge.textContent = `Build ${BUILD_ID}`;
+  }
 
   ctx.imageSmoothingEnabled = false;
 
@@ -20,6 +27,13 @@
   const TILE = 32;
   const DEPTH = 16;
   const MAX_LIFE = 3;
+  const GUARD_RADIUS = 12;
+  const NAV_CORNER_PAD = GUARD_RADIUS + 10;
+  const NAV_POINT_EPSILON = 6;
+  const NAV_TARGET_GRANULARITY = 24;
+  const STUCK_REPATH_TIME = 0.35;
+  const YARN_THROW_SPEED = 320;
+  const YARN_THROW_RANGE = 170;
   const keys = new Set();
   const noises = [];
   const shots = [];
@@ -45,7 +59,7 @@
   spriteSheet.onerror = () => {
     spritesReady = false;
   };
-  spriteSheet.src = "assets/whisker-sprites.png";
+  spriteSheet.src = assetUrl("assets/whisker-sprites.png");
 
   playerWalkSheet.onload = () => {
     playerWalkReady = playerWalkSheet.width >= SPRITE * 4 && playerWalkSheet.height >= SPRITE * 4;
@@ -53,7 +67,7 @@
   playerWalkSheet.onerror = () => {
     playerWalkReady = false;
   };
-  playerWalkSheet.src = "assets/player-walk.png";
+  playerWalkSheet.src = assetUrl("assets/player-walk.png");
 
   enemyWalkSheet.onload = () => {
     enemyWalkReady = enemyWalkSheet.width >= SPRITE * 4 && enemyWalkSheet.height >= SPRITE * 4;
@@ -61,7 +75,7 @@
   enemyWalkSheet.onerror = () => {
     enemyWalkReady = false;
   };
-  enemyWalkSheet.src = "assets/enemy-walk.png";
+  enemyWalkSheet.src = assetUrl("assets/enemy-walk.png");
 
   enemyFlashlightSheet.onload = () => {
     enemyFlashlightReady = enemyFlashlightSheet.width >= SPRITE * 4 && enemyFlashlightSheet.height >= SPRITE * 4;
@@ -69,7 +83,7 @@
   enemyFlashlightSheet.onerror = () => {
     enemyFlashlightReady = false;
   };
-  enemyFlashlightSheet.src = "assets/enemy-flashlight.png";
+  enemyFlashlightSheet.src = assetUrl("assets/enemy-flashlight.png");
 
   enemyAlertSheet.onload = () => {
     enemyAlertReady = enemyAlertSheet.width >= SPRITE * 4 && enemyAlertSheet.height >= SPRITE * 2;
@@ -77,7 +91,7 @@
   enemyAlertSheet.onerror = () => {
     enemyAlertReady = false;
   };
-  enemyAlertSheet.src = "assets/enemy-alert.png";
+  enemyAlertSheet.src = assetUrl("assets/enemy-alert.png");
 
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
@@ -139,7 +153,7 @@
       intel: { x: 694, y: 312, w: 40, h: 48, done: false, text: "SHADOWS HIDE YOU ONLY WHILE SNEAKING." },
       briefings: [
         "ZERO: shadows only work with soft paws.",
-        "ZERO: catnip pulls patrols off their route.",
+        "ZERO: yarn can bait one patrol off-route.",
         "ZERO: cameras build suspicion before contact.",
       ],
       rations: [{ x: 236, y: 132, taken: false }, { x: 614, y: 340, taken: false }],
@@ -333,6 +347,13 @@
     guard.aimTimer = 0;
     guard.aimMax = 0;
     guard.aimTarget = null;
+    guard.path = [];
+    guard.pathIndex = 0;
+    guard.navTargetKey = "";
+    guard.stuckTimer = 0;
+    guard.repathCooldown = 0;
+    guard.searchBaseAngle = 0;
+    guard.searchPhase = Math.random() * Math.PI * 2;
     pointGuardAtTarget(guard, guard.route[1]);
   }
 
@@ -364,6 +385,7 @@
     player.hidden = false;
     player.boxed = false;
     player.catnip = 2;
+    player.rationsHeld = 0;
     player.meowCooldown = 0;
     player.ventHidden = 0;
     player.hitCooldown = 0;
@@ -526,6 +548,9 @@
     } else if (name === "room") {
       beep(420, 0.07, "square", 0.025);
       setTimeout(() => beep(640, 0.08, "square", 0.02), 80);
+    } else if (name === "yarn") {
+      beep(520, 0.04, "triangle", 0.025);
+      setTimeout(() => beep(460, 0.05, "triangle", 0.02), 40);
     }
   }
 
@@ -576,8 +601,9 @@
     const dir = guard.dir || { x: 1, y: 0 };
     const dot = (dx / dist) * dir.x + (dy / dist) * dir.y;
     if (dot < Math.cos(0.78)) return 0;
-    if (player.moving) return clamp(1.2 - dist / 230, 0.28, 1);
-    return nearPlausibleBoxSpot(room) ? 0 : clamp(0.48 - dist / 460, 0.12, 0.42);
+    if (player.moving) return clamp(1.05 - dist / 240, 0.22, 0.9);
+    if (nearPlausibleBoxSpot(room)) return 0;
+    return dist < 78 ? clamp(0.2 - dist / 520, 0.04, 0.12) : 0;
   }
 
   function securityFactor() {
@@ -689,7 +715,7 @@
   }
 
   function guardBlocked(room, x, y) {
-    return room.walls.some((wall) => circleRect(x, y, 12, wall));
+    return room.walls.some((wall) => circleRect(x, y, GUARD_RADIUS, wall));
   }
 
   function openTacticalPoint(room, x, y, fallback) {
@@ -700,6 +726,219 @@
     return guardBlocked(room, point.x, point.y)
       ? { x: fallback[0], y: fallback[1] }
       : point;
+  }
+
+  function clearGuardNavigation(guard) {
+    guard.path = [];
+    guard.pathIndex = 0;
+    guard.navTargetKey = "";
+    guard.stuckTimer = 0;
+    guard.repathCooldown = 0;
+  }
+
+  function setGuardSearch(guard, duration) {
+    guard.state = "search";
+    guard.searchTimer = duration;
+    guard.target = null;
+    guard.searchBaseAngle = Math.atan2((guard.dir || { y: 0 }).y, (guard.dir || { x: 1 }).x);
+    if (!Number.isFinite(guard.searchBaseAngle)) guard.searchBaseAngle = 0;
+    guard.searchPhase = Math.random() * Math.PI * 2;
+    clearGuardNavigation(guard);
+  }
+
+  function addNavNode(nodes, room, x, y) {
+    const point = {
+      x: clamp(x, 36, PLAY_W - 36),
+      y: clamp(y, 36, H - 36),
+    };
+    if (guardBlocked(room, point.x, point.y)) return;
+    if (nodes.some((node) => Math.hypot(node.x - point.x, node.y - point.y) < NAV_POINT_EPSILON)) return;
+    nodes.push(point);
+  }
+
+  function guardLineClear(room, ax, ay, bx, by) {
+    const steps = Math.max(1, Math.ceil(Math.hypot(bx - ax, by - ay) / 8));
+    for (let i = 0; i <= steps; i += 1) {
+      const t = i / steps;
+      const x = ax + (bx - ax) * t;
+      const y = ay + (by - ay) * t;
+      if (guardBlocked(room, x, y)) return false;
+    }
+    return true;
+  }
+
+  function buildRoomNav(room) {
+    if (room.guardNav) return room.guardNav;
+    const nodes = [];
+
+    room.guards.forEach((guard) => {
+      guard.route.forEach((point) => addNavNode(nodes, room, point[0], point[1]));
+    });
+
+    addNavNode(nodes, room, room.start.x, room.start.y);
+
+    room.walls.forEach((wall) => {
+      addNavNode(nodes, room, wall.x - NAV_CORNER_PAD, wall.y - NAV_CORNER_PAD);
+      addNavNode(nodes, room, wall.x + wall.w + NAV_CORNER_PAD, wall.y - NAV_CORNER_PAD);
+      addNavNode(nodes, room, wall.x - NAV_CORNER_PAD, wall.y + wall.h + NAV_CORNER_PAD);
+      addNavNode(nodes, room, wall.x + wall.w + NAV_CORNER_PAD, wall.y + wall.h + NAV_CORNER_PAD);
+    });
+
+    const edges = nodes.map(() => []);
+    for (let i = 0; i < nodes.length; i += 1) {
+      for (let j = i + 1; j < nodes.length; j += 1) {
+        if (!guardLineClear(room, nodes[i].x, nodes[i].y, nodes[j].x, nodes[j].y)) continue;
+        const cost = Math.hypot(nodes[j].x - nodes[i].x, nodes[j].y - nodes[i].y);
+        edges[i].push({ to: j, cost });
+        edges[j].push({ to: i, cost });
+      }
+    }
+
+    room.guardNav = { nodes, edges };
+    return room.guardNav;
+  }
+
+  function reconstructGuardPath(cameFrom, nodes, current) {
+    const path = [];
+    let cursor = current;
+    while (cameFrom[cursor] !== -1) {
+      path.push({ x: nodes[cursor].x, y: nodes[cursor].y });
+      cursor = cameFrom[cursor];
+    }
+    return path.reverse();
+  }
+
+  function findGuardPath(room, start, goal) {
+    const safeGoal = openTacticalPoint(room, goal.x, goal.y, [start.x, start.y]);
+    if (guardLineClear(room, start.x, start.y, safeGoal.x, safeGoal.y)) return [safeGoal];
+
+    const nav = buildRoomNav(room);
+    const nodes = nav.nodes.map((node) => ({ x: node.x, y: node.y }));
+    const edges = nav.edges.map((neighbors) => neighbors.map((edge) => ({ to: edge.to, cost: edge.cost })));
+    const startIndex = nodes.push({ x: start.x, y: start.y }) - 1;
+    const goalIndex = nodes.push({ x: safeGoal.x, y: safeGoal.y }) - 1;
+    edges.push([]);
+    edges.push([]);
+
+    for (let i = 0; i < nodes.length - 2; i += 1) {
+      const startCost = Math.hypot(nodes[i].x - start.x, nodes[i].y - start.y);
+      if (guardLineClear(room, start.x, start.y, nodes[i].x, nodes[i].y)) {
+        edges[startIndex].push({ to: i, cost: startCost });
+        edges[i].push({ to: startIndex, cost: startCost });
+      }
+
+      const goalCost = Math.hypot(nodes[i].x - safeGoal.x, nodes[i].y - safeGoal.y);
+      if (guardLineClear(room, safeGoal.x, safeGoal.y, nodes[i].x, nodes[i].y)) {
+        edges[goalIndex].push({ to: i, cost: goalCost });
+        edges[i].push({ to: goalIndex, cost: goalCost });
+      }
+    }
+
+    if (guardLineClear(room, start.x, start.y, safeGoal.x, safeGoal.y)) {
+      const direct = Math.hypot(safeGoal.x - start.x, safeGoal.y - start.y);
+      edges[startIndex].push({ to: goalIndex, cost: direct });
+      edges[goalIndex].push({ to: startIndex, cost: direct });
+    }
+
+    const gScore = new Array(nodes.length).fill(Infinity);
+    const fScore = new Array(nodes.length).fill(Infinity);
+    const cameFrom = new Array(nodes.length).fill(-1);
+    const open = [startIndex];
+    gScore[startIndex] = 0;
+    fScore[startIndex] = Math.hypot(safeGoal.x - start.x, safeGoal.y - start.y);
+
+    while (open.length) {
+      let best = 0;
+      for (let i = 1; i < open.length; i += 1) {
+        if (fScore[open[i]] < fScore[open[best]]) best = i;
+      }
+      const current = open.splice(best, 1)[0];
+      if (current === goalIndex) return reconstructGuardPath(cameFrom, nodes, current);
+
+      edges[current].forEach((edge) => {
+        const tentative = gScore[current] + edge.cost;
+        if (tentative >= gScore[edge.to]) return;
+        cameFrom[edge.to] = current;
+        gScore[edge.to] = tentative;
+        fScore[edge.to] = tentative + Math.hypot(nodes[edge.to].x - safeGoal.x, nodes[edge.to].y - safeGoal.y);
+        if (!open.includes(edge.to)) open.push(edge.to);
+      });
+    }
+
+    return [];
+  }
+
+  function guardTargetKey(state, target) {
+    return `${state}:${Math.round(target.x / NAV_TARGET_GRANULARITY)}:${Math.round(target.y / NAV_TARGET_GRANULARITY)}`;
+  }
+
+  function blendGuardDirection(guard, desiredX, desiredY, dt, turnRate = 7) {
+    const desiredLen = Math.hypot(desiredX, desiredY) || 1;
+    const desired = { x: desiredX / desiredLen, y: desiredY / desiredLen };
+    const current = guard.dir || desired;
+    const factor = Math.min(1, dt * turnRate);
+    const mixX = current.x + (desired.x - current.x) * factor;
+    const mixY = current.y + (desired.y - current.y) * factor;
+    const mixLen = Math.hypot(mixX, mixY) || 1;
+    guard.dir = { x: mixX / mixLen, y: mixY / mixLen };
+  }
+
+  function moveGuardTowardTarget(room, guard, target, speed, dt) {
+    const key = guardTargetKey(guard.state, target);
+    if (guard.navTargetKey !== key || !guard.path.length || guard.pathIndex >= guard.path.length) {
+      guard.path = findGuardPath(room, { x: guard.x, y: guard.y }, target);
+      guard.pathIndex = 0;
+      guard.navTargetKey = key;
+      guard.stuckTimer = 0;
+    }
+    if (!guard.path.length) return false;
+
+    while (guard.pathIndex < guard.path.length && Math.hypot(guard.path[guard.pathIndex].x - guard.x, guard.path[guard.pathIndex].y - guard.y) < 10) {
+      guard.pathIndex += 1;
+    }
+    if (guard.pathIndex >= guard.path.length) {
+      guard.path = [{ x: target.x, y: target.y }];
+      guard.pathIndex = 0;
+    }
+
+    let next = guard.path[guard.pathIndex];
+    for (let i = guard.path.length - 1; i > guard.pathIndex; i -= 1) {
+      const candidate = guard.path[i];
+      if (guardLineClear(room, guard.x, guard.y, candidate.x, candidate.y)) {
+        guard.pathIndex = i;
+        next = candidate;
+        break;
+      }
+    }
+    const dx = next.x - guard.x;
+    const dy = next.y - guard.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist < 0.001) {
+      guard.pathIndex += 1;
+      return true;
+    }
+
+    const turnRate = guard.state === "patrol" || guard.state === "reroute" ? 5.5 : 8;
+    blendGuardDirection(guard, dx, dy, dt, turnRate);
+    const arrival = clamp(dist / 34, 0.42, 1);
+    const moved = moveGuardWithCollision(room, guard, guard.dir.x * speed * arrival * dt, guard.dir.y * speed * arrival * dt);
+    const newDist = Math.hypot(next.x - guard.x, next.y - guard.y);
+
+    if (!moved || newDist > dist - 0.35) {
+      guard.stuckTimer += dt;
+    } else {
+      guard.stuckTimer = Math.max(0, guard.stuckTimer - dt * 2.5);
+    }
+
+    if (guard.stuckTimer >= STUCK_REPATH_TIME) {
+      guard.path = findGuardPath(room, { x: guard.x, y: guard.y }, target);
+      guard.pathIndex = 0;
+      guard.navTargetKey = key;
+      guard.stuckTimer = 0;
+      return guard.path.length > 0;
+    }
+
+    return moved;
   }
 
   function moveGuardWithCollision(room, guard, dx, dy) {
@@ -787,6 +1026,7 @@
         x: clamp(target.x + Math.cos(angle) * offset, 44, PLAY_W - 44),
         y: clamp(target.y + Math.sin(angle) * offset, 44, H - 44),
       };
+      clearGuardNavigation(guard);
     });
     radio(`CP: ${reason}`);
     notice(`${reason}: BREAK LINE OF SIGHT`, 1.2);
@@ -809,6 +1049,7 @@
       guard.target = openTacticalPoint(room, lastKnown.x + offset[0], lastKnown.y + offset[1], guard.route[guard.i]);
       guard.searchTimer = sweepTimer - index * 0.45;
       guard.suspicion = Math.max(guard.suspicion, 0.34);
+      clearGuardNavigation(guard);
     });
     markLastKnown(lastKnown.x, lastKnown.y, "SWEEP");
     radio("CP: sweep last known");
@@ -836,6 +1077,7 @@
       );
       guard.suspicion = Math.max(guard.suspicion, 0.72);
       guard.searchTimer = 1.4;
+      clearGuardNavigation(guard);
     });
     playCue("alert");
     radio("CP: tuna breach. seal exits.");
@@ -877,25 +1119,29 @@
     notice("WHISKER SENSE: READ THE ROOM", 0.9);
   }
 
-  function dropCatnip() {
+  function throwYarnBall() {
     if (won || gameOver || paused) return;
     if (player.catnip <= 0) {
-      notice("CATNIP EMPTY", 0.75);
+      notice("NO YARN LEFT", 0.75);
       return;
     }
+    const facing = player.facing || { x: 1, y: 0 };
     player.catnip -= 1;
     stats.catnips += 1;
     catnips.push({
-      x: clamp(player.x, 40, PLAY_W - 40),
-      y: clamp(player.y, 40, H - 40),
-      ttl: 7.2,
-      maxTtl: 7.2,
-      pulse: 0,
+      x: clamp(player.x + facing.x * 18, 40, PLAY_W - 40),
+      y: clamp(player.y + facing.y * 18, 40, H - 40),
+      vx: facing.x * YARN_THROW_SPEED,
+      vy: facing.y * YARN_THROW_SPEED,
+      traveled: 0,
+      trail: [{ x: player.x, y: player.y }],
+      ttl: 2.4,
+      maxTtl: 2.4,
+      landed: false,
     });
     roomFlash = Math.max(roomFlash, 0.28);
-    makeNoise(player.x, player.y, 210, 0.55, "rgba(126, 214, 200, 0.72)", "CATNIP", "catnip");
-    playCue("pickup");
-    notice("CATNIP POUCH DROPPED", 0.9);
+    playCue("yarn");
+    notice("YARN BALL TOSSED", 0.9);
   }
 
   function movePlayer(dt) {
@@ -958,20 +1204,42 @@
     noises.forEach((sound) => {
       if (!sound.fresh) return;
       let responders = 0;
-      room.guards.forEach((guard) => {
-        if (guard.stunned > 0) return;
-        const dist = Math.hypot(sound.x - guard.x, sound.y - guard.y);
-        const muffled = hasLineOfSight(sound.x, sound.y, guard.x, guard.y, room.walls) ? 1 : 0.55;
-        if (dist <= sound.radius * muffled) {
+      if (sound.kind === "yarn") {
+        const candidates = room.guards
+          .map((guard, index) => ({ guard, index }))
+          .filter(({ guard }) => {
+            if (guard.stunned > 0) return false;
+            const dist = Math.hypot(sound.x - guard.x, sound.y - guard.y);
+            if (dist > sound.radius) return false;
+            return hasLineOfSight(sound.x, sound.y, guard.x, guard.y, room.walls);
+          })
+          .sort((a, b) => Math.hypot(sound.x - a.guard.x, sound.y - a.guard.y) - Math.hypot(sound.x - b.guard.x, sound.y - b.guard.y));
+        if (candidates.length) {
+          const { guard } = candidates[0];
           guard.state = "investigate";
           guard.target = { x: sound.x, y: sound.y };
-          guard.suspicion = Math.max(guard.suspicion, sound.kind === "meow" ? 0.34 : 0.16);
-          responders += 1;
+          guard.searchTimer = 0.85;
+          guard.suspicion = Math.min(0.24, Math.max(guard.suspicion, 0.08));
+          clearGuardNavigation(guard);
+          responders = 1;
         }
-      });
+      } else {
+        room.guards.forEach((guard) => {
+          if (guard.stunned > 0) return;
+          const dist = Math.hypot(sound.x - guard.x, sound.y - guard.y);
+          const muffled = hasLineOfSight(sound.x, sound.y, guard.x, guard.y, room.walls) ? 1 : 0.55;
+          if (dist <= sound.radius * muffled) {
+            guard.state = "investigate";
+            guard.target = { x: sound.x, y: sound.y };
+            guard.suspicion = Math.max(guard.suspicion, sound.kind === "meow" ? 0.34 : 0.16);
+            clearGuardNavigation(guard);
+            responders += 1;
+          }
+        });
+      }
       if (responders > 0) {
         if (sound.kind === "meow") radio("GUARD: heard a meow");
-        else if (sound.kind === "catnip") radio("GUARD: strange scent");
+        else if (sound.kind === "yarn") radio("GUARD: what's that?");
         else if (sound.kind === "tuna") radio("GUARD: tuna scent");
         else if (sound.kind === "box") radio("GUARD: box rustle");
         else if (sound.kind === "step") radio("GUARD: movement");
@@ -987,16 +1255,31 @@
     }
   }
 
-  function updateCatnips(dt) {
+  function updateCatnips(room, dt) {
     for (let i = catnips.length - 1; i >= 0; i -= 1) {
       const pouch = catnips[i];
-      pouch.ttl -= dt;
-      pouch.pulse -= dt;
+      if (!pouch.landed) {
+        const stepX = pouch.vx * dt;
+        const stepY = pouch.vy * dt;
+        const nextX = clamp(pouch.x + stepX, 40, PLAY_W - 40);
+        const nextY = clamp(pouch.y + stepY, 40, H - 40);
+        pouch.traveled += Math.hypot(stepX, stepY);
+        pouch.trail.push({ x: pouch.x, y: pouch.y });
+        if (pouch.trail.length > 8) pouch.trail.shift();
+        pouch.x = nextX;
+        pouch.y = nextY;
+        const hitWall = room.walls.some((wall) => circleRect(pouch.x, pouch.y, 7, wall));
+        if (hitWall || pouch.traveled >= YARN_THROW_RANGE) {
+          pouch.landed = true;
+          pouch.ttl = 1.6;
+          pouch.maxTtl = 1.6;
+          makeNoise(pouch.x, pouch.y, 190, 0.45, "rgba(126, 214, 200, 0.6)", "YARN", "yarn");
+        }
+      } else {
+        pouch.ttl -= dt;
+      }
       if (pouch.ttl <= 0) {
         catnips.splice(i, 1);
-      } else if (pouch.pulse <= 0) {
-        pouch.pulse = 1.05;
-        makeNoise(pouch.x, pouch.y, 190, 0.46, "rgba(126, 214, 200, 0.58)", "SNIFF", "catnip");
       }
     }
   }
@@ -1050,12 +1333,14 @@
       .sort((a, b) => b.dist - a.dist);
     const pick = sorted[Math.floor(Math.random() * Math.min(3, sorted.length))];
     const target = openTacticalPoint(room, pick.x, pick.y, guard.route[guard.i]);
-    guard.state = "investigate";
+    guard.state = "reroute";
     guard.target = target;
-    guard.searchTimer = 1.8;
-    guard.suspicion = Math.max(guard.suspicion, extractionActive ? 0.58 : 0.24);
-    addTacticalPing(target.x, target.y, pick.label, extractionActive ? "#f35d4c" : "#ffd65a");
-    radio(extractionActive ? `CP: intercept ${pick.label}` : `CP: check ${pick.label}`);
+    guard.searchTimer = 0;
+    clearGuardNavigation(guard);
+    if (extractionActive) {
+      addTacticalPing(target.x, target.y, pick.label, "#f35d4c");
+      radio(`CP: intercept ${pick.label}`);
+    }
     return true;
   }
 
@@ -1065,9 +1350,7 @@
     if (directorTimer > 0) return;
     directorTimer = patrolShiftDelay();
     if (missionTime < 10 && !extractionActive) return;
-    if (commandPatrolShift(room)) {
-      notice(extractionActive ? "CP ORDER: INTERCEPT ROUTE" : "CP ORDER: PATROL SHIFT", 0.9);
-    }
+    if (commandPatrolShift(room) && extractionActive) notice("CP ORDER: INTERCEPT ROUTE", 0.9);
   }
 
   function updateBriefings(room) {
@@ -1109,6 +1392,7 @@
           guard.state = "investigate";
           guard.target = { x: print.x, y: print.y };
           guard.suspicion = Math.max(guard.suspicion, 0.24);
+          clearGuardNavigation(guard);
           print.fresh = false;
           radio("GUARD: fresh paw prints");
         }
@@ -1178,8 +1462,7 @@
     if (player.hidden || !hasLineOfSight(guard.x, guard.y, player.x, player.y, room.walls)) {
       guard.aimTimer = 0;
       guard.aimTarget = null;
-      guard.state = "search";
-      guard.searchTimer = 0.9;
+      setGuardSearch(guard, 0.9);
       guard.fireCooldown = 0.45;
       return true;
     }
@@ -1190,6 +1473,24 @@
       guard.aimTarget = null;
     }
     return true;
+  }
+
+  function useRation() {
+    if (won || gameOver || paused) return;
+    if (player.rationsHeld <= 0) {
+      notice("NO RATIONS STORED", 0.8);
+      return;
+    }
+    if (player.life >= MAX_LIFE) {
+      notice("LIFE FULL", 0.8);
+      return;
+    }
+    player.rationsHeld -= 1;
+    player.life = Math.min(MAX_LIFE, player.life + 1);
+    stats.rations += 1;
+    roomFlash = 0.45;
+    playCue("pickup");
+    notice("TUNA RATION USED: LIFE +1", 1.2);
   }
 
   function scratchableGuard(room) {
@@ -1352,6 +1653,7 @@
     guard.state = "investigate";
     guard.target = { x: downed.x, y: downed.y };
     guard.suspicion = clamp(guard.suspicion + dt * 0.9, 0, 1);
+    clearGuardNavigation(guard);
     markLastKnown(downed.x, downed.y, "GUARD DOWN");
     if (!downed.reported) {
       downed.reported = true;
@@ -1390,12 +1692,15 @@
       }
       if (guard.state === "search") {
         guard.searchTimer -= dt;
-        const base = Math.atan2(guard.dir.y, guard.dir.x);
-        const sweep = Math.sin(performance.now() / 230) * 1.1;
+        const sweep = Math.sin(performance.now() / 230 + (guard.searchPhase || 0)) * 1.1;
+        const base = guard.searchBaseAngle || 0;
         guard.dir = { x: Math.cos(base + sweep), y: Math.sin(base + sweep) };
-        if (guard.searchTimer <= 0) guard.state = "patrol";
+        if (guard.searchTimer <= 0) {
+          guard.state = "patrol";
+          clearGuardNavigation(guard);
+        }
       } else if (!patrolPausing) {
-        const target = (guard.state === "investigate" || guard.state === "sweep") && guard.target
+        const target = (guard.state === "investigate" || guard.state === "sweep" || guard.state === "reroute") && guard.target
           ? [guard.target.x, guard.target.y]
           : guard.route[guard.i];
         const dx = target[0] - guard.x;
@@ -1403,30 +1708,36 @@
         const dist = Math.hypot(dx, dy);
         if (dist < 5) {
           if (guard.state === "investigate") {
-            guard.state = "search";
-            guard.searchTimer = 1.25;
+            setGuardSearch(guard, 1.25);
           } else if (guard.state === "sweep") {
-            guard.state = "search";
-            guard.searchTimer = 0.9;
+            setGuardSearch(guard, 0.9);
+          } else if (guard.state === "reroute") {
+            guard.state = "patrol";
             guard.target = null;
+            guard.pauseBase = Math.atan2((guard.dir || { y: 0 }).y, (guard.dir || { x: 1 }).x);
+            guard.pauseTimer = 0.35 + Math.random() * 0.25;
+            clearGuardNavigation(guard);
           } else {
             const next = guard.route[(guard.i + 1) % guard.route.length];
             guard.pauseBase = Math.atan2(next[1] - guard.y, next[0] - guard.x);
             guard.pauseTimer = 0.55 + Math.random() * 0.85;
             guard.i = (guard.i + 1) % guard.route.length;
+            clearGuardNavigation(guard);
           }
         } else {
-          guard.dir = { x: dx / dist, y: dy / dist };
           const speed = guard.speed * securityFactor() * (guard.state === "investigate" ? 1.22 : guard.state === "sweep" ? 1.08 : 1);
-          const moved = moveGuardWithCollision(room, guard, guard.dir.x * speed * dt, guard.dir.y * speed * dt);
+          const moved = moveGuardTowardTarget(room, guard, { x: target[0], y: target[1] }, speed, dt);
           if (!moved && (guard.state === "investigate" || guard.state === "sweep")) {
-            guard.state = "search";
-            guard.searchTimer = 1.1;
+            setGuardSearch(guard, 1.1);
+          } else if (!moved && guard.state === "reroute") {
+            guard.state = "patrol";
             guard.target = null;
+            clearGuardNavigation(guard);
           } else if (!moved) {
             guard.pauseTimer = 0.35;
             guard.pauseBase = Math.atan2((guard.dir || { y: 0 }).y, (guard.dir || { x: 1 }).x);
             guard.i = (guard.i + 1) % guard.route.length;
+            clearGuardNavigation(guard);
           }
         }
       }
@@ -1545,30 +1856,29 @@
 
     const ration = room.rations?.find((candidate) => !candidate.taken && Math.hypot(player.x - candidate.x, player.y - candidate.y) < 42);
     if (ration) {
-      if (player.life >= MAX_LIFE) {
-        notice("RATION HELD: LIFE FULL", 0.9);
+      if (player.rationsHeld >= 3) {
+        notice("RATION POUCH FULL", 0.9);
         return;
       }
       ration.taken = true;
-      player.life = Math.min(MAX_LIFE, player.life + 1);
-      stats.rations += 1;
+      player.rationsHeld += 1;
       roomFlash = 0.45;
       playCue("pickup");
-      notice("TUNA RATION USED: LIFE +1", 1.2);
+      notice("TUNA RATION STORED", 1.2);
       return;
     }
 
     const catnipPickup = room.catnipPickups?.find((candidate) => !candidate.taken && Math.hypot(player.x - candidate.x, player.y - candidate.y) < 42);
     if (catnipPickup) {
       if (player.catnip >= 3) {
-        notice("CATNIP FULL", 0.9);
+        notice("YARN STASH FULL", 0.9);
         return;
       }
       catnipPickup.taken = true;
       player.catnip = Math.min(3, player.catnip + 1);
       roomFlash = 0.38;
       playCue("pickup");
-      notice("CATNIP POUCH ACQUIRED", 1.05);
+      notice("YARN BALL ACQUIRED", 1.05);
       return;
     }
 
@@ -1637,7 +1947,7 @@
       || (player.soft && inShadow(room))
       || boxCover(room);
 
-    updateCatnips(dt);
+    updateCatnips(room, dt);
     updateTunaScent(dt);
     updateVentRattles(dt);
     updateTacticalPings(dt);
@@ -1955,6 +2265,35 @@
     ctx.stroke();
   }
 
+  function drawYarnBall(x, y, active = true, trail = []) {
+    if (trail.length > 1) {
+      ctx.strokeStyle = active ? "rgba(240, 237, 207, 0.55)" : "rgba(70, 80, 74, 0.4)";
+      ctx.beginPath();
+      ctx.moveTo(trail[0].x, trail[0].y);
+      for (let i = 1; i < trail.length; i += 1) ctx.lineTo(trail[i].x, trail[i].y);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    }
+    ctx.fillStyle = "rgba(0,0,0,0.22)";
+    ctx.beginPath();
+    ctx.arc(x + 2, y + 6, 9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = active ? "#9b4967" : "#3d3138";
+    ctx.beginPath();
+    ctx.arc(x, y, 9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = active ? "#f0edcf" : "#5d5358";
+    ctx.beginPath();
+    ctx.arc(x - 1, y, 4.2, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x - 7, y - 1);
+    ctx.lineTo(x + 5, y + 1);
+    ctx.moveTo(x - 1, y - 7);
+    ctx.lineTo(x + 1, y + 5);
+    ctx.stroke();
+  }
+
   function drawCatnipPouch(x, y, active = true) {
     ctx.fillStyle = "rgba(0,0,0,0.28)";
     ctx.fillRect(x - 12, y + 7, 24, 6);
@@ -2113,9 +2452,9 @@
       if (!ration.taken) drawTunaCan(ration.x, ration.y);
     });
     room.catnipPickups?.forEach((pickup) => {
-      if (!pickup.taken) drawCatnipPouch(pickup.x, pickup.y, true);
+      if (!pickup.taken) drawYarnBall(pickup.x, pickup.y, true);
     });
-    catnips.forEach((pouch) => drawCatnipPouch(pouch.x, pouch.y, true));
+    catnips.forEach((pouch) => drawYarnBall(pouch.x, pouch.y, true, pouch.trail));
     if (room.tuna && !room.tuna.taken) drawTuna(room.tuna.x, room.tuna.y);
 
     if (room.lasers) {
@@ -2908,7 +3247,7 @@
         if (!ration.taken) mark(ration.x, ration.y, "#7ed6c8", 3);
       });
       room.catnipPickups?.forEach((pickup) => {
-        if (!pickup.taken) mark(pickup.x, pickup.y, "#9fb27b", 3);
+      if (!pickup.taken) mark(pickup.x, pickup.y, "#9b4967", 3);
       });
       room.vents?.forEach((vent) => mark(vent.x + vent.w / 2, vent.y + vent.h / 2, "#98a08f", 3));
       room.panels?.forEach((panel) => {
@@ -2924,11 +3263,11 @@
       ctx.fillRect(ex, ey, 4, 4);
     }
     noises.forEach((sound) => {
-      ctx.fillStyle = sound.kind === "meow" ? "#7ed6c8" : "#ffd65a";
+      ctx.fillStyle = sound.kind === "meow" ? "#7ed6c8" : sound.kind === "yarn" ? "#9b4967" : "#ffd65a";
       ctx.fillRect(x + 10 + sound.x * sx, y + 24 + sound.y * sy, 3, 3);
     });
     catnips.forEach((pouch) => {
-      ctx.fillStyle = "#9fb27b";
+      ctx.fillStyle = "#9b4967";
       ctx.fillRect(x + 10 + pouch.x * sx, y + 24 + pouch.y * sy, 4, 4);
     });
     ventRattles.forEach((rattle) => {
@@ -3061,7 +3400,10 @@
     drawTunaCan(PANEL_X + 50, 446);
     ctx.fillStyle = "#f0edcf";
     ctx.font = "700 24px monospace";
-    ctx.fillText(`x${remainingRations(room)}`, PANEL_X + 94, 452);
+    ctx.fillText(`x${player.rationsHeld}`, PANEL_X + 94, 452);
+    ctx.fillStyle = player.rationsHeld > 0 ? "#7ed6c8" : "#46504a";
+    ctx.font = "700 8px monospace";
+    ctx.fillText("X USE", PANEL_X + 102, 468);
 
     drawSideBox(PANEL_X + 12, 498, PANEL_W - 24, 86, "ITEM", "#98a08f");
     drawKeycard(PANEL_X + 38, 545);
@@ -3083,7 +3425,7 @@
     ctx.fillStyle = player.boxed ? "#ffd65a" : "#46504a";
     ctx.font = "700 8px monospace";
     ctx.fillText("BOX", PANEL_X + 109, 562);
-    drawCatnipPouch(PANEL_X + 156, 546, player.catnip > 0);
+    drawYarnBall(PANEL_X + 156, 546, player.catnip > 0);
     ctx.fillStyle = player.catnip > 0 ? "#ffd65a" : "#46504a";
     ctx.font = "700 8px monospace";
     ctx.fillText(`x${player.catnip}`, PANEL_X + 148, 562);
@@ -3254,7 +3596,7 @@
   window.addEventListener("keydown", (event) => {
     const key = event.key.toLowerCase();
     ensureAudio();
-    if (["arrowleft", "arrowright", "arrowup", "arrowdown", " ", "shift", "q", "f"].includes(key)) {
+    if (["arrowleft", "arrowright", "arrowup", "arrowdown", " ", "shift", "q", "f", "x"].includes(key)) {
       event.preventDefault();
     }
     if ((key === "p" || key === "escape") && !won && !gameOver) {
@@ -3267,8 +3609,9 @@
     if (paused) return;
     if (key === "e") interact();
     if (key === " ") emitMeow();
-    if (key === "q" && !event.repeat) dropCatnip();
+    if (key === "q" && !event.repeat) throwYarnBall();
     if (key === "f" && !event.repeat) activateWhiskerSense();
+    if (key === "x" && !event.repeat) useRation();
   });
 
   window.addEventListener("keyup", (event) => {

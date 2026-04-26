@@ -41,6 +41,15 @@ body {
   width: min(100%, 1180px);
 }
 
+.build-badge {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  margin: 0;
+  text-align: right;
+  text-transform: uppercase;
+}
+
 .hud {
   display: none !important;
 }
@@ -212,6 +221,10 @@ kbd {
 @media (max-width: 760px) {
   body {
     padding: 12px;
+  }
+
+  .build-badge {
+    text-align: left;
   }
 
   .hud {

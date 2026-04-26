@@ -3,8 +3,18 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Cache-Control" content="no-store, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Whisker Intrusion</title>
-    <link rel="stylesheet" href="styles.css">
+    <link id="appStyles" rel="stylesheet" href="styles.css">
+    <script>
+      window.__BUILD_ID__ = new URLSearchParams(window.location.search).get("v") || "1ac3c0e";
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("appStyles").href = `styles.css?v=${encodeURIComponent(window.__BUILD_ID__)}`;
+        document.getElementById("buildBadge").textContent = `Build ${window.__BUILD_ID__}`;
+      });
+    </script>
   </head>
   <body>
     <main class="shell">
@@ -42,14 +52,20 @@
         <span><kbd>WASD</kbd> or <kbd>Arrows</kbd> move</span>
         <span><kbd>Shift</kbd> pad softly</span>
         <span><kbd>C</kbd> box cover</span>
-        <span><kbd>Q</kbd> catnip lure</span>
+        <span><kbd>Q</kbd> yarn toss</span>
         <span><kbd>F</kbd> whisker sense</span>
         <span><kbd>Space</kbd> meow lure</span>
+        <span><kbd>X</kbd> use ration</span>
         <span><kbd>E</kbd> scratch / vents / collect</span>
         <span><kbd>P</kbd> pause</span>
         <span><kbd>R</kbd> restart</span>
       </section>
+      <p class="build-badge" id="buildBadge">Build 1ac3c0e</p>
     </main>
-    <script src="game.js"></script>
+    <script>
+      const appScript = document.createElement("script");
+      appScript.src = `game.js?v=${encodeURIComponent(window.__BUILD_ID__)}`;
+      document.body.appendChild(appScript);
+    </script>
   </body>
 </html>

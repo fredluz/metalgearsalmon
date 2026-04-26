@@ -32,6 +32,8 @@
   const NAV_POINT_EPSILON = 6;
   const NAV_TARGET_GRANULARITY = 24;
   const STUCK_REPATH_TIME = 0.35;
+  const NORMAL_ROOM_GUARD_CAP = 3;
+  const EXTRACTION_ROOM_GUARD_CAP = 4;
   const YARN_THROW_SPEED = 320;
   const YARN_THROW_RANGE = 170;
   const keys = new Set();
@@ -102,7 +104,16 @@
       wall: "#4c5742",
       trim: "#778060",
       start: { x: 86, y: 540 },
-      exit: { x: 722, y: 292, w: 38, h: 86, to: 1, need: 1 },
+      doors: [
+        {
+          x: 722, y: 292, w: 38, h: 86,
+          to: 4,
+          need: 0,
+          label: "SERVICE",
+          approach: { x: 690, y: 335 },
+          spawn: { x: 112, y: 328 },
+        },
+      ],
       keycard: { x: 664, y: 112, taken: false },
       intel: { x: 220, y: 232, w: 40, h: 48, done: false, text: "VENT PAIRS CAN BREAK CONTACT FAST." },
       briefings: [
@@ -127,6 +138,7 @@
         { x: 728, y: 44, base: Math.PI * 0.78, sweep: 0.46, range: 180, phase: 0 },
       ],
       panels: [{ x: 220, y: 232, w: 40, h: 48, done: false }],
+      alarm: { x: 606, y: 88, w: 38, h: 42, disabled: false, triggered: false },
       sweeps: [
         { x: 72, y: 414, w: 420, h: 110, axis: "x", phase: 0.2, speed: 0.0011 },
       ],
@@ -147,8 +159,17 @@
       floor: "#202822",
       wall: "#45534f",
       trim: "#77918b",
-      start: { x: 70, y: 334 },
-      exit: { x: 454, y: 0, w: 96, h: 38, to: 2, need: 2 },
+      start: { x: 506, y: 568 },
+      doors: [
+        {
+          x: 454, y: 602, w: 96, h: 38,
+          to: 4,
+          need: 1,
+          label: "SERVICE",
+          approach: { x: 506, y: 568 },
+          spawn: { x: 382, y: 126 },
+        },
+      ],
       keycard: { x: 650, y: 506, taken: false },
       intel: { x: 694, y: 312, w: 40, h: 48, done: false, text: "SHADOWS HIDE YOU ONLY WHILE SNEAKING." },
       briefings: [
@@ -173,6 +194,7 @@
         { x: 720, y: 58, base: Math.PI * 0.86, sweep: 0.54, range: 190, phase: 0.9 },
       ],
       panels: [{ x: 694, y: 312, w: 40, h: 48, done: false }],
+      alarm: { x: 642, y: 312, w: 38, h: 42, disabled: false, triggered: false },
       sweeps: [
         { x: 66, y: 78, w: 488, h: 112, axis: "x", phase: 1.6, speed: 0.001 },
       ],
@@ -194,8 +216,26 @@
       floor: "#1c2026",
       wall: "#4a4f5d",
       trim: "#7d86a0",
-      start: { x: 506, y: 590 },
-      exit: { x: 722, y: 76, w: 38, h: 112, to: 3, need: 3 },
+      start: { x: 70, y: 308 },
+      doors: [
+        {
+          x: 0, y: 268, w: 38, h: 96,
+          to: 4,
+          need: 2,
+          label: "SERVICE",
+          approach: { x: 62, y: 316 },
+          spawn: { x: 632, y: 328 },
+        },
+        {
+          x: 722, y: 76, w: 38, h: 112,
+          to: 3,
+          need: 3,
+          progress: 3,
+          label: "TUNA",
+          approach: { x: 690, y: 132 },
+          spawn: { x: 70, y: 124 },
+        },
+      ],
       keycard: { x: 124, y: 88, taken: false },
       intel: { x: 84, y: 532, w: 46, h: 54, done: false, text: "PANEL CLAWS CUT LASERS AND CAMERAS." },
       briefings: [
@@ -208,6 +248,7 @@
       hiding: [{ x: 172, y: 476, w: 92, h: 58 }, { x: 690, y: 84, w: 76, h: 60 }],
       shadows: [{ x: 370, y: 414, w: 132, h: 82 }, { x: 662, y: 212, w: 72, h: 84 }],
       panels: [{ x: 84, y: 532, w: 46, h: 54, done: false }],
+      alarm: { x: 96, y: 72, w: 38, h: 42, disabled: false, triggered: false },
       props: [
         { type: "terminal", x: 84, y: 532, w: 46, h: 54 },
         { type: "pipe", x: 590, y: 280, w: 124, h: 14 },
@@ -238,7 +279,16 @@
       wall: "#584a3e",
       trim: "#8f7458",
       start: { x: 70, y: 124 },
-      exit: null,
+      doors: [
+        {
+          x: 0, y: 76, w: 38, h: 112,
+          to: 2,
+          need: 3,
+          label: "LASER",
+          approach: { x: 70, y: 124 },
+          spawn: { x: 690, y: 132 },
+        },
+      ],
       tuna: { x: 660, y: 520, taken: false },
       intel: { x: 644, y: 92, w: 42, h: 48, done: false, text: "FINAL ROOM: STUN ONLY WHEN CLOSE." },
       briefings: [
@@ -260,6 +310,7 @@
         { x: 712, y: 584, base: -Math.PI * 0.72, sweep: 0.58, range: 190, phase: 3.1 },
       ],
       panels: [{ x: 644, y: 92, w: 42, h: 48, done: false }],
+      alarm: { x: 224, y: 500, w: 38, h: 42, disabled: false, triggered: false },
       sweeps: [
         { x: 218, y: 252, w: 414, h: 116, axis: "y", phase: 0.7, speed: 0.00125 },
       ],
@@ -275,6 +326,96 @@
         { x: 470, y: 526, route: [[470, 526], [680, 526], [680, 470], [470, 470]], i: 1, speed: 55 },
       ],
     },
+    {
+      name: "Service Hall",
+      floor: "#181f20",
+      wall: "#3f5050",
+      trim: "#7aa6a0",
+      start: { x: 72, y: 328 },
+      doors: [
+        {
+          x: 0, y: 286, w: 38, h: 86,
+          to: 0,
+          need: 0,
+          label: "KENNEL",
+          approach: { x: 68, y: 328 },
+          spawn: { x: 656, y: 335 },
+        },
+        {
+          x: 366, y: 0, w: 92, h: 34,
+          to: 1,
+          need: 1,
+          progress: 1,
+          label: "PANTRY",
+          approach: { x: 412, y: 58 },
+          trigger: { x: 376, y: 28, w: 72, h: 26 },
+          spawn: { x: 506, y: 520 },
+        },
+        {
+          x: 722, y: 280, w: 38, h: 96,
+          to: 2,
+          need: 2,
+          progress: 2,
+          label: "LASER",
+          approach: { x: 680, y: 328 },
+          spawn: { x: 120, y: 308 },
+        },
+      ],
+      intel: { x: 364, y: 282, w: 40, h: 48, done: false, text: "ADJACENT PATROLS CAN ANSWER ALERTS THROUGH DOORS." },
+      briefings: [
+        "ZERO: this hall connects the whole kennel block.",
+        "ZERO: alerts travel through adjacent doors.",
+        "ZERO: use the hub to shake a pursuit.",
+      ],
+      rations: [{ x: 404, y: 480, taken: false }],
+      catnipPickups: [{ x: 120, y: 194, taken: false }],
+      hiding: [{ x: 180, y: 112, w: 82, h: 58 }, { x: 540, y: 454, w: 88, h: 58 }],
+      shadows: [{ x: 48, y: 286, w: 112, h: 92 }, { x: 72, y: 420, w: 126, h: 84 }, { x: 520, y: 116, w: 112, h: 78 }],
+      props: [
+        { type: "pipe", x: 86, y: 264, w: 214, h: 14 },
+        { type: "pipe", x: 468, y: 364, w: 198, h: 14 },
+        { type: "crate", x: 176, y: 108, w: 88, h: 62 },
+        { type: "crate", x: 538, y: 450, w: 92, h: 62 },
+        { type: "terminal", x: 364, y: 282, w: 40, h: 48 },
+      ],
+      cameras: [
+        { x: 478, y: 72, base: Math.PI * 0.72, sweep: 0.5, range: 170, phase: 0.5 },
+      ],
+      panels: [{ x: 364, y: 282, w: 40, h: 48, done: false }],
+      alarm: { x: 388, y: 330, w: 38, h: 42, disabled: false, triggered: false },
+      sweeps: [
+        { x: 298, y: 86, w: 168, h: 416, axis: "y", phase: 1.1, speed: 0.001 },
+      ],
+      walls: [
+        { x: 0, y: 0, w: 366, h: 28 }, { x: 458, y: 0, w: PLAY_W - 458, h: 28 }, { x: 0, y: H - 28, w: PLAY_W, h: 28 },
+        { x: 0, y: 0, w: 28, h: H }, { x: PLAY_W - 28, y: 0, w: 28, h: H },
+        { x: 132, y: 218, w: 176, h: 38 }, { x: 456, y: 218, w: 178, h: 38 },
+        { x: 132, y: 382, w: 176, h: 38 }, { x: 456, y: 382, w: 178, h: 38 },
+        { x: 312, y: 28, w: 38, h: 166 },
+        { x: 414, y: 446, w: 38, h: 166 },
+      ],
+      guards: [
+        { x: 236, y: 328, route: [[236, 328], [292, 328], [292, 156], [156, 156]], i: 1, speed: 64 },
+        { x: 622, y: 328, route: [[622, 328], [466, 328], [466, 502], [622, 502]], i: 1, speed: 60 },
+      ],
+    },
+  ];
+
+  const START_ROOM = 0;
+  const FINAL_ROOM = 3;
+  const REQUIRED_TAGS = 3;
+  const baseGuardLayouts = rooms.map((room, roomIndex) => room.guards.map((guard, guardIndex) => ({
+    ...guard,
+    id: `r${roomIndex}g${guardIndex}`,
+    homeRoom: roomIndex,
+    route: guard.route.map((point) => [point[0], point[1]]),
+  })));
+  const facilityMapLayout = [
+    { room: 0, code: "KEN", x: 0.04, y: 0.48, w: 0.31, h: 0.30 },
+    { room: 4, code: "HALL", x: 0.43, y: 0.38, w: 0.22, h: 0.40 },
+    { room: 1, code: "PAN", x: 0.40, y: 0.05, w: 0.28, h: 0.26 },
+    { room: 2, code: "LAS", x: 0.72, y: 0.44, w: 0.25, h: 0.31 },
+    { room: 3, code: "TUNA", x: 0.72, y: 0.05, w: 0.25, h: 0.27 },
   ];
 
   const player = {
@@ -291,6 +432,8 @@
     catnip: 2,
     meowCooldown: 0,
     ventHidden: 0,
+    entryGrace: 0,
+    doorCooldown: 0,
     hitCooldown: 0,
     senseTimer: 0,
     senseCooldown: 0,
@@ -331,6 +474,22 @@
     scratches: 0,
   };
 
+  function cloneGuardLayout(spec) {
+    return {
+      ...spec,
+      route: spec.route.map((point) => [point[0], point[1]]),
+      baseRoute: spec.route.map((point) => [point[0], point[1]]),
+      room: spec.homeRoom,
+    };
+  }
+
+  function restoreAllGuards() {
+    rooms.forEach((room, roomIndex) => {
+      room.guards = baseGuardLayouts[roomIndex].map(cloneGuardLayout);
+      room.guardNav = null;
+    });
+  }
+
   function resetGuard(guard) {
     guard.x = guard.route[0][0];
     guard.y = guard.route[0][1];
@@ -354,7 +513,11 @@
     guard.repathCooldown = 0;
     guard.searchBaseAngle = 0;
     guard.searchPhase = Math.random() * Math.PI * 2;
+    guard.reinforceTo = null;
+    guard.reinforceDoor = null;
+    guard.room = Number.isFinite(guard.room) ? guard.room : guard.homeRoom;
     pointGuardAtTarget(guard, guard.route[1]);
+    guard.pauseBase = Math.atan2(guard.dir.y, guard.dir.x);
   }
 
   function resetRoomSystems(room) {
@@ -365,11 +528,16 @@
     room.rations?.forEach((ration) => { ration.taken = false; });
     room.catnipPickups?.forEach((pickup) => { pickup.taken = false; });
     if (room.panels) room.panels.forEach((panel) => { panel.done = false; });
+    if (room.alarm) {
+      room.alarm.disabled = false;
+      room.alarm.triggered = false;
+    }
     room.cameras?.forEach((camera) => { camera.suspicion = 0; });
     room.guards.forEach(resetGuard);
   }
 
   function reset() {
+    restoreAllGuards();
     rooms.forEach(resetRoomSystems);
     noises.length = 0;
     shots.length = 0;
@@ -377,9 +545,9 @@
     catnips.length = 0;
     ventRattles.length = 0;
     tacticalPings.length = 0;
-    player.room = 0;
-    player.x = rooms[0].start.x;
-    player.y = rooms[0].start.y;
+    player.room = START_ROOM;
+    player.x = rooms[START_ROOM].start.x;
+    player.y = rooms[START_ROOM].start.y;
     player.keys = 0;
     player.facing = { x: 1, y: 0 };
     player.hidden = false;
@@ -388,6 +556,8 @@
     player.rationsHeld = 0;
     player.meowCooldown = 0;
     player.ventHidden = 0;
+    player.entryGrace = 0;
+    player.doorCooldown = 0;
     player.hitCooldown = 0;
     player.senseTimer = 0;
     player.senseCooldown = 0;
@@ -477,11 +647,14 @@
 
   function resetCurrentRoomAfterCatch() {
     const room = rooms[player.room];
+    restoreAllGuards();
     player.x = room.start.x;
     player.y = room.start.y;
     player.hidden = false;
     player.moving = false;
     player.ventHidden = 0;
+    player.entryGrace = 0.9;
+    player.doorCooldown = 0.35;
     player.hitCooldown = 0.8;
     noises.length = 0;
     shots.length = 0;
@@ -614,6 +787,84 @@
     return 1 + securityLevel * 0.1 + (extractionActive ? 0.22 : 0);
   }
 
+  function roomDoors(room) {
+    return room.doors || [];
+  }
+
+  function doorCenter(door) {
+    return { x: door.x + door.w / 2, y: door.y + door.h / 2 };
+  }
+
+  function doorApproach(door) {
+    return door.approach || doorCenter(door);
+  }
+
+  function doorTarget(door) {
+    return {
+      x: doorApproach(door).x,
+      y: doorApproach(door).y,
+      r: Math.max(door.w, door.h) / 2,
+    };
+  }
+
+  function doorUnlocked(door) {
+    return player.keys >= (door.need || 0);
+  }
+
+  function doorTriggerRect(door) {
+    if (door.trigger) return door.trigger;
+    if (door.y <= 0) return { x: door.x + 10, y: 28, w: Math.max(20, door.w - 20), h: 18 };
+    if (door.y + door.h >= H) return { x: door.x + 10, y: H - 46, w: Math.max(20, door.w - 20), h: 18 };
+    if (door.x <= 0) return { x: 28, y: door.y + 10, w: 18, h: Math.max(20, door.h - 20) };
+    if (door.x + door.w >= PLAY_W) return { x: PLAY_W - 46, y: door.y + 10, w: 18, h: Math.max(20, door.h - 20) };
+    const point = doorApproach(door);
+    return { x: point.x - 30, y: point.y - 30, w: 60, h: 60 };
+  }
+
+  function doorBlockRect(door) {
+    return door.block || { x: door.x, y: door.y, w: door.w, h: door.h };
+  }
+
+  function connectedDoors(roomIndex, ignoreLocks = false) {
+    return roomDoors(rooms[roomIndex]).filter((door) => ignoreLocks || doorUnlocked(door));
+  }
+
+  function nextDoorToward(fromRoom, goalRoom, ignoreLocks = false) {
+    if (fromRoom === goalRoom) return null;
+    const queue = [{ room: fromRoom, firstDoor: null }];
+    const visited = new Set([fromRoom]);
+    while (queue.length) {
+      const current = queue.shift();
+      for (const door of connectedDoors(current.room, ignoreLocks)) {
+        if (visited.has(door.to)) continue;
+        const firstDoor = current.firstDoor || door;
+        if (door.to === goalRoom) return firstDoor;
+        visited.add(door.to);
+        queue.push({ room: door.to, firstDoor });
+      }
+    }
+    return null;
+  }
+
+  function lockedProgressDoor(room) {
+    return roomDoors(room)
+      .filter((door) => !doorUnlocked(door))
+      .sort((a, b) => (a.need || 0) - (b.need || 0))[0] || null;
+  }
+
+  function primaryDoorObjective(room) {
+    const roomIndex = rooms.indexOf(room);
+    if (extractionActive) return nextDoorToward(roomIndex, START_ROOM);
+    const progressStage = clamp(player.keys, 1, REQUIRED_TAGS);
+    const progressDoor = roomDoors(room).find((door) => door.progress === progressStage);
+    if (progressDoor) return progressDoor;
+    const forwardDoor = nextDoorToward(roomIndex, FINAL_ROOM, true);
+    return forwardDoor
+      || lockedProgressDoor(room)
+      || roomDoors(room).find((door) => doorUnlocked(door))
+      || null;
+  }
+
   function objectiveText(room) {
     if (extractionActive) return alert > 0 ? "EVAC UNDER FIRE" : "REACH EVAC";
     if (alert > 0) return "BREAK CONTACT";
@@ -621,23 +872,32 @@
     if (boxCover(room)) return "BOX COVER";
     if (player.soft && inShadow(room)) return "SHADOW COVER";
     if (room.tuna && !room.tuna.taken) return "SECURE TUNA";
-    if (room.exit && player.keys < room.exit.need) return `FIND TAG ${room.exit.need}`;
+    if (room.keycard && !room.keycard.taken && player.keys < REQUIRED_TAGS) return `FIND TAG ${player.keys + 1}`;
+    const doorObjective = primaryDoorObjective(room);
+    if (doorObjective && !doorUnlocked(doorObjective)) return `TAG ${doorObjective.need} NEEDED`;
+    const lockedDoor = doorObjective ? null : lockedProgressDoor(room);
+    if (lockedDoor) return `TAG ${lockedDoor.need} NEEDED`;
     if (room.panels?.some((panel) => !panel.done) && (room.sweeps?.length || room.cameras?.some((camera) => camera.disabledBySystem))) return "SCRATCH PANEL";
-    if (room.exit) return "REACH EXIT";
+    if (roomDoors(room).length) return "USE DOOR";
     return "STAY LOW";
   }
 
   function objectiveTarget(room) {
-    if (extractionActive) return { x: room.start.x, y: room.start.y, r: 42 };
+    if (extractionActive) {
+      if (player.room === START_ROOM) return { x: rooms[START_ROOM].start.x, y: rooms[START_ROOM].start.y, r: 42 };
+      const door = primaryDoorObjective(room);
+      return door ? doorTarget(door) : null;
+    }
     if (room.tuna && !room.tuna.taken) return { x: room.tuna.x, y: room.tuna.y, r: 32 };
-    if (room.exit && player.keys < room.exit.need && room.keycard && !room.keycard.taken) {
+    if (room.keycard && !room.keycard.taken && player.keys < REQUIRED_TAGS) {
       return { x: room.keycard.x, y: room.keycard.y, r: 24 };
     }
     const panel = room.panels?.find((candidate) => !candidate.done);
     if (panel && (room.sweeps?.length || room.cameras?.some((camera) => camera.disabledBySystem))) {
       return { x: panel.x + panel.w / 2, y: panel.y + panel.h / 2, r: 30 };
     }
-    if (room.exit) return { x: room.exit.x + room.exit.w / 2, y: room.exit.y + room.exit.h / 2, r: 34 };
+    const door = primaryDoorObjective(room);
+    if (door) return doorTarget(door);
     return null;
   }
 
@@ -650,7 +910,10 @@
     const points = [];
     const target = objectiveTarget(room);
     if (target) points.push({ x: target.x, y: target.y, label: extractionActive ? "EVAC" : "OBJ" });
-    if (room.exit) points.push({ x: room.exit.x + room.exit.w / 2, y: room.exit.y + room.exit.h / 2, label: "EXIT" });
+    roomDoors(room).forEach((door) => {
+      const point = doorApproach(door);
+      points.push({ x: point.x, y: point.y, label: door.label || "DOOR" });
+    });
     if (room.keycard && !room.keycard.taken) points.push({ x: room.keycard.x, y: room.keycard.y, label: "TAG" });
     if (room.tuna && !room.tuna.taken) points.push({ x: room.tuna.x, y: room.tuna.y, label: "TUNA" });
     room.panels?.forEach((panel) => {
@@ -668,7 +931,7 @@
   function updateHud() {
     const suspicion = Math.round(maxSuspicion() * 100);
     roomLabel.textContent = rooms[player.room].name;
-    keyLabel.textContent = `${player.keys}/3`;
+    keyLabel.textContent = `${player.keys}/${REQUIRED_TAGS}`;
     gadgetLabel.textContent = player.meowCooldown > 0 ? `${Math.ceil(player.meowCooldown)}s` : "Ready";
     if (gameOver) {
       alertLabel.textContent = "Down";
@@ -711,10 +974,14 @@
 
   function blocked(x, y) {
     const room = rooms[player.room];
+    if (x < player.r || x > PLAY_W - player.r || y < player.r || y > H - player.r) return true;
+    if (roomDoors(room).some((door) => !doorUnlocked(door) && circleRect(x, y, player.r, doorBlockRect(door)))) return true;
     return room.walls.some((wall) => circleRect(x, y, player.r, wall));
   }
 
   function guardBlocked(room, x, y) {
+    if (x < GUARD_RADIUS || x > PLAY_W - GUARD_RADIUS || y < GUARD_RADIUS || y > H - GUARD_RADIUS) return true;
+    if (roomDoors(room).some((door) => !doorUnlocked(door) && circleRect(x, y, GUARD_RADIUS, doorBlockRect(door)))) return true;
     return room.walls.some((wall) => circleRect(x, y, GUARD_RADIUS, wall));
   }
 
@@ -776,6 +1043,10 @@
     });
 
     addNavNode(nodes, room, room.start.x, room.start.y);
+    roomDoors(room).forEach((door) => {
+      const point = doorApproach(door);
+      addNavNode(nodes, room, point.x, point.y);
+    });
 
     room.walls.forEach((wall) => {
       addNavNode(nodes, room, wall.x - NAV_CORNER_PAD, wall.y - NAV_CORNER_PAD);
@@ -1000,9 +1271,141 @@
     };
   }
 
+  function responseRouteForRoom(room, x, y, focus) {
+    const safeFocus = openTacticalPoint(room, focus?.x || x, focus?.y || y, [x, y]);
+    const offsetA = openTacticalPoint(room, safeFocus.x + 72, safeFocus.y, [x, y]);
+    const offsetB = openTacticalPoint(room, safeFocus.x - 72, safeFocus.y + 54, [x, y]);
+    return [[x, y], [safeFocus.x, safeFocus.y], [offsetA.x, offsetA.y], [offsetB.x, offsetB.y]];
+  }
+
+  function roomGuardCap() {
+    return extractionActive ? EXTRACTION_ROOM_GUARD_CAP : NORMAL_ROOM_GUARD_CAP;
+  }
+
+  function activeAlarm(room) {
+    return room.alarm && !room.alarm.disabled ? room.alarm : null;
+  }
+
+  function alarmCenter(alarm) {
+    return { x: alarm.x + alarm.w / 2, y: alarm.y + alarm.h / 2 };
+  }
+
+  function dispatchReinforcement(roomIndex, door, sourceRoomIndex, target, reason) {
+    if (rooms[sourceRoomIndex].guards.length >= roomGuardCap()) return false;
+    const room = rooms[roomIndex];
+    const guard = room.guards
+      .filter((candidate) => candidate.stunned <= 0 && candidate.state !== "reinforce")
+      .sort((a, b) => {
+        const point = doorApproach(door);
+        return Math.hypot(a.x - point.x, a.y - point.y) - Math.hypot(b.x - point.x, b.y - point.y);
+      })[0];
+    if (!guard) return false;
+    const point = doorApproach(door);
+    guard.state = "reinforce";
+    guard.target = { x: point.x, y: point.y };
+    guard.reinforceTo = sourceRoomIndex;
+    guard.reinforceDoor = door;
+    guard.searchTimer = 0;
+    guard.suspicion = Math.max(guard.suspicion, 0.58);
+    clearGuardNavigation(guard);
+    addTacticalPing(target.x, target.y, "CALL", "#f35d4c");
+    radio(`CP: adjacent unit moving from ${room.name}`, 1.4);
+    return true;
+  }
+
+  function callAdjacentReinforcement(sourceRoomIndex, target, reason) {
+    const candidates = roomDoors(rooms[sourceRoomIndex])
+      .filter((sourceDoor) => doorUnlocked(sourceDoor))
+      .map((sourceDoor) => {
+      const adjacentIndex = sourceDoor.to;
+      const adjacentDoor = roomDoors(rooms[adjacentIndex]).find((door) => door.to === sourceRoomIndex);
+        if (!adjacentDoor || !doorUnlocked(adjacentDoor)) return null;
+        const guards = rooms[adjacentIndex].guards.filter((guard) => guard.stunned <= 0 && guard.state !== "reinforce");
+        if (!guards.length) return null;
+        return { adjacentIndex, adjacentDoor, count: guards.length };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.count - a.count);
+
+    let called = 0;
+    const limit = extractionActive ? 2 : 1;
+    for (const candidate of candidates) {
+      if (called >= limit || rooms[sourceRoomIndex].guards.length + called >= roomGuardCap()) break;
+      if (dispatchReinforcement(candidate.adjacentIndex, candidate.adjacentDoor, sourceRoomIndex, target, reason)) called += 1;
+    }
+    return called;
+  }
+
+  function orderAlarmCall(room, target, reason) {
+    const alarm = activeAlarm(room);
+    if (!alarm || alarm.triggered) return false;
+    const point = alarmCenter(alarm);
+    const caller = room.guards
+      .filter((guard) => guard.stunned <= 0 && guard.state !== "reinforce" && guard.state !== "callAlarm")
+      .sort((a, b) => Math.hypot(a.x - point.x, a.y - point.y) - Math.hypot(b.x - point.x, b.y - point.y))[0];
+    if (!caller) return false;
+    caller.state = "callAlarm";
+    caller.target = point;
+    caller.suspicion = Math.max(caller.suspicion, 0.9);
+    caller.searchTimer = 0;
+    caller.alarmReason = reason;
+    clearGuardNavigation(caller);
+    addTacticalPing(point.x, point.y, "ALARM", "#f35d4c");
+    radio("GUARD: reaching alarm", 1.15);
+    return true;
+  }
+
+  function triggerRoomAlarm(room, guard) {
+    const alarm = activeAlarm(room);
+    if (!alarm || alarm.triggered) {
+      setGuardSearch(guard, 0.8);
+      return;
+    }
+    alarm.triggered = true;
+    const called = callAdjacentReinforcement(rooms.indexOf(room), lastKnown || { x: guard.x, y: guard.y }, guard.alarmReason || "ALARM");
+    guard.state = "sweep";
+    guard.target = lastKnown ? { x: lastKnown.x, y: lastKnown.y } : null;
+    guard.searchTimer = 2.3;
+    guard.alarmReason = "";
+    clearGuardNavigation(guard);
+    playCue("alert");
+    addTacticalPing(alarm.x + alarm.w / 2, alarm.y + alarm.h / 2, called ? "CALL" : "NO UNIT", called ? "#f35d4c" : "#ffd65a");
+    radio(called ? "CP: backup requested" : "CP: no adjacent unit available", 1.4);
+  }
+
+  function transferGuardToRoom(fromRoomIndex, guard, toRoomIndex, door) {
+    const fromRoom = rooms[fromRoomIndex];
+    const toRoom = rooms[toRoomIndex];
+    const index = fromRoom.guards.indexOf(guard);
+    if (index >= 0) fromRoom.guards.splice(index, 1);
+    const spawn = door.spawn || toRoom.start;
+    guard.x = spawn.x;
+    guard.y = spawn.y;
+    guard.room = toRoomIndex;
+    guard.route = responseRouteForRoom(toRoom, guard.x, guard.y, toRoomIndex === player.room ? lastKnown : toRoom.start);
+    guard.i = 1;
+    guard.state = toRoomIndex === player.room && alert > 0 ? "investigate" : "patrol";
+    guard.target = toRoomIndex === player.room && lastKnown
+      ? { x: lastKnown.x, y: lastKnown.y }
+      : null;
+    guard.reinforceTo = null;
+    guard.reinforceDoor = null;
+    guard.searchTimer = 1.1;
+    guard.suspicion = Math.max(guard.suspicion, toRoomIndex === player.room ? 0.72 : 0.28);
+    clearGuardNavigation(guard);
+    toRoom.guards.push(guard);
+    fromRoom.guardNav = null;
+    toRoom.guardNav = null;
+    if (toRoomIndex === player.room) {
+      addTacticalPing(guard.x, guard.y, "UNIT", "#f35d4c");
+      radio("CP: unit entering your sector", 1.15);
+    }
+  }
+
   function triggerCaught(reason) {
     if (won || gameOver) return;
     const wasClear = alert <= 0;
+    const sourceRoomIndex = player.room;
     const target = {
       x: clamp(player.x, 44, PLAY_W - 44),
       y: clamp(player.y, 44, H - 44),
@@ -1016,7 +1419,7 @@
       playCue("alert");
     }
     markLastKnown(target.x, target.y, reason);
-    rooms[player.room].guards.forEach((guard, index) => {
+    rooms[sourceRoomIndex].guards.forEach((guard, index) => {
       const angle = index * 2.35;
       const offset = index === 0 ? 0 : 34;
       guard.state = "investigate";
@@ -1028,6 +1431,9 @@
       };
       clearGuardNavigation(guard);
     });
+    if (wasClear && !orderAlarmCall(rooms[sourceRoomIndex], target, reason)) {
+      radio("CP: local alarm unavailable", 1.1);
+    }
     radio(`CP: ${reason}`);
     notice(`${reason}: BREAK LINE OF SIGHT`, 1.2);
   }
@@ -1079,6 +1485,7 @@
       guard.searchTimer = 1.4;
       clearGuardNavigation(guard);
     });
+    orderAlarmCall(room, { x: player.x, y: player.y }, "TUNA BREACH");
     playCue("alert");
     radio("CP: tuna breach. seal exits.");
     notice("TUNA SECURED: RETURN TO EVAC", 1.8);
@@ -1522,11 +1929,12 @@
 
   function visionScore(guard, room) {
     if (guard.stunned > 0) return 0;
+    if (player.entryGrace > 0) return 0;
     if (player.hidden) return 0;
     const dx = player.x - guard.x;
     const dy = player.y - guard.y;
     const dist = Math.hypot(dx, dy);
-    const heightened = guard.state === "investigate" || guard.state === "search" || guard.state === "sweep";
+    const heightened = guard.state === "investigate" || guard.state === "callAlarm" || guard.state === "reinforce" || guard.state === "search" || guard.state === "sweep";
     const range = (heightened ? 205 : 176) * securityFactor();
     if (dist > range || dist < 1) return 0;
     const dir = guard.dir || { x: 1, y: 0 };
@@ -1587,6 +1995,7 @@
   }
 
   function cameraVisionScore(room, camera) {
+    if (player.entryGrace > 0) return 0;
     if (player.hidden || !cameraActive(room, camera)) return 0;
     const angle = cameraAngle(camera);
     const dx = player.x - camera.x;
@@ -1617,7 +2026,7 @@
     if (room.systemDown) return;
     room.sweeps?.forEach((sweep) => {
       const beam = sweepBeam(sweep);
-      if (!player.hidden && circleRect(player.x, player.y, player.r, beam)) {
+      if (player.entryGrace <= 0 && !player.hidden && circleRect(player.x, player.y, player.r, beam)) {
         markLastKnown(player.x, player.y, "SENSOR");
         radio("CP: sensor sweep hit");
         triggerCaught("SENSOR SWEEP");
@@ -1678,7 +2087,9 @@
       const patrolPausing = guard.state === "patrol" && (guard.pauseTimer || 0) > 0;
       if (patrolPausing) {
         guard.pauseTimer = Math.max(0, guard.pauseTimer - dt);
-        const base = guard.pauseBase || Math.atan2((guard.dir || { y: 0 }).y, (guard.dir || { x: 1 }).x);
+        const base = Number.isFinite(guard.pauseBase)
+          ? guard.pauseBase
+          : Math.atan2((guard.dir || { y: 0 }).y, (guard.dir || { x: 1 }).x);
         const scan = Math.sin(performance.now() / 260 + guard.x * 0.01) * 0.85;
         guard.dir = { x: Math.cos(base + scan), y: Math.sin(base + scan) };
       }
@@ -1693,14 +2104,14 @@
       if (guard.state === "search") {
         guard.searchTimer -= dt;
         const sweep = Math.sin(performance.now() / 230 + (guard.searchPhase || 0)) * 1.1;
-        const base = guard.searchBaseAngle || 0;
+        const base = Number.isFinite(guard.searchBaseAngle) ? guard.searchBaseAngle : 0;
         guard.dir = { x: Math.cos(base + sweep), y: Math.sin(base + sweep) };
         if (guard.searchTimer <= 0) {
           guard.state = "patrol";
           clearGuardNavigation(guard);
         }
       } else if (!patrolPausing) {
-        const target = (guard.state === "investigate" || guard.state === "sweep" || guard.state === "reroute") && guard.target
+        const target = (guard.state === "investigate" || guard.state === "sweep" || guard.state === "reroute" || guard.state === "reinforce" || guard.state === "callAlarm") && guard.target
           ? [guard.target.x, guard.target.y]
           : guard.route[guard.i];
         const dx = target[0] - guard.x;
@@ -1709,6 +2120,9 @@
         if (dist < 5) {
           if (guard.state === "investigate") {
             setGuardSearch(guard, 1.25);
+          } else if (guard.state === "callAlarm") {
+            triggerRoomAlarm(room, guard);
+            return;
           } else if (guard.state === "sweep") {
             setGuardSearch(guard, 0.9);
           } else if (guard.state === "reroute") {
@@ -1717,6 +2131,9 @@
             guard.pauseBase = Math.atan2((guard.dir || { y: 0 }).y, (guard.dir || { x: 1 }).x);
             guard.pauseTimer = 0.35 + Math.random() * 0.25;
             clearGuardNavigation(guard);
+          } else if (guard.state === "reinforce") {
+            transferGuardToRoom(rooms.indexOf(room), guard, guard.reinforceTo, guard.reinforceDoor);
+            return;
           } else {
             const next = guard.route[(guard.i + 1) % guard.route.length];
             guard.pauseBase = Math.atan2(next[1] - guard.y, next[0] - guard.x);
@@ -1725,10 +2142,15 @@
             clearGuardNavigation(guard);
           }
         } else {
-          const speed = guard.speed * securityFactor() * (guard.state === "investigate" ? 1.22 : guard.state === "sweep" ? 1.08 : 1);
+          const speed = guard.speed * securityFactor() * (guard.state === "investigate" ? 1.22 : guard.state === "callAlarm" ? 1.2 : guard.state === "reinforce" ? 1.14 : guard.state === "sweep" ? 1.08 : 1);
           const moved = moveGuardTowardTarget(room, guard, { x: target[0], y: target[1] }, speed, dt);
           if (!moved && (guard.state === "investigate" || guard.state === "sweep")) {
             setGuardSearch(guard, 1.1);
+          } else if (!moved && guard.state === "callAlarm") {
+            setGuardSearch(guard, 0.9);
+          } else if (!moved && guard.state === "reinforce") {
+            guard.target = { ...doorApproach(guard.reinforceDoor) };
+            clearGuardNavigation(guard);
           } else if (!moved && guard.state === "reroute") {
             guard.state = "patrol";
             guard.target = null;
@@ -1786,6 +2208,27 @@
     });
   }
 
+  function updateOffscreenReinforcements(dt) {
+    rooms.forEach((room, roomIndex) => {
+      if (roomIndex === player.room) return;
+      for (let i = room.guards.length - 1; i >= 0; i -= 1) {
+        const guard = room.guards[i];
+        if (guard.state !== "reinforce" || !guard.target || guard.stunned > 0) continue;
+        guard.fireCooldown = Math.max(0, (guard.fireCooldown || 0) - dt);
+        const dist = Math.hypot(guard.target.x - guard.x, guard.target.y - guard.y);
+        if (dist < 8) {
+          transferGuardToRoom(roomIndex, guard, guard.reinforceTo, guard.reinforceDoor);
+          continue;
+        }
+        const moved = moveGuardTowardTarget(room, guard, guard.target, guard.speed * securityFactor() * 1.08, dt);
+        if (!moved) {
+          guard.target = { ...doorApproach(guard.reinforceDoor) };
+          clearGuardNavigation(guard);
+        }
+      }
+    });
+  }
+
   function interact() {
     if (won || gameOver) return;
     const room = rooms[player.room];
@@ -1826,14 +2269,25 @@
           room.intel.done = true;
         }
         room.systemDown = true;
+        if (room.alarm) room.alarm.disabled = true;
         if (!extractionActive) securityLevel = Math.max(0, securityLevel - 1.1);
         roomFlash = 0.7;
         makeNoise(panel.x + panel.w / 2, panel.y + panel.h / 2, 124, 0.5, "rgba(255, 214, 90, 0.65)", "SCRATCH", "scratch");
         playCue("pickup");
         radio("CP: local security offline");
-        notice(room.intel?.text || "SECURITY PANEL CLAWED: SYSTEM DOWN", 2.2);
+        notice(room.intel?.text || "SECURITY PANEL CLAWED: ALARM OFF", 2.2);
         return;
       }
+    }
+
+    if (room.alarm && !room.alarm.disabled && nearRect(room.alarm, 34)) {
+      room.alarm.disabled = true;
+      room.alarm.triggered = false;
+      roomFlash = 0.58;
+      makeNoise(room.alarm.x + room.alarm.w / 2, room.alarm.y + room.alarm.h / 2, 92, 0.35, "rgba(255, 214, 90, 0.5)", "SNIP", "scratch");
+      playCue("pickup");
+      notice("ALARM BUTTON DISABLED", 1.15);
+      return;
     }
 
     if (room.intel && !room.intel.done && nearRect(room.intel, 34)) {
@@ -1889,23 +2343,31 @@
     }
   }
 
-  function changeRoom(next) {
+  function changeRoom(door) {
+    const next = door.to;
+    const spawn = door.spawn || rooms[next].start;
     player.room = next;
-    player.x = rooms[next].start.x;
-    player.y = rooms[next].start.y;
+    player.x = spawn.x;
+    player.y = spawn.y;
     player.hidden = false;
     player.boxed = false;
     player.ventHidden = 0;
-    alert = 0;
-    alertReason = "";
+    player.entryGrace = 1.15;
+    player.doorCooldown = 0.55;
     noises.length = 0;
     shots.length = 0;
     pawPrints.length = 0;
     catnips.length = 0;
     ventRattles.length = 0;
     tacticalPings.length = 0;
-    lastKnown = null;
-    sweepTimer = 0;
+    if (alert > 0) {
+      markLastKnown(player.x, player.y, "ROOM BREACH");
+      orderAlarmCall(rooms[next], { x: player.x, y: player.y }, "ROOM BREACH");
+    } else {
+      alertReason = "";
+      lastKnown = null;
+      sweepTimer = 0;
+    }
     roomTime = 0;
     briefingIndex = 0;
     directorTimer = patrolShiftDelay();
@@ -1931,6 +2393,8 @@
     if (player.senseCooldown > 0) player.senseCooldown = Math.max(0, player.senseCooldown - dt);
     if (player.senseTimer > 0) player.senseTimer = Math.max(0, player.senseTimer - dt);
     if (player.ventHidden > 0) player.ventHidden = Math.max(0, player.ventHidden - dt);
+    if (player.entryGrace > 0) player.entryGrace = Math.max(0, player.entryGrace - dt);
+    if (player.doorCooldown > 0) player.doorCooldown = Math.max(0, player.doorCooldown - dt);
     if (player.hitCooldown > 0) player.hitCooldown = Math.max(0, player.hitCooldown - dt);
     if (noticeTimer > 0) noticeTimer = Math.max(0, noticeTimer - dt);
     if (radioTimer > 0) radioTimer = Math.max(0, radioTimer - dt);
@@ -1959,6 +2423,7 @@
     updateSensorSweeps(room);
     updateCameras(room, dt);
     updateGuards(room, dt);
+    updateOffscreenReinforcements(dt);
     updateDirector(room, dt);
     updateBriefings(room);
 
@@ -1968,21 +2433,23 @@
       alert = Math.max(0, alert - dt * decay);
       if (alert <= 0) {
         alertReason = "";
+        rooms.forEach((candidate) => {
+          if (candidate.alarm) candidate.alarm.triggered = false;
+        });
         startRoomSweep(room);
       }
     }
     if (sweepTimer > 0) sweepTimer = Math.max(0, sweepTimer - dt);
 
-    if (room.exit && circleRect(player.x, player.y, player.r, room.exit)) {
-      if (alert > 0) {
-        roomFlash = 0.2;
-        shake = Math.max(shake, 1.2);
-        notice("LOCKDOWN: BREAK CONTACT", 0.7);
-      } else if (player.keys >= room.exit.need) {
-        changeRoom(room.exit.to);
+    const door = player.doorCooldown <= 0
+      ? roomDoors(room).find((candidate) => circleRect(player.x, player.y, player.r, doorTriggerRect(candidate)))
+      : null;
+    if (door) {
+      if (doorUnlocked(door)) {
+        changeRoom(door);
       } else {
         roomFlash = 0.16;
-        notice(`TAG ${room.exit.need} REQUIRED`, 0.5);
+        notice(`TAG ${door.need} REQUIRED`, 0.5);
       }
     }
 
@@ -1995,7 +2462,7 @@
       });
     }
 
-    if (extractionActive && Math.hypot(player.x - room.start.x, player.y - room.start.y) < 38) {
+    if (extractionActive && player.room === START_ROOM && Math.hypot(player.x - rooms[START_ROOM].start.x, player.y - rooms[START_ROOM].start.y) < 38) {
       completeMission();
     }
 
@@ -2149,6 +2616,24 @@
       ctx.font = "700 8px monospace";
       ctx.fillText("OFF", panel.x + 13, panel.y + 37);
     }
+  }
+
+  function drawAlarmPanel(alarm) {
+    const off = alarm.disabled;
+    const hot = alarm.triggered;
+    ctx.fillStyle = "rgba(0,0,0,0.30)";
+    ctx.fillRect(alarm.x + 4, alarm.y + 7, alarm.w, alarm.h);
+    ctx.fillStyle = off ? "#18211f" : hot ? "#3f1414" : "#171313";
+    ctx.fillRect(alarm.x, alarm.y, alarm.w, alarm.h);
+    ctx.strokeStyle = off ? "#46504a" : hot ? "#f35d4c" : "#ffd65a";
+    ctx.strokeRect(alarm.x + 0.5, alarm.y + 0.5, alarm.w, alarm.h);
+    ctx.fillStyle = off ? "#46504a" : hot ? "#f35d4c" : "#ffd65a";
+    ctx.fillRect(alarm.x + 8, alarm.y + 8, alarm.w - 16, 8);
+    ctx.fillStyle = off ? "#26302c" : "#111514";
+    ctx.fillRect(alarm.x + 9, alarm.y + 22, alarm.w - 18, 13);
+    ctx.fillStyle = off ? "#98a08f" : hot ? "#ffd65a" : "#f35d4c";
+    ctx.font = "700 7px monospace";
+    ctx.fillText(off ? "OFF" : "CALL", alarm.x + 10, alarm.y + 32);
   }
 
   function drawCamera(camera, active) {
@@ -2325,6 +2810,81 @@
     ctx.lineWidth = 1;
   }
 
+  function drawDoorwayCutout(room, door) {
+    const center = doorCenter(door);
+    const trigger = doorTriggerRect(door);
+    const point = { x: trigger.x + trigger.w / 2, y: trigger.y + trigger.h / 2 };
+    ctx.save();
+    ctx.strokeStyle = "rgba(255, 214, 90, 0.18)";
+    ctx.lineWidth = 34;
+    ctx.beginPath();
+    ctx.moveTo(point.x, point.y);
+    ctx.lineTo(center.x, center.y);
+    ctx.stroke();
+    ctx.strokeStyle = "rgba(7, 17, 16, 0.92)";
+    ctx.lineWidth = 24;
+    ctx.beginPath();
+    ctx.moveTo(point.x, point.y);
+    ctx.lineTo(center.x, center.y);
+    ctx.stroke();
+    ctx.fillStyle = room.floor;
+    ctx.fillRect(door.x + 4, door.y + 4, Math.max(10, door.w - 8), Math.max(10, door.h - 8));
+    ctx.strokeStyle = "rgba(255, 214, 90, 0.62)";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 5]);
+    ctx.beginPath();
+    ctx.moveTo(point.x, point.y);
+    ctx.lineTo(center.x, center.y);
+    ctx.stroke();
+    ctx.restore();
+    ctx.lineWidth = 1;
+    ctx.setLineDash([]);
+  }
+
+  function drawDoor(room, door) {
+    const unlocked = doorUnlocked(door);
+    const activeAlert = alert > 0;
+    const trigger = doorTriggerRect(door);
+    const triggerCenter = { x: trigger.x + trigger.w / 2, y: trigger.y + trigger.h / 2 };
+    drawHazardStripe(door.x, door.y, door.w, door.h);
+    ctx.fillStyle = unlocked ? (activeAlert ? "#725231" : "#b99a35") : "#864b3f";
+    ctx.fillRect(door.x + 7, door.y + 7, Math.max(8, door.w - 14), Math.max(8, door.h - 14));
+    ctx.fillStyle = "rgba(0,0,0,0.22)";
+    if (door.h >= door.w) {
+      for (let y = door.y + 12; y < door.y + door.h - 8; y += 16) {
+        ctx.fillRect(door.x + 7, y, Math.max(8, door.w - 14), 4);
+      }
+    } else {
+      for (let x = door.x + 12; x < door.x + door.w - 8; x += 16) {
+        ctx.fillRect(x, door.y + 7, 4, Math.max(8, door.h - 14));
+      }
+    }
+    if (activeAlert) {
+      ctx.fillStyle = "rgba(243, 93, 76, 0.24)";
+      ctx.fillRect(door.x + 7, door.y + 7, Math.max(8, door.w - 14), Math.max(8, door.h - 14));
+    }
+    ctx.strokeStyle = unlocked ? "rgba(255, 214, 90, 0.78)" : "rgba(243, 93, 76, 0.42)";
+    ctx.lineWidth = unlocked ? 3 : 2;
+    ctx.setLineDash([4, 5]);
+    ctx.beginPath();
+    const center = doorCenter(door);
+    ctx.moveTo(center.x, center.y);
+    ctx.lineTo(triggerCenter.x, triggerCenter.y);
+    ctx.stroke();
+    ctx.lineWidth = 1;
+    ctx.setLineDash([]);
+    const label = unlocked ? (door.label || rooms[door.to].name).slice(0, 7).toUpperCase() : `TAG ${door.need}`;
+    const labelX = clamp(triggerCenter.x - label.length * 3 - 4, 34, PLAY_W - 82);
+    const labelY = clamp(trigger.y - 18, 40, H - 38);
+    ctx.fillStyle = "rgba(5, 9, 9, 0.86)";
+    ctx.fillRect(labelX, labelY, label.length * 6 + 8, 14);
+    ctx.strokeStyle = unlocked ? "#ffd65a" : "#f35d4c";
+    ctx.strokeRect(labelX + 0.5, labelY + 0.5, label.length * 6 + 8, 14);
+    ctx.fillStyle = unlocked ? "#ffd65a" : "#f35d4c";
+    ctx.font = "700 10px monospace";
+    ctx.fillText(label, labelX + 4, labelY + 10);
+  }
+
   function drawSensorSweep(sweep) {
     const room = rooms[player.room];
     if (room.systemDown) {
@@ -2415,7 +2975,7 @@
   function drawRoom(room) {
     drawFloor(room);
     drawIntelOverlay(room);
-    if (extractionActive) drawEvacPad(room.start.x, room.start.y);
+    if (extractionActive && player.room === START_ROOM) drawEvacPad(rooms[START_ROOM].start.x, rooms[START_ROOM].start.y);
     room.props?.forEach(drawProp);
     room.shadows?.forEach(drawShadowZone);
     room.hiding.forEach((spot) => drawCrate(spot, "#726b3e"));
@@ -2423,29 +2983,13 @@
     drawVentRattles();
     drawTacticalPings();
     room.panels?.forEach((panel) => drawPanel(panel, panel.done));
+    if (room.alarm) drawAlarmPanel(room.alarm);
     room.cameras?.forEach((camera) => drawCamera(camera, cameraActive(room, camera)));
     room.sweeps?.forEach(drawSensorSweep);
     room.walls.forEach((wall) => drawWall(room, wall));
+    roomDoors(room).forEach((door) => drawDoorwayCutout(room, door));
 
-    if (room.exit) {
-      const lockdown = alert > 0;
-      const unlocked = player.keys >= room.exit.need && !lockdown;
-      drawHazardStripe(room.exit.x, room.exit.y, room.exit.w, room.exit.h);
-      ctx.fillStyle = lockdown ? "#5a1e1e" : unlocked ? "#b99a35" : "#864b3f";
-      ctx.fillRect(room.exit.x + 7, room.exit.y + 7, Math.max(8, room.exit.w - 14), Math.max(8, room.exit.h - 14));
-      ctx.fillStyle = "rgba(0,0,0,0.2)";
-      for (let y = room.exit.y + 12; y < room.exit.y + room.exit.h - 8; y += 16) {
-        ctx.fillRect(room.exit.x + 7, y, Math.max(8, room.exit.w - 14), 4);
-      }
-      if (lockdown) {
-        ctx.fillStyle = "rgba(243, 93, 76, 0.42)";
-        ctx.fillRect(room.exit.x + 7, room.exit.y + 7, Math.max(8, room.exit.w - 14), 8);
-        ctx.fillRect(room.exit.x + 7, room.exit.y + room.exit.h - 15, Math.max(8, room.exit.w - 14), 8);
-      }
-      ctx.fillStyle = lockdown ? "#ffd65a" : "#111514";
-      ctx.font = "16px monospace";
-      ctx.fillText(lockdown ? "!" : `${room.exit.need}`, room.exit.x + 13, room.exit.y + room.exit.h / 2 + 5);
-    }
+    roomDoors(room).forEach((door) => drawDoor(room, door));
 
     if (room.keycard && !room.keycard.taken) drawKeycard(room.keycard.x, room.keycard.y);
     room.rations?.forEach((ration) => {
@@ -2474,7 +3018,7 @@
   function drawVision(guard) {
     const dir = guard.dir || { x: 1, y: 0 };
     const angle = Math.atan2(dir.y, dir.x);
-    const heightened = guard.state === "investigate" || guard.state === "search" || guard.state === "sweep";
+    const heightened = guard.state === "investigate" || guard.state === "callAlarm" || guard.state === "reinforce" || guard.state === "search" || guard.state === "sweep";
     const range = heightened ? 205 : 176;
     const spread = guard.state === "search" || guard.state === "sweep" ? 0.68 : 0.52;
     const tint = guard.suspicion > 0.6 ? "243, 93, 76" : "255, 214, 90";
@@ -2639,10 +3183,10 @@
     if (guard.stunned > 0) {
       ctx.globalAlpha = 0.72;
     }
-    const variant = guard.suspicion > 0.72 ? "alert" : guard.state === "investigate" || guard.state === "search" || guard.state === "sweep" ? "investigating" : "guard";
+    const variant = guard.suspicion > 0.72 ? "alert" : guard.state === "investigate" || guard.state === "callAlarm" || guard.state === "reinforce" || guard.state === "search" || guard.state === "sweep" ? "investigating" : "guard";
     if (!drawCatSprite(guard.x, guard.y, guard.dir || { x: 1, y: 0 }, variant)) {
       drawPixelCat(guard.x, guard.y, guard.dir || { x: 1, y: 0 }, {
-        body: guard.state === "investigate" || guard.state === "search" || guard.state === "sweep" ? "#c76145" : "#9f4a37",
+        body: guard.state === "investigate" || guard.state === "callAlarm" || guard.state === "reinforce" || guard.state === "search" || guard.state === "sweep" ? "#c76145" : "#9f4a37",
         trim: "#3a1f1a",
         eye: "#fff2a8",
       }, 1);
@@ -2670,10 +3214,10 @@
       ctx.fillRect(guard.x - w / 2, guard.y - 34, w * guard.suspicion, 5);
     }
 
-    if (guard.state === "investigate" || guard.state === "search" || guard.state === "sweep") {
+    if (guard.state === "investigate" || guard.state === "callAlarm" || guard.state === "reinforce" || guard.state === "search" || guard.state === "sweep") {
       ctx.fillStyle = guard.suspicion > 0.72 ? "#f35d4c" : "#ffd65a";
       ctx.font = "700 18px monospace";
-      ctx.fillText(guard.suspicion > 0.72 ? "!" : guard.state === "sweep" ? "*" : "?", guard.x - 5, guard.y - 42);
+      ctx.fillText(guard.suspicion > 0.72 ? "!" : guard.state === "sweep" ? "*" : guard.state === "reinforce" ? ">" : guard.state === "callAlarm" ? "!" : "?", guard.x - 5, guard.y - 42);
     } else if ((guard.pauseTimer || 0) > 0) {
       ctx.fillStyle = "#98a08f";
       ctx.font = "700 13px monospace";
@@ -3175,6 +3719,9 @@
     room.panels?.forEach((panel) => {
       if (!panel.done && nearRect(panel, 38)) prompts.push({ x: panel.x + panel.w / 2, y: panel.y - 12, text: "E" });
     });
+    if (room.alarm && !room.alarm.disabled && nearRect(room.alarm, 40)) {
+      prompts.push({ x: room.alarm.x + room.alarm.w / 2, y: room.alarm.y - 12, text: "E" });
+    }
     if (room.intel && !room.intel.done && nearRect(room.intel, 40)) {
       prompts.push({ x: room.intel.x + room.intel.w / 2, y: room.intel.y - 12, text: "E" });
     }
@@ -3189,104 +3736,109 @@
     });
   }
 
-  function drawRadar(room) {
+  function facilityRectFor(roomIndex, x, y, w, h) {
+    const spec = facilityMapLayout.find((candidate) => candidate.room === roomIndex);
+    if (!spec) return null;
+    return {
+      ...spec,
+      x: x + spec.x * w,
+      y: y + spec.y * h,
+      w: spec.w * w,
+      h: spec.h * h,
+    };
+  }
+
+  function drawFacilityMap(room) {
     const x = PANEL_X + 12;
     const y = 42;
     const w = PANEL_W - 24;
     const h = 132;
+    const mapX = x + 8;
+    const mapY = y + 24;
+    const mapW = w - 16;
+    const mapH = h - 34;
     ctx.fillStyle = "#071110";
     ctx.fillRect(x, y, w, h);
     ctx.strokeStyle = "#0cc083";
     ctx.strokeRect(x + 0.5, y + 0.5, w, h);
     ctx.fillStyle = "#7ed6c8";
     ctx.font = "700 11px monospace";
-    ctx.fillText("CAT RADAR", x + 8, y + 15);
+    ctx.fillText("FACILITY MAP", x + 8, y + 15);
     ctx.fillStyle = "rgba(12,192,131,0.12)";
-    ctx.fillRect(x + 8, y + 24, w - 16, h - 34);
+    ctx.fillRect(mapX, mapY, mapW, mapH);
     ctx.strokeStyle = "rgba(126,214,200,0.16)";
-    for (let gx = x + 18; gx < x + w - 8; gx += 22) {
+    for (let gx = mapX + 10; gx < mapX + mapW; gx += 20) {
       ctx.beginPath();
-      ctx.moveTo(gx, y + 24);
-      ctx.lineTo(gx, y + h - 10);
+      ctx.moveTo(gx, mapY);
+      ctx.lineTo(gx, mapY + mapH);
       ctx.stroke();
     }
-    for (let gy = y + 34; gy < y + h - 10; gy += 22) {
+    for (let gy = mapY + 10; gy < mapY + mapH; gy += 20) {
       ctx.beginPath();
-      ctx.moveTo(x + 8, gy);
-      ctx.lineTo(x + w - 8, gy);
+      ctx.moveTo(mapX, gy);
+      ctx.lineTo(mapX + mapW, gy);
       ctx.stroke();
     }
 
-    const sx = (w - 22) / PLAY_W;
-    const sy = (h - 38) / H;
-    room.guards.forEach((guard) => {
-      ctx.fillStyle = guard.suspicion > 0.5 ? "#f35d4c" : "#d16d4d";
-      ctx.fillRect(x + 10 + guard.x * sx, y + 24 + guard.y * sy, 4, 4);
-    });
-    room.cameras?.forEach((camera) => {
-      ctx.fillStyle = cameraActive(room, camera) ? ((camera.suspicion || 0) > 0.5 ? "#f35d4c" : "#7ed6c8") : "#33413c";
-      ctx.fillRect(x + 10 + camera.x * sx, y + 24 + camera.y * sy, 5, 3);
-    });
-    if (!room.systemDown) room.sweeps?.forEach((sweep) => {
-      const beam = sweepBeam(sweep);
-      ctx.fillStyle = "#7ed6c8";
-      ctx.fillRect(
-        x + 10 + (beam.x + beam.w / 2) * sx - 1,
-        y + 24 + (beam.y + beam.h / 2) * sy - 1,
-        3,
-        3
-      );
-    });
-    if (room.intel?.done) {
-      const mark = (px, py, color, size = 4) => {
-        ctx.fillStyle = color;
-        ctx.fillRect(x + 10 + px * sx, y + 24 + py * sy, size, size);
-      };
-      if (room.keycard && !room.keycard.taken) mark(room.keycard.x, room.keycard.y, "#ffd65a", 5);
-      room.rations?.forEach((ration) => {
-        if (!ration.taken) mark(ration.x, ration.y, "#7ed6c8", 3);
+    const drawnLinks = new Set();
+    rooms.forEach((sourceRoom, sourceIndex) => {
+      roomDoors(sourceRoom).forEach((door) => {
+        const key = [sourceIndex, door.to].sort((a, b) => a - b).join(":");
+        if (drawnLinks.has(key)) return;
+        drawnLinks.add(key);
+        const from = facilityRectFor(sourceIndex, mapX, mapY, mapW, mapH);
+        const to = facilityRectFor(door.to, mapX, mapY, mapW, mapH);
+        if (!from || !to) return;
+        const unlocked = doorUnlocked(door);
+        ctx.strokeStyle = unlocked ? "rgba(255, 214, 90, 0.72)" : "rgba(134, 75, 63, 0.7)";
+        ctx.lineWidth = unlocked ? 4 : 3;
+        ctx.beginPath();
+        ctx.moveTo(from.x + from.w / 2, from.y + from.h / 2);
+        ctx.lineTo(to.x + to.w / 2, to.y + to.h / 2);
+        ctx.stroke();
+        ctx.lineWidth = 1;
       });
-      room.catnipPickups?.forEach((pickup) => {
-      if (!pickup.taken) mark(pickup.x, pickup.y, "#9b4967", 3);
+    });
+
+    facilityMapLayout.forEach((spec) => {
+      const rect = facilityRectFor(spec.room, mapX, mapY, mapW, mapH);
+      const sourceRoom = rooms[spec.room];
+      const current = spec.room === player.room;
+      const lockedAhead = roomDoors(sourceRoom).some((door) => !doorUnlocked(door));
+      ctx.fillStyle = current ? "rgba(255, 214, 90, 0.22)" : "rgba(5, 9, 9, 0.82)";
+      ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+      ctx.strokeStyle = current ? "#ffd65a" : lockedAhead ? "#864b3f" : "#0cc083";
+      ctx.strokeRect(rect.x + 0.5, rect.y + 0.5, rect.w, rect.h);
+      ctx.fillStyle = current ? "#ffd65a" : "#7ed6c8";
+      ctx.font = "700 7px monospace";
+      ctx.fillText(spec.code, rect.x + 3, rect.y + 8);
+      sourceRoom.guards.forEach((guard) => {
+        const gx = rect.x + 3 + clamp(guard.x / PLAY_W, 0, 1) * Math.max(1, rect.w - 7);
+        const gy = rect.y + 10 + clamp(guard.y / H, 0, 1) * Math.max(1, rect.h - 14);
+        ctx.fillStyle = guard.state === "reinforce" || guard.suspicion > 0.5 ? "#f35d4c" : "#d16d4d";
+        ctx.fillRect(gx - 1.5, gy - 1.5, 3, 3);
       });
-      room.vents?.forEach((vent) => mark(vent.x + vent.w / 2, vent.y + vent.h / 2, "#98a08f", 3));
-      room.panels?.forEach((panel) => {
-        if (!panel.done) mark(panel.x + panel.w / 2, panel.y + panel.h / 2, "#f35d4c", 4);
-      });
-    }
+      if (spec.room === player.room) {
+        const px = rect.x + 3 + clamp(player.x / PLAY_W, 0, 1) * Math.max(1, rect.w - 7);
+        const py = rect.y + 10 + clamp(player.y / H, 0, 1) * Math.max(1, rect.h - 14);
+        ctx.fillStyle = "#f0edcf";
+        ctx.fillRect(px - 2, py - 2, 5, 5);
+      }
+    });
+
     if (extractionActive) {
+      const rect = facilityRectFor(START_ROOM, mapX, mapY, mapW, mapH);
       ctx.fillStyle = "#ffd65a";
       ctx.strokeStyle = "#ffd65a";
-      const ex = x + 10 + room.start.x * sx;
-      const ey = y + 24 + room.start.y * sy;
+      const ex = rect.x + 3 + clamp(rooms[START_ROOM].start.x / PLAY_W, 0, 1) * Math.max(1, rect.w - 7);
+      const ey = rect.y + 10 + clamp(rooms[START_ROOM].start.y / H, 0, 1) * Math.max(1, rect.h - 14);
       ctx.strokeRect(ex - 3, ey - 3, 10, 10);
       ctx.fillRect(ex, ey, 4, 4);
     }
-    noises.forEach((sound) => {
-      ctx.fillStyle = sound.kind === "meow" ? "#7ed6c8" : sound.kind === "yarn" ? "#9b4967" : "#ffd65a";
-      ctx.fillRect(x + 10 + sound.x * sx, y + 24 + sound.y * sy, 3, 3);
-    });
-    catnips.forEach((pouch) => {
-      ctx.fillStyle = "#9b4967";
-      ctx.fillRect(x + 10 + pouch.x * sx, y + 24 + pouch.y * sy, 4, 4);
-    });
-    ventRattles.forEach((rattle) => {
-      ctx.strokeStyle = "#7ed6c8";
-      ctx.strokeRect(x + 10 + rattle.x * sx - 2, y + 24 + rattle.y * sy - 2, 5, 5);
-    });
-    tacticalPings.forEach((ping) => {
-      const alpha = ping.ttl / ping.maxTtl;
-      const px = x + 10 + ping.x * sx;
-      const py = y + 24 + ping.y * sy;
-      ctx.globalAlpha = alpha;
-      ctx.strokeStyle = ping.color;
-      ctx.strokeRect(px - 4, py - 4, 9, 9);
-      ctx.fillStyle = ping.color;
-      ctx.fillRect(px - 1, py - 1, 3, 3);
-      ctx.globalAlpha = 1;
-    });
-    ctx.fillStyle = "#f0edcf";
-    ctx.fillRect(x + 10 + player.x * sx, y + 24 + player.y * sy, 5, 5);
+
+    ctx.fillStyle = "#98a08f";
+    ctx.font = "700 7px monospace";
+    ctx.fillText("WHITE YOU  RED PATROLS  GOLD LINKS", x + 8, y + h - 4);
   }
 
   function drawSideBox(x, y, w, h, title, accent) {
@@ -3345,9 +3897,9 @@
     ctx.strokeRect(PANEL_X + 12.5, 10.5, PANEL_W - 24, 24);
     ctx.fillStyle = "#0cc083";
     ctx.font = "700 13px monospace";
-    ctx.fillText("RADAR", PANEL_X + 20, 27);
+    ctx.fillText("MAP", PANEL_X + 20, 27);
 
-    drawRadar(room);
+    drawFacilityMap(room);
 
     const sweepActive = sweepTimer > 0;
     drawSideBox(PANEL_X + 12, 204, PANEL_W - 24, 76, "ALERT", alert > 0 ? "#f35d4c" : sweepActive ? "#ffd65a" : "#0cc083");

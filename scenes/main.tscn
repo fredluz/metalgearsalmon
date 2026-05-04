@@ -1,0 +1,697 @@
+[gd_scene format=3 uid="uid://c4ij5tlw72xia"]
+
+[ext_resource type="Script" uid="uid://dwilwufemjq70" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="Texture2D" uid="uid://bea4i4vjd40pm" path="res://assets/maps/dock-village/dock-village-base.png" id="2_map"]
+[ext_resource type="Texture2D" uid="uid://6qlymyil3rrd" path="res://assets/props/dock-fishing-boat-small/prop.png" id="3_boat"]
+[ext_resource type="Texture2D" uid="uid://b23f7is3j0mgb" path="res://assets/props/dock-rowboat/prop.png" id="4_rowboat"]
+[ext_resource type="Texture2D" uid="uid://dc7r7o1aucf8m" path="res://assets/props/dock-fish-crate/prop.png" id="5_crate"]
+[ext_resource type="Texture2D" uid="uid://hgkrgfxsq1ak" path="res://assets/props/dock-barrel-stack/prop.png" id="6_barrels"]
+[ext_resource type="Texture2D" uid="uid://cjwhv1dhhuvuw" path="res://assets/props/dock-lantern-post/prop.png" id="7_lantern"]
+[ext_resource type="Texture2D" uid="uid://bx45v1ykrlxvf" path="res://assets/props/dock-hanging-lantern/prop.png" id="8_hang"]
+[ext_resource type="Script" uid="uid://0jkx0dqgh6sf" path="res://scripts/prop_marker.gd" id="9_prop_script"]
+[ext_resource type="Script" uid="uid://dhoco0bmcwghq" path="res://scripts/guard_marker.gd" id="10_guard_script"]
+[ext_resource type="Script" uid="uid://brbr1mgp4dx13" path="res://scripts/zone_marker.gd" id="11_zone_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ya4ey"]
+size = Vector2(64, 348)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_eb6dy"]
+size = Vector2(235, 44)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_trceg"]
+size = Vector2(235, 56)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_a8y0u"]
+size = Vector2(615, 62)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jkv2x"]
+size = Vector2(38, 122)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jbj1t"]
+size = Vector2(38, 122)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_muem4"]
+size = Vector2(43, 122)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_dp3eg"]
+size = Vector2(43, 122)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0ld40"]
+size = Vector2(527, 52)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gqmmt"]
+size = Vector2(60, 170)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_yc10j"]
+size = Vector2(139, 56)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jscy8"]
+size = Vector2(63, 199)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pm3ni"]
+size = Vector2(460, 67)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_y6deb"]
+size = Vector2(265, 462)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_og1vs"]
+size = Vector2(68, 315)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2wyq8"]
+size = Vector2(415, 73)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vxglm"]
+size = Vector2(78, 285)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2f3dj"]
+size = Vector2(58, 229)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_yq6so"]
+size = Vector2(185, 55)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fv21b"]
+size = Vector2(335, 169)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_tel4y"]
+size = Vector2(64, 179)
+
+[sub_resource type="RectangleShape2D" id="Rect_1"]
+size = Vector2(76, 52)
+
+[sub_resource type="RectangleShape2D" id="Rect_2"]
+size = Vector2(82, 44)
+
+[sub_resource type="RectangleShape2D" id="Rect_3"]
+size = Vector2(96, 48)
+
+[sub_resource type="RectangleShape2D" id="Rect_4"]
+size = Vector2(76, 46)
+
+[sub_resource type="RectangleShape2D" id="Rect_5"]
+size = Vector2(88, 48)
+
+[sub_resource type="RectangleShape2D" id="Rect_6"]
+size = Vector2(86, 58)
+
+[sub_resource type="RectangleShape2D" id="Rect_7"]
+size = Vector2(82, 58)
+
+[sub_resource type="RectangleShape2D" id="Rect_8"]
+size = Vector2(92, 58)
+
+[sub_resource type="RectangleShape2D" id="Rect_9"]
+size = Vector2(118, 66)
+
+[sub_resource type="RectangleShape2D" id="Rect_10"]
+size = Vector2(122, 56)
+
+[sub_resource type="RectangleShape2D" id="Rect_11"]
+size = Vector2(116, 66)
+
+[sub_resource type="RectangleShape2D" id="Rect_12"]
+size = Vector2(54, 42)
+
+[sub_resource type="RectangleShape2D" id="Rect_13"]
+size = Vector2(78, 62)
+
+[sub_resource type="RectangleShape2D" id="Rect_14"]
+size = Vector2(122, 54)
+
+[sub_resource type="RectangleShape2D" id="Rect_15"]
+size = Vector2(28, 28)
+
+[node name="WhiskerIntrusion2" type="Node2D" unique_id=1378382412]
+script = ExtResource("1_main")
+show_editor_guides = false
+
+[node name="MapArt" type="Sprite2D" parent="." unique_id=1489951865]
+z_index = -100
+position = Vector2(755.5, 520.5)
+texture = ExtResource("2_map")
+
+[node name="WalkBounds" type="Node2D" parent="." unique_id=2017555140]
+
+[node name="left_lower_vertical" type="Area2D" parent="WalkBounds" unique_id=52789082]
+position = Vector2(100, 557)
+script = ExtResource("11_zone_script")
+zone_type = "walk"
+
+[node name="Shape" type="CollisionShape2D" parent="WalkBounds/left_lower_vertical" unique_id=1806609345]
+shape = SubResource("RectangleShape2D_ya4ey")
+
+[node name="left_lower_top" type="Area2D" parent="WalkBounds" unique_id=1041576650]
+position = Vector2(187.5, 404)
+script = ExtResource("11_zone_script")
+zone_type = "walk"
+
+[node name="Shape" type="CollisionShape2D" parent="WalkBounds/left_lower_top" unique_id=272964046]
+shape = SubResource("RectangleShape2D_eb6dy")
+
+[node name="left_lower_bottom" type="Area2D" parent="WalkBounds" unique_id=1224857947]
+position = Vector2(245.5, 761)
+script = ExtResource("11_zone_script")
+zone_type = "walk"
+
+[node name="Shape" type="CollisionShape2D" parent="WalkBounds/left_lower_bottom" unique_id=1375546706]
+shape = SubResource("RectangleShape2D_trceg")
+
+[node name="lower_main_dock" type="Area2D" parent="WalkBounds" unique_id=33233370]
+position = Vector2(606.5, 590)
+script = ExtResource("11_zone_script")
+zone_type = "walk"
+
+[node name="Shape" type="CollisionShape2D" parent="WalkBounds/lower_main_dock" unique_id=944378207]
+shape = SubResource("RectangleShape2D_a8y0u")
+
+[node name="lower_pier_01" type="Area2D" parent="WalkBounds" unique_id=2143848969]
+position = Vector2(450, 671)
+script = ExtResource("11_zone_script")
+zone_type = "walk"
+
+[node name="Shape" type="CollisionShape2D" parent="WalkBounds/lower_pier_01" unique_id=745181575]
+shape = SubResource("RectangleShape2D_jkv2x")
+
+[node name="lower_pier_02" type="Area2D" parent="WalkBounds" unique_id=1738536126]
+position = Vector2(555, 671)
+script = ExtResource("11_zone_script")
+zone_type = "walk"
+
+[node name="Shape" type="CollisionShape2D" parent="WalkBounds/lower_pier_02" unique_id=60793810]
+shape = SubResource("RectangleShape2D_jbj1t")
+
+[node name="lower_pier_03" type="Area2D" parent="WalkBounds" unique_id=1536982485]
+position = Vector2(664.5, 671)
+script = ExtResource("11_zone_script")
+zone_type = "walk"
+
+[node name="Shape" type="CollisionShape2D" parent="WalkBounds/lower_pier_03" unique_id=523374912]
+shape = SubResource("RectangleShape2D_muem4")
+
+[node name="lower_pier_04" type="Area2D" parent="WalkBounds" unique_id=1620913829]
+position = Vector2(769.5, 671)
+script = ExtResource("11_zone_script")
+zone_type = "walk"
+
+[node name="Shape" type="CollisionShape2D" parent="WalkBounds/lower_pier_04" unique_id=561793995]
+shape = SubResource("RectangleShape2D_dp3eg")
+
+[node name="left_upper_main" type="Area2D" parent="WalkBounds" unique_id=366703219]
+position = Vector2(444.5, 270)
+script = ExtResource("11_zone_script")
+zone_type = "walk"
+
+[node name="Shape" type="CollisionShape2D" parent="WalkBounds/left_upper_main" unique_id=503083044]
+shape = SubResource("RectangleShape2D_0ld40")
+
+[node name="left_upper_riser" type="Area2D" parent="WalkBounds" unique_id=489385607]
+position = Vector2(523, 211)
+script = ExtResource("11_zone_script")
+zone_type = "walk"
+
+[node name="Shape" type="CollisionShape2D" parent="WalkBounds/left_upper_riser" unique_id=1991086162]
+shape = SubResource("RectangleShape2D_gqmmt")
+
+[node name="left_upper_top" type="Area2D" parent="WalkBounds" unique_id=1892076334]
+position = Vector2(622.5, 161)
+script = ExtResource("11_zone_script")
+zone_type = "walk"
+
+[node name="Shape" type="CollisionShape2D" parent="WalkBounds/left_upper_top" unique_id=1881853075]
+shape = SubResource("RectangleShape2D_yc10j")
+
+[node name="left_upper_drop" type="Area2D" parent="WalkBounds" unique_id=1893191345]
+position = Vector2(675.5, 331.5)
+script = ExtResource("11_zone_script")
+zone_type = "walk"
+
+[node name="Shape" type="CollisionShape2D" parent="WalkBounds/left_upper_drop" unique_id=1267613198]
+shape = SubResource("RectangleShape2D_jscy8")
+
+[node name="center_bridge" type="Area2D" parent="WalkBounds" unique_id=1402489964]
+position = Vector2(936, 404.5)
+script = ExtResource("11_zone_script")
+zone_type = "walk"
+
+[node name="Shape" type="CollisionShape2D" parent="WalkBounds/center_bridge" unique_id=1129747325]
+shape = SubResource("RectangleShape2D_pm3ni")
+
+[node name="center_platform" type="Area2D" parent="WalkBounds" unique_id=1386359738]
+position = Vector2(1044.5, 669)
+script = ExtResource("11_zone_script")
+zone_type = "walk"
+
+[node name="Shape" type="CollisionShape2D" parent="WalkBounds/center_platform" unique_id=2063769970]
+shape = SubResource("RectangleShape2D_y6deb")
+
+[node name="right_left_vertical" type="Area2D" parent="WalkBounds" unique_id=374370253]
+position = Vector2(1064, 217.5)
+script = ExtResource("11_zone_script")
+zone_type = "walk"
+
+[node name="Shape" type="CollisionShape2D" parent="WalkBounds/right_left_vertical" unique_id=715759222]
+shape = SubResource("RectangleShape2D_og1vs")
+
+[node name="right_top_horizontal" type="Area2D" parent="WalkBounds" unique_id=1173735166]
+position = Vector2(1237.5, 98.5)
+script = ExtResource("11_zone_script")
+zone_type = "walk"
+
+[node name="Shape" type="CollisionShape2D" parent="WalkBounds/right_top_horizontal" unique_id=1601102232]
+shape = SubResource("RectangleShape2D_2wyq8")
+
+[node name="right_outer_vertical" type="Area2D" parent="WalkBounds" unique_id=1027446934]
+position = Vector2(1405, 202.5)
+script = ExtResource("11_zone_script")
+zone_type = "walk"
+
+[node name="Shape" type="CollisionShape2D" parent="WalkBounds/right_outer_vertical" unique_id=300494654]
+shape = SubResource("RectangleShape2D_vxglm")
+
+[node name="right_inner_vertical" type="Area2D" parent="WalkBounds" unique_id=1802627372]
+position = Vector2(1252, 309.5)
+script = ExtResource("11_zone_script")
+zone_type = "walk"
+
+[node name="Shape" type="CollisionShape2D" parent="WalkBounds/right_inner_vertical" unique_id=1348858951]
+shape = SubResource("RectangleShape2D_2f3dj")
+
+[node name="right_mid_horizontal" type="Area2D" parent="WalkBounds" unique_id=811212352]
+position = Vector2(1187.5, 399.5)
+script = ExtResource("11_zone_script")
+zone_type = "walk"
+
+[node name="Shape" type="CollisionShape2D" parent="WalkBounds/right_mid_horizontal" unique_id=1764945915]
+shape = SubResource("RectangleShape2D_yq6so")
+
+[node name="exit_shore" type="Area2D" parent="WalkBounds" unique_id=1078592034]
+position = Vector2(1343.5, 956.5)
+script = ExtResource("11_zone_script")
+zone_type = "walk"
+
+[node name="Shape" type="CollisionShape2D" parent="WalkBounds/exit_shore" unique_id=2062376368]
+shape = SubResource("RectangleShape2D_fv21b")
+
+[node name="lower_left_connector" type="Area2D" parent="WalkBounds" unique_id=1584258120]
+position = Vector2(331, 699.5)
+script = ExtResource("11_zone_script")
+zone_type = "walk"
+
+[node name="Shape" type="CollisionShape2D" parent="WalkBounds/lower_left_connector" unique_id=809114884]
+shape = SubResource("RectangleShape2D_tel4y")
+
+[node name="Collision" type="Node2D" parent="." unique_id=1211742193]
+
+[node name="orange_crate_block" type="StaticBody2D" parent="Collision" unique_id=1081212413]
+position = Vector2(308, 264)
+
+[node name="Shape" type="CollisionShape2D" parent="Collision/orange_crate_block" unique_id=313728723]
+shape = SubResource("Rect_1")
+
+[node name="central_crate_block" type="StaticBody2D" parent="Collision" unique_id=1146832850]
+position = Vector2(907, 532)
+
+[node name="Shape" type="CollisionShape2D" parent="Collision/central_crate_block" unique_id=1673709721]
+shape = SubResource("Rect_2")
+
+[node name="lower_crate_block" type="StaticBody2D" parent="Collision" unique_id=51740884]
+position = Vector2(1076, 752)
+
+[node name="Shape" type="CollisionShape2D" parent="Collision/lower_crate_block" unique_id=1413766630]
+shape = SubResource("Rect_3")
+
+[node name="generator_barrel_block" type="StaticBody2D" parent="Collision" unique_id=182680172]
+position = Vector2(1458, 347)
+
+[node name="Shape" type="CollisionShape2D" parent="Collision/generator_barrel_block" unique_id=1443709360]
+shape = SubResource("Rect_4")
+
+[node name="exit_crate_block" type="StaticBody2D" parent="Collision" unique_id=1646325294]
+position = Vector2(1344, 1040)
+
+[node name="Shape" type="CollisionShape2D" parent="Collision/exit_crate_block" unique_id=1386614578]
+shape = SubResource("Rect_5")
+
+[node name="HidingZones" type="Node2D" parent="." unique_id=1766299647]
+
+[node name="Hiding_01" type="Area2D" parent="HidingZones" unique_id=591606959]
+position = Vector2(149, 279)
+script = ExtResource("11_zone_script")
+
+[node name="Shape" type="CollisionShape2D" parent="HidingZones/Hiding_01" unique_id=1364529776]
+shape = SubResource("Rect_6")
+
+[node name="Hiding_02" type="Area2D" parent="HidingZones" unique_id=2114986099]
+position = Vector2(289, 763)
+script = ExtResource("11_zone_script")
+
+[node name="Shape" type="CollisionShape2D" parent="HidingZones/Hiding_02" unique_id=730155884]
+shape = SubResource("Rect_7")
+
+[node name="Hiding_03" type="Area2D" parent="HidingZones" unique_id=643247232]
+position = Vector2(908, 533)
+script = ExtResource("11_zone_script")
+
+[node name="Shape" type="CollisionShape2D" parent="HidingZones/Hiding_03" unique_id=1033928784]
+shape = SubResource("Rect_8")
+
+[node name="Hiding_04" type="Area2D" parent="HidingZones" unique_id=63667754]
+position = Vector2(1081, 757)
+script = ExtResource("11_zone_script")
+
+[node name="Shape" type="CollisionShape2D" parent="HidingZones/Hiding_04" unique_id=193948102]
+shape = SubResource("Rect_9")
+
+[node name="Hiding_05" type="Area2D" parent="HidingZones" unique_id=386789045]
+position = Vector2(1477, 116)
+script = ExtResource("11_zone_script")
+
+[node name="Shape" type="CollisionShape2D" parent="HidingZones/Hiding_05" unique_id=361838051]
+shape = SubResource("Rect_10")
+
+[node name="Hiding_06" type="Area2D" parent="HidingZones" unique_id=1516089546]
+position = Vector2(1352, 1043)
+script = ExtResource("11_zone_script")
+
+[node name="Shape" type="CollisionShape2D" parent="HidingZones/Hiding_06" unique_id=1365668038]
+shape = SubResource("Rect_11")
+
+[node name="Props" type="Node2D" parent="." unique_id=586428538]
+
+[node name="left_fish_boat" type="Sprite2D" parent="Props" unique_id=1775736046]
+position = Vector2(112, 232)
+scale = Vector2(0.371, 0.191)
+texture = ExtResource("3_boat")
+centered = false
+script = ExtResource("9_prop_script")
+prop_id = "left-fish-boat"
+image_key = "dockFishingBoatSmall"
+prop_size = Vector2(190, 98)
+
+[node name="left_fish_crate" type="Sprite2D" parent="Props" unique_id=422072638]
+position = Vector2(144, 280)
+scale = Vector2(0.367, 0.289)
+texture = ExtResource("5_crate")
+centered = false
+script = ExtResource("9_prop_script")
+prop_id = "left-fish-crate"
+image_key = "dockFishCrate"
+prop_size = Vector2(94, 74)
+
+[node name="orange_crate" type="Sprite2D" parent="Props" unique_id=1202699943]
+position = Vector2(304, 268)
+scale = Vector2(0.359, 0.305)
+texture = ExtResource("5_crate")
+centered = false
+script = ExtResource("9_prop_script")
+prop_id = "orange-crate"
+image_key = "dockFishCrate"
+prop_size = Vector2(92, 78)
+
+[node name="backpack_lantern" type="Sprite2D" parent="Props" unique_id=617535420]
+position = Vector2(148, 450)
+scale = Vector2(0.227, 0.492)
+texture = ExtResource("7_lantern")
+centered = false
+script = ExtResource("9_prop_script")
+prop_id = "backpack-lantern"
+image_key = "dockLanternPost"
+hideable = false
+prop_size = Vector2(58, 126)
+
+[node name="upper_loop_rowboat" type="Sprite2D" parent="Props" unique_id=1023409956]
+position = Vector2(762, 276)
+scale = Vector2(0.469, 0.25)
+texture = ExtResource("4_rowboat")
+centered = false
+script = ExtResource("9_prop_script")
+prop_id = "upper-loop-rowboat"
+image_key = "dockRowboat"
+prop_size = Vector2(180, 96)
+
+[node name="upper_loop_lantern" type="Sprite2D" parent="Props" unique_id=510927064]
+position = Vector2(626, 188)
+scale = Vector2(0.211, 0.273)
+texture = ExtResource("8_hang")
+centered = false
+script = ExtResource("9_prop_script")
+prop_id = "upper-loop-lantern"
+image_key = "dockHangingLantern"
+hideable = false
+prop_size = Vector2(54, 70)
+
+[node name="central_crate_cover" type="Sprite2D" parent="Props" unique_id=1971605426]
+position = Vector2(902, 548)
+scale = Vector2(0.438, 0.32)
+texture = ExtResource("5_crate")
+centered = false
+script = ExtResource("9_prop_script")
+prop_id = "central-crate-cover"
+image_key = "dockFishCrate"
+prop_size = Vector2(112, 82)
+
+[node name="lower_fish_boat_a" type="Sprite2D" parent="Props" unique_id=1169910227]
+position = Vector2(384, 882)
+scale = Vector2(0.324, 0.18)
+texture = ExtResource("3_boat")
+centered = false
+script = ExtResource("9_prop_script")
+prop_id = "lower-fish-boat-a"
+image_key = "dockFishingBoatSmall"
+prop_size = Vector2(166, 92)
+
+[node name="lower_fish_boat_b" type="Sprite2D" parent="Props" unique_id=1687183031]
+position = Vector2(526, 882)
+scale = Vector2(0.324, 0.18)
+texture = ExtResource("3_boat")
+centered = false
+script = ExtResource("9_prop_script")
+prop_id = "lower-fish-boat-b"
+image_key = "dockFishingBoatSmall"
+prop_size = Vector2(166, 92)
+
+[node name="lower_fish_boat_c" type="Sprite2D" parent="Props" unique_id=133653275]
+position = Vector2(670, 882)
+scale = Vector2(0.324, 0.18)
+texture = ExtResource("3_boat")
+centered = false
+script = ExtResource("9_prop_script")
+prop_id = "lower-fish-boat-c"
+image_key = "dockFishingBoatSmall"
+prop_size = Vector2(166, 92)
+
+[node name="lower_fish_boat_d" type="Sprite2D" parent="Props" unique_id=1810708382]
+position = Vector2(814, 882)
+scale = Vector2(0.324, 0.18)
+texture = ExtResource("3_boat")
+centered = false
+script = ExtResource("9_prop_script")
+prop_id = "lower-fish-boat-d"
+image_key = "dockFishingBoatSmall"
+prop_size = Vector2(166, 92)
+
+[node name="lower_fish_boat_e" type="Sprite2D" parent="Props" unique_id=1634491314]
+position = Vector2(958, 882)
+scale = Vector2(0.324, 0.18)
+texture = ExtResource("3_boat")
+centered = false
+script = ExtResource("9_prop_script")
+prop_id = "lower-fish-boat-e"
+image_key = "dockFishingBoatSmall"
+prop_size = Vector2(166, 92)
+
+[node name="lower_fish_crate" type="Sprite2D" parent="Props" unique_id=1389620779]
+position = Vector2(1066, 776)
+scale = Vector2(0.484, 0.344)
+texture = ExtResource("5_crate")
+centered = false
+script = ExtResource("9_prop_script")
+prop_id = "lower-fish-crate"
+image_key = "dockFishCrate"
+prop_size = Vector2(124, 88)
+
+[node name="right_spine_lantern" type="Sprite2D" parent="Props" unique_id=1703754242]
+position = Vector2(1232, 686)
+scale = Vector2(0.242, 0.508)
+texture = ExtResource("7_lantern")
+centered = false
+script = ExtResource("9_prop_script")
+prop_id = "right-spine-lantern"
+image_key = "dockLanternPost"
+hideable = false
+prop_size = Vector2(62, 130)
+
+[node name="right_top_fish_boat" type="Sprite2D" parent="Props" unique_id=388382490]
+position = Vector2(1436, 116)
+scale = Vector2(0.426, 0.207)
+texture = ExtResource("3_boat")
+centered = false
+script = ExtResource("9_prop_script")
+prop_id = "right-top-fish-boat"
+image_key = "dockFishingBoatSmall"
+prop_size = Vector2(218, 106)
+
+[node name="right_top_crates" type="Sprite2D" parent="Props" unique_id=1674577658]
+position = Vector2(1476, 126)
+scale = Vector2(0.453, 0.32)
+texture = ExtResource("5_crate")
+centered = false
+script = ExtResource("9_prop_script")
+prop_id = "right-top-crates"
+image_key = "dockFishCrate"
+prop_size = Vector2(116, 82)
+
+[node name="generator_barrels" type="Sprite2D" parent="Props" unique_id=1646188695]
+position = Vector2(1458, 352)
+scale = Vector2(0.359, 0.359)
+texture = ExtResource("6_barrels")
+centered = false
+script = ExtResource("9_prop_script")
+prop_id = "generator-barrels"
+image_key = "dockBarrelStack"
+prop_size = Vector2(92, 92)
+
+[node name="exit_fish_crate" type="Sprite2D" parent="Props" unique_id=577759033]
+position = Vector2(1350, 1044)
+scale = Vector2(0.492, 0.359)
+texture = ExtResource("5_crate")
+centered = false
+script = ExtResource("9_prop_script")
+prop_id = "exit-fish-crate"
+image_key = "dockFishCrate"
+prop_size = Vector2(126, 92)
+
+[node name="exit_boat" type="Sprite2D" parent="Props" unique_id=958313435]
+position = Vector2(1534, 1132)
+scale = Vector2(0.495, 0.271)
+texture = ExtResource("4_rowboat")
+centered = false
+script = ExtResource("9_prop_script")
+prop_id = "exit-boat"
+image_key = "dockRowboat"
+prop_size = Vector2(190, 104)
+
+[node name="Guards" type="Node2D" parent="." unique_id=156335682]
+
+[node name="left_sentry" type="Node2D" parent="Guards" unique_id=1244058384]
+position = Vector2(248, 772)
+script = ExtResource("10_guard_script")
+guard_id = "left-sentry"
+facing = Vector2(-0.9241386, 0.3820573)
+sight_range = 250.0
+sight_spread = 0.58
+dark_range_factor = 0.42
+
+[node name="upper_sentry" type="Node2D" parent="Guards" unique_id=1202689077]
+position = Vector2(726, 272)
+script = ExtResource("10_guard_script")
+guard_id = "upper-sentry"
+facing = Vector2(0.3820573, 0.9241386)
+sight_range = 285.0
+sight_spread = 0.5
+dark_range_factor = 0.42
+
+[node name="right_top_sentry" type="Node2D" parent="Guards" unique_id=1685834248]
+position = Vector2(1244, 106)
+script = ExtResource("10_guard_script")
+guard_id = "right-top-sentry"
+facing = Vector2(0.9835, 0.18090801)
+sight_range = 280.0
+sight_spread = 0.54
+dark_range_factor = 0.34
+
+[node name="generator_sentry" type="Node2D" parent="Guards" unique_id=20219178]
+position = Vector2(1492, 408)
+script = ExtResource("10_guard_script")
+guard_id = "generator-sentry"
+facing = Vector2(-0.21491899, -0.9766319)
+sight_range = 260.0
+dark_range_factor = 0.32
+
+[node name="south_left_sentry" type="Node2D" parent="Guards" unique_id=1154491592]
+position = Vector2(1182, 1034)
+script = ExtResource("10_guard_script")
+guard_id = "south-left-sentry"
+facing = Vector2(-0.80972916, 0.58680373)
+sight_range = 300.0
+sight_spread = 0.62
+dark_range_factor = 0.2
+
+[node name="south_center_sentry" type="Node2D" parent="Guards" unique_id=432120388]
+position = Vector2(1274, 1026)
+script = ExtResource("10_guard_script")
+guard_id = "south-center-sentry"
+facing = Vector2(0.04998748, 0.99874985)
+sight_range = 330.0
+sight_spread = 0.6
+dark_range_factor = 0.18
+
+[node name="south_right_sentry" type="Node2D" parent="Guards" unique_id=135387255]
+position = Vector2(1432, 1034)
+script = ExtResource("10_guard_script")
+guard_id = "south-right-sentry"
+facing = Vector2(0.6970356, 0.7170366)
+sight_range = 310.0
+sight_spread = 0.62
+dark_range_factor = 0.2
+
+[node name="Objectives" type="Node2D" parent="." unique_id=734902620]
+
+[node name="Backpack" type="Area2D" parent="Objectives" unique_id=1794165539]
+position = Vector2(193, 479)
+script = ExtResource("11_zone_script")
+zone_type = "backpack"
+label = "Backpack"
+
+[node name="Shape" type="CollisionShape2D" parent="Objectives/Backpack" unique_id=1074231297]
+shape = SubResource("Rect_12")
+
+[node name="Generator" type="Area2D" parent="Objectives" unique_id=85691437]
+position = Vector2(1165, 267)
+script = ExtResource("11_zone_script")
+zone_type = "generator"
+label = "Generator"
+
+[node name="Shape" type="CollisionShape2D" parent="Objectives/Generator" unique_id=1797135283]
+shape = SubResource("Rect_13")
+
+[node name="Exit" type="Area2D" parent="Objectives" unique_id=960090655]
+position = Vector2(1221, 883)
+script = ExtResource("11_zone_script")
+zone_type = "exit"
+label = "Exit"
+
+[node name="Shape" type="CollisionShape2D" parent="Objectives/Exit" unique_id=787506097]
+shape = SubResource("Rect_14")
+
+[node name="Ration_01" type="Area2D" parent="Objectives" unique_id=429318850]
+position = Vector2(276, 780)
+script = ExtResource("11_zone_script")
+zone_type = "ration"
+
+[node name="Shape" type="CollisionShape2D" parent="Objectives/Ration_01" unique_id=2046645548]
+shape = SubResource("Rect_15")
+
+[node name="Ration_02" type="Area2D" parent="Objectives" unique_id=816532346]
+position = Vector2(990, 760)
+script = ExtResource("11_zone_script")
+zone_type = "ration"
+
+[node name="Shape" type="CollisionShape2D" parent="Objectives/Ration_02" unique_id=141929121]
+shape = SubResource("Rect_15")
+
+[node name="Yarn_01" type="Area2D" parent="Objectives" unique_id=311420882]
+position = Vector2(542, 174)
+script = ExtResource("11_zone_script")
+zone_type = "yarn"
+
+[node name="Shape" type="CollisionShape2D" parent="Objectives/Yarn_01" unique_id=231389122]
+shape = SubResource("Rect_15")
+
+[node name="PlayerStart" type="Area2D" parent="Objectives" unique_id=2047173864]
+position = Vector2(40, 810)
+script = ExtResource("11_zone_script")
+zone_type = "player_start"
+label = "Player Start"
+
+[node name="Shape" type="CollisionShape2D" parent="Objectives/PlayerStart" unique_id=2045286446]
+shape = SubResource("Rect_15")
